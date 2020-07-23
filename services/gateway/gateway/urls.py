@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from gatewayapp.proxies import AutenticacaoProxy
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('autenticacao/<path:path>', AutenticacaoProxy.as_view())
 ]
