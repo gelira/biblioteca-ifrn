@@ -1,1 +1,2 @@
-from .token import ObterTokenSerializer, VerificarTokenSerializer
+from .token import (
+    ObterTokenSerializer, ObterTokenSUAPSerializer, VerificarTokenSerializer)
