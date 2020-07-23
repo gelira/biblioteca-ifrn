@@ -4,13 +4,19 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework.exceptions import AuthenticationFailed
 
+ALLOW_URLS = [
+    '/autenticacao/token',
+    '/autenticacao/verificar'
+]
+
 class AutenticacaoMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         try:
-            request.META['_id'] = self.autenticar_request(request)
+            if request.path not in ALLOW_URLS:
+                request.META['_id'] = self.autenticar_request(request)
             return self.get_response(request)
 
         except KeyError:
