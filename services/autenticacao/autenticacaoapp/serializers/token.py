@@ -2,12 +2,14 @@ from django.contrib.auth import get_user_model
 
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer, TokenVerifySerializer)
+    TokenObtainPairSerializer, TokenVerifySerializer
+)
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.settings import api_settings
 
 from ..suap import SUAP, SUAPUnauthorized
 from ..models import Usuario
+from ..tokens import AcessoToken
 
 User = get_user_model()
 
@@ -35,7 +37,8 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
             nome_completo=dados['vinculo']['nome'],
             email_institucional=dados['email'],
             vinculo=dados['tipo_vinculo'].lower(),
-            url_foto=dados['url_foto_150x200'])
+            url_foto=dados['url_foto_150x200']
+        )
 
     def validate(self, attrs):
         suap = SUAP(attrs['username'], attrs['password'])
@@ -45,12 +48,13 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
         except SUAPUnauthorized:
             raise AuthenticationFailed(
                 self.error_messages['no_active_account'],
-                'no_active_account')
+                'no_active_account'
+            )
         
         self.checar_usuario(suap)
-        token = self.get_token(self.user)
+        token = AcessoToken.for_user(self.user)
         return {
-            'token': str(token.access_token)
+            'token': str(token)
         }
 
 class VerificarTokenSerializer(TokenVerifySerializer):

@@ -139,5 +139,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4)
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),
+    'USER_ID_FIELD': '_id',
+    'AUTH_TOKEN_CLASSES': [
+        'autenticacaoapp.token.AcessoToken'
+    ],
 }
