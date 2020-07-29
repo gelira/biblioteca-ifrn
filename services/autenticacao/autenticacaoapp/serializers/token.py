@@ -46,10 +46,7 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
         try:
             suap.autenticar()
         except SUAPUnauthorized:
-            raise AuthenticationFailed(
-                self.error_messages['no_active_account'],
-                'no_active_account'
-            )
+            raise AuthenticationFailed
         
         self.checar_usuario(suap)
         token = AcessoToken.for_user(self.user)
