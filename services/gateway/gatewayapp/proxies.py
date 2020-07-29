@@ -16,3 +16,10 @@ class BaseProxy(ProxyView):
 
 class AutenticacaoProxy(BaseProxy):
     upstream = 'http://127.0.0.1:8001'
+
+    def get_request_headers(self):
+        headers = super(BaseProxy, self).get_request_headers()
+        authorization = headers.get('Authorization')
+        if authorization is not None:
+            headers['Authorization'] = 'JWT {}'.format(authorization)
+        return headers
