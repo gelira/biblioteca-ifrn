@@ -11,7 +11,10 @@ class BaseProxy(ProxyView):
 
     def get_request_headers(self):
         headers = super().get_request_headers()
-        headers['X-Userid'] = self.request.META.get('_id', '')
+        headers.pop('Authorization', None)
+        usuario_id = self.request.META.get('_id')
+        if usuario_id is not None:
+            headers['X-Usuario-Id'] = usuario_id
         return headers
 
 class AutenticacaoProxy(BaseProxy):
