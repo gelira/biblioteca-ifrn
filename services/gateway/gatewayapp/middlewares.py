@@ -30,7 +30,9 @@ class AutenticacaoMiddleware:
 
     def autenticar_request(self, request):
         token = request.headers['Authorization']
-        res = requests.post('http://127.0.0.1:8001/verificar', timeout=5, json={ 'token': token })
+        res = requests.get('http://127.0.0.1:8001/verificar', timeout=5, headers={ 
+            'Authorization': 'JWT {}'.format(token) 
+        })
         if res.ok:
             return res.json()['_id']
         raise AuthenticationFailed
