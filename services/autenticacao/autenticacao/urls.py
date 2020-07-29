@@ -21,5 +21,6 @@ from autenticacaoapp import views
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path('token', views.ObterTokenView.as_view()),
-    path('verificar', views.VerificarTokenView.as_view())
+    path('verificar', views.VerificarTokenView.as_view()),
+    path('informacoes', views.InformacoesUsuarioView.as_view())
 ]
