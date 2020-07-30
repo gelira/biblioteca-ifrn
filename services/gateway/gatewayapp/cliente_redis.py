@@ -1,9 +1,12 @@
+import os
 import json
 from redis import Redis
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+
 class ClienteRedis:
     def __init__(self):
-        self.con = Redis(host='172.25.0.11', db=10)
+        self.con = Redis(host=REDIS_HOST, db=10)
 
     def store(self, chave, valor):
         if not isinstance(valor, str):
