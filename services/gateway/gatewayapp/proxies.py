@@ -1,6 +1,9 @@
+import os
 from django.http.response import JsonResponse
 from revproxy.views import ProxyView
 from urllib3.exceptions import MaxRetryError
+
+AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 
 class BaseProxy(ProxyView):
     def dispatch(self, request, path):
@@ -18,7 +21,7 @@ class BaseProxy(ProxyView):
         return headers
 
 class AutenticacaoProxy(BaseProxy):
-    upstream = 'http://127.0.0.1:8001'
+    upstream = AUTENTICACAO_SERVICE_URL
 
     def get_request_headers(self):
         headers = super(BaseProxy, self).get_request_headers()
