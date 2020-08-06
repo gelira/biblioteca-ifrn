@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.settings import api_settings
 
 from ..suap import SUAP, SUAPUnauthorized
-from ..models import Usuario
+from ..models import Usuario, Perfil
 from ..tokens import AcessoToken
 
 User = get_user_model()
@@ -31,7 +31,7 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
         dados = suap.dados_usuario()
         matricula = dados['matricula']
         self.user = User.objects.create_user(matricula, password=matricula)
-        Usuario.objects.create(
+        u = Usuario.objects.create(
             user=self.user,
             nome=dados['nome_usual'],
             nome_completo=dados['vinculo']['nome'],
@@ -39,6 +39,10 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
             vinculo=dados['tipo_vinculo'].lower(),
             url_foto=dados['url_foto_150x200']
         )
+        perfil = Perfil.objects.filter(padrao=True).first()
+        if perfil is not None:
+            u.perfil = perfil
+            u.save()
 
     def validate(self, attrs):
         suap = SUAP(attrs['username'], attrs['password'])

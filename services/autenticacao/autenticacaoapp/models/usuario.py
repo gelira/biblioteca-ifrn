@@ -2,14 +2,24 @@ from django.db import models
 from django.conf import settings
 import uuid
 
+from .perfil import Perfil
+
 class Usuario(models.Model):
     _id = models.UUIDField(
         unique=True, 
         editable=False, 
-        default=uuid.uuid4)
+        default=uuid.uuid4
+    )
     user = models.OneToOneField(
         to=settings.AUTH_USER_MODEL, 
-        on_delete=models.PROTECT)
+        on_delete=models.PROTECT
+    )
+    perfil = models.ForeignKey(
+        to=Perfil,
+        on_delete=models.SET_NULL,
+        related_name='usuarios',
+        null=True
+    )
     nome = models.CharField(max_length=150)
     nome_completo = models.CharField(max_length=150)
     email_institucional = models.EmailField()
