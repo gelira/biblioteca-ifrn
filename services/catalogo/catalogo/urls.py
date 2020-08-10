@@ -15,7 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
+from catalogoapp import views
+
+router = SimpleRouter(trailing_slash=False)
+router.register('livros', views.LivroViewSet)
+
+urlpatterns = router.urls
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+# ]
