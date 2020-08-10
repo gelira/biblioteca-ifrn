@@ -22,6 +22,7 @@ from catalogoapp import views
 router = SimpleRouter(trailing_slash=False)
 router.register('livros', views.LivroViewSet)
 router.register('indexadores', views.IndexadorViewSet)
+router.register('exemplares', views.ExemplarViewSet)
 
 urlpatterns = router.urls
 
