@@ -1,6 +1,8 @@
+import uuid
 from django.db import models
 
-import uuid
+def nome_arquivo(instance, filename):
+    return instance._id
 
 class Livro(models.Model):
     _id = models.UUIDField(
@@ -48,8 +50,8 @@ class Livro(models.Model):
     paginas = models.CharField(
         max_length=10
     )
-    foto_capa = models.CharField(
-        max_length=100,
+    foto_capa = models.ImageField(
+        upload_to=nome_arquivo,
         blank=True
     )
 
