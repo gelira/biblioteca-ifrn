@@ -18,9 +18,13 @@ class LivroViewSet(viewsets.ModelViewSet):
     def get_object(self):
         return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
 
-    @action(methods=['put'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
+    @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
     def foto_capa(self, request, pk=None):
         livro = self.get_object()
+        if request.method.lower() == 'delete':
+            livro.foto_capa.delete()
+            return Response(status=204)
+
         serializer = FotoCapaLivroSerializer(data=request.data, instance=livro)
         serializer.is_valid(raise_exception=True)
         serializer.save()
