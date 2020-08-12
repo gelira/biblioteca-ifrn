@@ -1,9 +1,13 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
 
 from ..models import Livro
-from ..serializers import LivroSerializer
+from ..serializers import (
+    LivroSerializer, FotoCapaLivroSerializer
+)
 
 class LivroViewSet(viewsets.ModelViewSet):
     queryset = Livro.objects.all()
@@ -13,3 +17,11 @@ class LivroViewSet(viewsets.ModelViewSet):
     
     def get_object(self):
         return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
+
+    @action(methods=['put'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
+    def foto_capa(self, request, pk=None):
+        livro = self.get_object()
+        serializer = FotoCapaLivroSerializer(data=request.data, instance=livro)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=200)
