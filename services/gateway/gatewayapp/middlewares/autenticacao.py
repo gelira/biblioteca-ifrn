@@ -5,21 +5,14 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework.exceptions import AuthenticationFailed
 
+from .base import BaseMiddleware
+
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 
-ALLOW_URLS = [
-    '/autenticacao/token',
-    '/autenticacao/verificar'
-]
-
-class AutenticacaoMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
+class AutenticacaoMiddleware(BaseMiddleware):
+    def process_request(self, request):
         try:
-            if request.path not in ALLOW_URLS:
-                request.META['_id'] = self.autenticar_request(request)
+            request.META['_id'] = self.autenticar_request(request)
             return self.get_response(request)
 
         except KeyError:
