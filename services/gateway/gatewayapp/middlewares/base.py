@@ -1,6 +1,7 @@
 ALLOW_URLS = [
     '/autenticacao/token',
-    '/autenticacao/verificar'
+    '/autenticacao/verificar',
+    '/catalogo/media',
 ]
 
 class BaseMiddleware:
