@@ -2,7 +2,10 @@ import uuid
 from django.db import models
 
 def nome_arquivo(instance, filename):
-    return instance._id
+    nome = str(instance._id)
+    sub1 = nome[0]
+    sub2 = nome[1]
+    return '{}/{}/{}'.format(sub1, sub2, nome)
 
 class Livro(models.Model):
     _id = models.UUIDField(
