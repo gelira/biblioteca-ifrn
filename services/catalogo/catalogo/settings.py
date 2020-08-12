@@ -132,3 +132,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
 }
+
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'catalogo-media')
+
+MEDIA_URL = '/media/'
