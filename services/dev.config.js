@@ -15,6 +15,13 @@ module.exports = {
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/autenticacao',
       script: './manage.py',
       args: 'runserver 8001'
+    },
+    {
+      name: 'catalogo-dev',
+      interpreter,
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/catalogo',
+      script: './manage.py',
+      args: 'runserver 8002'
     }
   ],
 };

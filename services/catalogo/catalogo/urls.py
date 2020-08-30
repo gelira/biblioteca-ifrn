@@ -1,4 +1,4 @@
-"""gateway URL Configuration
+"""catalogo URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
@@ -15,11 +15,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+from rest_framework.routers import SimpleRouter
 
-from gatewayapp import views
+from catalogoapp import views
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('autenticacao/<path:path>', views.AutenticacaoProxyView.as_view()),
-    path('catalogo/<path:path>', views.CatalogoProxyView.as_view()),
-]
+router = SimpleRouter(trailing_slash=False)
+router.register('livros', views.LivroViewSet)
+router.register('indexadores', views.IndexadorViewSet)
+router.register('exemplares', views.ExemplarViewSet)
+router.register('localizacoes-fisicas', views.LocalizacaoFisicaViewSet)
+
+urlpatterns = router.urls
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+# ]
