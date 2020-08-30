@@ -8,7 +8,7 @@ class LocalizacaoFisica(models.Model):
         on_delete=models.CASCADE,
         related_name='localizacoes'
     )
-    localicazao = models.CharField(
+    localizacao = models.CharField(
         max_length=200
     )
     ativo = models.BooleanField(
