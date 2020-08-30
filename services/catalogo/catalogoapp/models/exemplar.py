@@ -19,6 +19,9 @@ class Exemplar(models.Model):
     disponivel = models.BooleanField(
         default=True
     )
+    ativo = models.BooleanField(
+        default=True
+    )
 
     class Meta:
         db_table = 'exemplares'
