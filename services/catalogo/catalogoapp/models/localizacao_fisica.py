@@ -11,7 +11,7 @@ class LocalizacaoFisica(models.Model):
     localicazao = models.CharField(
         max_length=200
     )
-    disponivel = models.BooleanField(
+    ativo = models.BooleanField(
         default=True
     )
 
