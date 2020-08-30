@@ -25,6 +25,7 @@ router = SimpleRouter(trailing_slash=False)
 router.register('livros', views.LivroViewSet)
 router.register('indexadores', views.IndexadorViewSet)
 router.register('exemplares', views.ExemplarViewSet)
+router.register('localizacoes-fisicas', views.LocalizacaoFisicaViewSet)
 
 urlpatterns = router.urls
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
