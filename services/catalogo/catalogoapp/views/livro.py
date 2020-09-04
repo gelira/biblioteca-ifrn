@@ -8,11 +8,12 @@ from ..models import Livro
 from ..serializers import (
     LivroSerializer, FotoCapaLivroSerializer
 )
+from ..permissions import CatalogarPermissao
 
 class LivroViewSet(viewsets.ModelViewSet):
     queryset = Livro.objects.all()
     serializer_class = LivroSerializer
-    permission_classes = []
+    permission_classes = [CatalogarPermissao]
     lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     
     def get_object(self):
