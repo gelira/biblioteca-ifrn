@@ -131,6 +131,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'catalogoapp.authentication.RedisAutenticacao'
+    ],
 }
 
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'catalogo-media')
