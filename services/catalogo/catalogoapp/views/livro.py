@@ -8,16 +8,32 @@ from ..models import Livro
 from ..serializers import (
     LivroSerializer, FotoCapaLivroSerializer
 )
-from ..permissions import CatalogarPermissao
+from ..permissions import (
+    AutenticadoPermissao,
+    LivroCatalogarPermissao,
+    LivroModificarPermissao
+)
 
 class LivroViewSet(viewsets.ModelViewSet):
     queryset = Livro.objects.all()
     serializer_class = LivroSerializer
-    permission_classes = [CatalogarPermissao]
     lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     
     def get_object(self):
         return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
+
+    def get_permissions(self):
+        if self.action in ['update', 'partial_update']:
+            return [
+                AutenticadoPermissao(), 
+                LivroModificarPermissao()
+            ]
+        if self.action in ['create', 'destroy', 'foto_capa']:
+            return [
+                AutenticadoPermissao(), 
+                LivroCatalogarPermissao()
+            ]
+        return []
 
     @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
     def foto_capa(self, request, pk=None):
