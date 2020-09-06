@@ -1,5 +1,10 @@
 from .livro import (
-    LivroSerializer, FotoCapaLivroSerializer
+    LivroSerializer, 
+    LivroListSerializer,
+    LivroRetrieveSerializer,
+    LivroPesquisaSerializer,
+    FotoCapaLivroSerializer,
+    ExemplarConsultaSerializer
 )
 from .indexador import IndexadorSerializer
 from .exemplar import ExemplarSerializer

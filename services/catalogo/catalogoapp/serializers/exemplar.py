@@ -43,3 +43,12 @@ class ExemplarSerializer(serializers.ModelSerializer):
                 'required': False
             }
         }
+
+class ExemplarListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exemplar
+        fields = [
+            'codigo',
+            'referencia',
+            'disponivel'
+        ]
