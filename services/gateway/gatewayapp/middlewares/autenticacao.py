@@ -15,9 +15,6 @@ class AutenticacaoMiddleware(BaseMiddleware):
             request.META['_id'] = self.autenticar_request(request)
             return self.get_response(request)
 
-        except KeyError:
-            return JsonResponse({ 'detail': 'Token não especificado' }, status=401)
-
         except (ConnectionError, Timeout):
             return JsonResponse({ 'detail': 'Serviço demorou muito para responder' }, status=408)
 
@@ -25,7 +22,9 @@ class AutenticacaoMiddleware(BaseMiddleware):
             return JsonResponse({ 'detail': 'Token inválido' }, status=401)
 
     def autenticar_request(self, request):
-        token = request.headers['Authorization']
+        token = request.headers.get('Authorization')
+        if token is None:
+            return None
         res = requests.get(AUTENTICACAO_SERVICE_URL + '/verificar', timeout=5, headers={ 
             'Authorization': 'JWT {}'.format(token) 
         })
