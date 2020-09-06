@@ -6,7 +6,9 @@ from rest_framework.response import Response
 
 from ..models import Livro
 from ..serializers import (
-    LivroSerializer, FotoCapaLivroSerializer
+    LivroSerializer, 
+    LivroListSerializer,
+    FotoCapaLivroSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
@@ -16,7 +18,6 @@ from ..permissions import (
 
 class LivroViewSet(viewsets.ModelViewSet):
     queryset = Livro.objects.all()
-    serializer_class = LivroSerializer
     lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     
     def get_object(self):
@@ -34,6 +35,11 @@ class LivroViewSet(viewsets.ModelViewSet):
                 LivroCatalogarPermissao()
             ]
         return []
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LivroListSerializer
+        return LivroSerializer
 
     @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
     def foto_capa(self, request, pk=None):

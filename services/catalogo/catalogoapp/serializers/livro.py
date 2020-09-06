@@ -10,6 +10,21 @@ class LivroSerializer(serializers.ModelSerializer):
             'foto_capa'
         ]
 
+class LivroListSerializer(serializers.ModelSerializer):
+    foto_capa = serializers.SerializerMethodField()
+
+    def get_foto_capa(self, obj):
+        try:
+            return obj.foto_capa.url
+        except:
+            return None
+
+    class Meta:
+        model = Livro
+        exclude = [
+            'id'
+        ]
+
 class FotoCapaLivroSerializer(serializers.ModelSerializer):
     def update(self, instance, data):
         instance.foto_capa.delete(save=False)
