@@ -22,7 +22,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'consulta':
-            return [AutenticadoPermissao()]
+            return []
         return [
             AutenticadoPermissao(),
             LivroModificarPermissao()
