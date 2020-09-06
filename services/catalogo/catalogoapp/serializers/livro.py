@@ -6,6 +6,7 @@ class LivroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
+            'id',
             'foto_capa'
         ]
 
