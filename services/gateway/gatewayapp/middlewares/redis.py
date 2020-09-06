@@ -13,12 +13,13 @@ class RedisMiddleware(BaseMiddleware):
         self.con = ClienteRedis()
 
     def process_request(self, request):
-        chave = request.META['_id']
-        if not self.con.exist(chave):
-            res = requests.get(AUTENTICACAO_SERVICE_URL + '/informacoes', timeout=5, headers={ 
-                'Authorization': 'JWT {}'.format(request.headers['Authorization']) 
-            })
-            if not res.ok:
-                raise AuthenticationFailed
-            self.con.store(chave, res.text)
+        chave = request.META.get('_id')
+        if chave is not None:
+            if not self.con.exist(chave):
+                res = requests.get(AUTENTICACAO_SERVICE_URL + '/informacoes', timeout=5, headers={ 
+                    'Authorization': 'JWT {}'.format(request.headers['Authorization']) 
+                })
+                if not res.ok:
+                    raise AuthenticationFailed
+                self.con.store(chave, res.text)
         return self.get_response(request)
