@@ -9,6 +9,7 @@ from ..serializers import (
     LivroSerializer, 
     LivroListSerializer,
     LivroRetrieveSerializer,
+    LivroPesquisaSerializer,
     FotoCapaLivroSerializer
 )
 from ..permissions import (
@@ -42,6 +43,8 @@ class LivroViewSet(viewsets.ModelViewSet):
             return LivroListSerializer
         if self.action == 'retrieve':
             return LivroRetrieveSerializer
+        if self.action == 'pesquisa':
+            return LivroPesquisaSerializer
         return LivroSerializer
 
     @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
@@ -55,3 +58,10 @@ class LivroViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=200)
+
+    @action(methods=['post'], detail=False, url_path='pesquisa')
+    def pesquisa(self, request):
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(data=serializer.validated_data, status=200)
