@@ -3,7 +3,8 @@ from .livro import (
     LivroListSerializer,
     LivroRetrieveSerializer,
     LivroPesquisaSerializer,
-    FotoCapaLivroSerializer
+    FotoCapaLivroSerializer,
+    ExemplarConsultaSerializer
 )
 from .indexador import IndexadorSerializer
 from .exemplar import ExemplarSerializer
