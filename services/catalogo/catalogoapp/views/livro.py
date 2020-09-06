@@ -8,6 +8,7 @@ from ..models import Livro
 from ..serializers import (
     LivroSerializer, 
     LivroListSerializer,
+    LivroRetrieveSerializer,
     FotoCapaLivroSerializer
 )
 from ..permissions import (
@@ -39,6 +40,8 @@ class LivroViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return LivroListSerializer
+        if self.action == 'retrieve':
+            return LivroRetrieveSerializer
         return LivroSerializer
 
     @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])

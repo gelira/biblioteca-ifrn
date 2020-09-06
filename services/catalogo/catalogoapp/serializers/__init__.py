@@ -1,6 +1,7 @@
 from .livro import (
     LivroSerializer, 
     LivroListSerializer,
+    LivroRetrieveSerializer,
     FotoCapaLivroSerializer,
 )
 from .indexador import IndexadorSerializer
