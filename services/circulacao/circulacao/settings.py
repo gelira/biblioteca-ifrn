@@ -133,3 +133,5 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
 }
+
+CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
