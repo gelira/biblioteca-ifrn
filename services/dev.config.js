@@ -22,6 +22,13 @@ module.exports = {
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/catalogo',
       script: './manage.py',
       args: 'runserver 8002'
+    },
+    {
+      name: 'circulacao-dev',
+      interpreter,
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
+      script: './manage.py',
+      args: 'runserver 8003'
     }
   ],
 };

@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('autenticacao/<path:path>', views.AutenticacaoProxyView.as_view()),
     path('catalogo/<path:path>', views.CatalogoProxyView.as_view()),
+    path('circulacao/<path:path>', views.CirculacaoProxyView.as_view()),
 ]
