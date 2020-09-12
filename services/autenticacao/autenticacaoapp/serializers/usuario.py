@@ -22,7 +22,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         exclude = [
             'id',
-            '_id',
             'user'
         ]
 
