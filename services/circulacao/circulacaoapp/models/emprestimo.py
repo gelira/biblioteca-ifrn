@@ -8,6 +8,7 @@ class Emprestimo(models.Model):
         default=uuid.uuid4
     )
     usuario_id = models.UUIDField()
+    livro_id = models.UUIDField()
     exemplar_codigo = models.CharField(
         max_length=20
     )
