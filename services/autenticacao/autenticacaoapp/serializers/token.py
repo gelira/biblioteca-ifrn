@@ -4,7 +4,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer, TokenVerifySerializer
 )
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.settings import api_settings
 
 from ..suap import SUAP, SUAPUnauthorized
@@ -65,7 +64,7 @@ class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
 
 class VerificarTokenSerializer(TokenVerifySerializer):
     def validate(self, attrs):
-        token = AccessToken(attrs['token'])
+        token = AcessoToken(attrs['token'])
         user_id = token[api_settings.USER_ID_CLAIM]
         user = User.objects.get(**{api_settings.USER_ID_FIELD: user_id})
         return {
