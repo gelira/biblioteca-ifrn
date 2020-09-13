@@ -1,4 +1,8 @@
-from .autenticacao import ObterTokenView, VerificarTokenView
+from .autenticacao import (
+    ObterTokenView, 
+    ObterTokenLocalView,
+    VerificarTokenView
+)
 from .usuario import (
     InformacoesUsuarioView,
     ConsultaMatriculaUsuarioView

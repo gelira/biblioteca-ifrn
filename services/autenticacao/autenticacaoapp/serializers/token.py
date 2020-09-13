@@ -13,11 +13,16 @@ from ..tokens import AcessoToken
 
 User = get_user_model()
 
-class ObterTokenSerializer(TokenObtainPairSerializer):
+class ObterTokenLocalSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return AcessoToken.for_user(user)
+
     def validate(self, attrs):
-        data = super().validate(attrs)
+        data = super(TokenObtainPairSerializer, self).validate(attrs)
+        token = self.get_token(self.user)
         return {
-            'token': data['access']
+            'token': str(token)
         }
 
 class ObterTokenSUAPSerializer(TokenObtainPairSerializer):
