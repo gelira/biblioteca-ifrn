@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -28,9 +29,11 @@ class ExemplarViewSet(viewsets.ModelViewSet):
             LivroModificarPermissao()
         ]
 
-    @action(methods=['post'], detail=False, url_path='consulta')
-    def consulta(self, request):
+    @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)')
+    def consulta(self, request, codigo):
+        exemplar = get_object_or_404(self.get_queryset(), codigo=codigo)
+        
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = serializer_class(exemplar)
+        
         return Response(data=serializer.data, status=200)

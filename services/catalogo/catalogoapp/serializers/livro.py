@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework import serializers
 
@@ -119,27 +118,9 @@ class ExemplarConsultaSerializer(serializers.ModelSerializer):
     livro = LivroListSerializer(
         read_only=True
     )
-    codigo = serializers.CharField(
-        max_length=20
-    )
-
-    def validate(self, data):
-        self.instance = get_object_or_404(Exemplar.objects.all(), codigo=data['codigo'])
-        return data
 
     class Meta:
         model = Exemplar
         exclude = [
             'id'
         ]
-        extra_kwargs = {
-            'referencia': {
-                'read_only': True
-            },
-            'disponivel':{
-                'read_only': True
-            },
-            'ativo': {
-                'read_only': True
-            }
-        }
