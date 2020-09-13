@@ -7,5 +7,8 @@ from .livro import (
     ExemplarConsultaSerializer
 )
 from .indexador import IndexadorSerializer
-from .exemplar import ExemplarSerializer
+from .exemplar import (
+    ExemplarSerializer,
+    ExemplarEmprestadosSerializer
+)
 from .localizacao_fisica import LocalizacaoFisicaSerializer

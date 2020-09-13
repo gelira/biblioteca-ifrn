@@ -6,7 +6,8 @@ from rest_framework.decorators import action
 from ..models import Exemplar
 from ..serializers import (
     ExemplarSerializer,
-    ExemplarConsultaSerializer
+    ExemplarConsultaSerializer,
+    ExemplarEmprestadosSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
@@ -19,10 +20,14 @@ class ExemplarViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'consulta':
             return ExemplarConsultaSerializer
+
+        if self.action == 'exemplares_emprestados':
+            return ExemplarEmprestadosSerializer
+        
         return ExemplarSerializer
 
     def get_permissions(self):
-        if self.action == 'consulta':
+        if self.action in ['consulta', 'exemplares_emprestados']:
             return []
         return [
             AutenticadoPermissao(),
@@ -37,3 +42,11 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         serializer = serializer_class(exemplar)
         
         return Response(data=serializer.data, status=200)
+
+    @action(methods=['put'], detail=False, url_path='emprestados')
+    def exemplares_emprestados(self, request):
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=204)
