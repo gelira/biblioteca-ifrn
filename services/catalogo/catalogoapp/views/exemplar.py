@@ -11,7 +11,8 @@ from ..serializers import (
 )
 from ..permissions import (
     AutenticadoPermissao,
-    LivroModificarPermissao
+    LivroModificarPermissao,
+    FazerEmprestimoPermissao
 )
 
 class ExemplarViewSet(viewsets.ModelViewSet):
@@ -27,8 +28,15 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         return ExemplarSerializer
 
     def get_permissions(self):
-        if self.action in ['consulta', 'exemplares_emprestados']:
+        if self.action == 'consulta':
             return []
+
+        if self.action == 'exemplares_emprestados':
+            return [
+                AutenticadoPermissao(),
+                FazerEmprestimoPermissao()
+            ]
+
         return [
             AutenticadoPermissao(),
             LivroModificarPermissao()

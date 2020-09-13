@@ -3,3 +3,4 @@ from .livro import (
     LivroCatalogarPermissao,
     LivroModificarPermissao
 )
+from .emprestimo import FazerEmprestimoPermissao
