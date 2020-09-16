@@ -22,9 +22,6 @@ class Emprestimo(models.Model):
     quantidade_renovacoes = models.PositiveIntegerField(
         default=0
     )
-    atrasado = models.BooleanField(
-        default=False
-    )
     avaliado = models.BooleanField(
         default=False
     )
