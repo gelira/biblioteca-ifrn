@@ -29,6 +29,12 @@ module.exports = {
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
       script: './manage.py',
       args: 'runserver 8003'
+    },
+    {
+      name: 'circulacao-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m celery -A circulacao worker -l info'
     }
   ],
 };
