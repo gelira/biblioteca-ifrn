@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import date, timedelta
+from django.db import transaction
 from rest_framework import serializers
 
 from ..models import Emprestimo, Suspensao, Data
@@ -41,24 +42,25 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         usuario = data['usuario']
         emprestimos = []
 
-        for exemplar in data['exemplares']:
-            e = Emprestimo(
-                usuario_id=usuario['_id'],
-                livro_id=exemplar['livro']['_id'],
-                exemplar_codigo=exemplar['codigo']
-            )
-            if data_limite is None:
-                if not exemplar['referencia']:
-                    data_limite = self.calcular_data_limite(usuario['perfil']['max_dias'])
-            
-            if data_limite_referencia is None:
-                if exemplar['referencia']:
-                    data_limite_referencia = self.calcular_data_limite()
+        with transaction.atomic():
+            for exemplar in data['exemplares']:
+                e = Emprestimo(
+                    usuario_id=usuario['_id'],
+                    livro_id=exemplar['livro']['_id'],
+                    exemplar_codigo=exemplar['codigo']
+                )
+                if data_limite is None:
+                    if not exemplar['referencia']:
+                        data_limite = self.calcular_data_limite(usuario['perfil']['max_dias'])
+                
+                if data_limite_referencia is None:
+                    if exemplar['referencia']:
+                        data_limite_referencia = self.calcular_data_limite()
 
-            e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
-            e.save()
+                e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
+                e.save()
 
-            emprestimos.append(e)
+                emprestimos.append(e)
 
         return emprestimos
 
