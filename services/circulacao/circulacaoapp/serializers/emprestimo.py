@@ -5,6 +5,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from ..models import Emprestimo, Suspensao, Data
+from ..tasks import marcar_exemplares_emprestados
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
@@ -62,6 +63,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 emprestimos.append(e)
 
+        marcar_exemplares_emprestados.delay(self.context['request'].user['_id'], data['codigos'])
         return emprestimos
 
     def validar_usuario(self, matricula, senha):
@@ -120,14 +122,6 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 
                 livros_emprestados.append(livro_id)
                 exemplares.append(exemplar)
-
-            r = requests.put(
-                CATALOGO_SERVICE_URL + '/exemplares/emprestados', 
-                headers={'X-Usuario-Id': self.context['request'].user['_id']},
-                json={'codigos': codigos}
-            )
-            if not r.ok:
-                raise serializers.ValidationError('Erro ao marcar livros como emprestados')
 
             return exemplares
 
