@@ -160,7 +160,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         if (len(emprestimos_vigentes) + quantidade_livros) > max_livros:
             raise serializers.ValidationError('Atingido o limite de livros para o usuário')
 
-        return list(map(lambda x: str(x), emprestimos_vigentes))
+        return emprestimos_vigentes
 
     def emprestar_exemplar_referencia(self):
         hoje = date.today()
