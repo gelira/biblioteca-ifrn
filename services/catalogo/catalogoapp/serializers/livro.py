@@ -109,7 +109,7 @@ class FotoCapaLivroSerializer(serializers.ModelSerializer):
             }
         }
 
-# Este serializer encontrasse no módulo de livros para resolver
+# Este serializer encontra-se no módulo de livros para resolver
 # um problema de importação cíclica que estava acontecendo por
 # causa do LivroListSerializer
 # A forma mais rápida de resolver foi reescrever o serializer
