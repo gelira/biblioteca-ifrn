@@ -1,0 +1,1 @@
+from .autenticacao_redis import RedisAutenticacao

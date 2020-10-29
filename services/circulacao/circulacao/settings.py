@@ -132,4 +132,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'circulacaoapp.authentication.RedisAutenticacao'
+    ],
 }
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
+CELERY_EVENT_QUEUE_EXPIRES = int(os.getenv('CELERY_EVENT_QUEUE_EXPIRES'))
+
+CELERY_EVENT_QUEUE_TTL = int(os.getenv('CELERY_EVENT_QUEUE_TTL'))

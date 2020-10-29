@@ -1,13 +1,12 @@
-from rest_framework.serializers import ModelSerializer
-from rest_framework.serializers import SerializerMethodField
+from rest_framework import serializers
 
 from ..models import Usuario, Permissao
 from .perfil import PerfilSerializer
 
-class UsuarioSerializer(ModelSerializer):
-    matricula = SerializerMethodField()
+class UsuarioSerializer(serializers.ModelSerializer):
+    matricula = serializers.SerializerMethodField()
     perfil = PerfilSerializer()
-    lista_permissoes = SerializerMethodField()
+    lista_permissoes = serializers.SerializerMethodField()
 
     def get_matricula(self, obj):
         return obj.user.username
@@ -23,6 +22,20 @@ class UsuarioSerializer(ModelSerializer):
         model = Usuario
         exclude = [
             'id',
-            '_id',
             'user'
+        ]
+
+class UsuarioConsultaSerializer(serializers.ModelSerializer):
+    matricula = serializers.SerializerMethodField()
+
+    def get_matricula(self, obj):
+        return obj.user.username
+
+    class Meta:
+        model = Usuario
+        fields = [
+            'matricula',
+            'nome_completo',
+            'vinculo',
+            'url_foto'
         ]

@@ -1,3 +1,10 @@
-from .autenticacao import ObterTokenView, VerificarTokenView
-from .usuario import InformacoesUsuarioView
+from .autenticacao import (
+    ObterTokenView, 
+    ObterTokenLocalView,
+    VerificarTokenView
+)
+from .usuario import (
+    InformacoesUsuarioView,
+    ConsultaMatriculaUsuarioView
+)
 from .perfil import PerfilViewSet

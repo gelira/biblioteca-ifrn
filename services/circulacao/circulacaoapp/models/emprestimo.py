@@ -8,7 +8,10 @@ class Emprestimo(models.Model):
         default=uuid.uuid4
     )
     usuario_id = models.UUIDField()
-    exemplar_id = models.UUIDField()
+    livro_id = models.UUIDField()
+    exemplar_codigo = models.CharField(
+        max_length=20
+    )
     data_emprestimo = models.DateField(
         auto_now_add=True
     )
@@ -18,9 +21,6 @@ class Emprestimo(models.Model):
     )
     quantidade_renovacoes = models.PositiveIntegerField(
         default=0
-    )
-    atrasado = models.BooleanField(
-        default=False
     )
     avaliado = models.BooleanField(
         default=False

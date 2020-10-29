@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -5,11 +6,13 @@ from rest_framework.decorators import action
 from ..models import Exemplar
 from ..serializers import (
     ExemplarSerializer,
-    ExemplarConsultaSerializer
+    ExemplarConsultaSerializer,
+    ExemplarEmprestadosSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
-    LivroModificarPermissao
+    LivroModificarPermissao,
+    FazerEmprestimoPermissao
 )
 
 class ExemplarViewSet(viewsets.ModelViewSet):
@@ -18,19 +21,40 @@ class ExemplarViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'consulta':
             return ExemplarConsultaSerializer
+
+        if self.action == 'exemplares_emprestados':
+            return ExemplarEmprestadosSerializer
+        
         return ExemplarSerializer
 
     def get_permissions(self):
         if self.action == 'consulta':
             return []
+
+        if self.action == 'exemplares_emprestados':
+            return [
+                AutenticadoPermissao(),
+                FazerEmprestimoPermissao()
+            ]
+
         return [
             AutenticadoPermissao(),
             LivroModificarPermissao()
         ]
 
-    @action(methods=['post'], detail=False, url_path='consulta')
-    def consulta(self, request):
+    @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)')
+    def consulta(self, request, codigo):
+        exemplar = get_object_or_404(self.get_queryset(), codigo=codigo)
+        
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(exemplar)
+        
+        return Response(data=serializer.data, status=200)
+
+    @action(methods=['put'], detail=False, url_path='emprestados')
+    def exemplares_emprestados(self, request):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response(data=serializer.data, status=200)
+        serializer.save()
+        return Response(status=204)
