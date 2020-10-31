@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import date, timedelta
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from ..models import Emprestimo, Suspensao, Data
@@ -182,3 +183,39 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
                     return hoje
             hoje = hoje + timedelta(days=1)
+
+class DevolucaoEmprestimosSerializer(serializers.Serializer):
+    codigos = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=False
+    )
+
+    def validate_codigos(self, value):
+        return list(set(value))
+
+    def validate(self, data):
+        emprestimos = []
+        codigos = data['codigos']
+        
+        for codigo in codigos:
+            emprestimo = Emprestimo.objects.filter(**{
+                'exemplar_codigo': codigo,
+                'data_devolucao': None
+            }).order_by('-created').first()
+
+            if emprestimo is not None:
+                emprestimos.append(emprestimo)
+
+        if len(emprestimos) == 0:
+            raise serializers.ValidationError('Nenhum empréstimo foi encontrado')
+
+        data['emprestimos'] = emprestimos
+        return data
+
+    def create(self, data):
+        emprestimos = data['emprestimos']
+        for emprestimo in emprestimos:
+            emprestimo.data_devolucao = timezone.now()
+            emprestimo.save()
+
+        return {}

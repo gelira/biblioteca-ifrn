@@ -1,2 +1,5 @@
 from .feriado import FeriadoCreateSerializer
-from .emprestimo import EmprestimoCreateSerializer
+from .emprestimo import (
+    EmprestimoCreateSerializer,
+    DevolucaoEmprestimosSerializer
+)
