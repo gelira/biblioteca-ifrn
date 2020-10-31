@@ -5,7 +5,11 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
-from ..models import Emprestimo, Suspensao, Data
+from ..models import (
+    Emprestimo, 
+    Suspensao, 
+    Data
+)
 from ..tasks import marcar_exemplares_emprestados
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
@@ -215,7 +219,16 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
     def create(self, data):
         emprestimos = data['emprestimos']
         for emprestimo in emprestimos:
-            emprestimo.data_devolucao = timezone.now()
+            hoje = timezone.now().date()
+            if hoje > emprestimo.data_limite:
+                diff = hoje - emprestimo.data_limite
+                Suspensao.objects.create(**{
+                    'emprestimo': emprestimo,
+                    'usuario_id': emprestimo.usuario_id,
+                    'total_dias': diff.days
+                })
+
+            emprestimo.data_devolucao = hoje
             emprestimo.save()
 
         return {}
