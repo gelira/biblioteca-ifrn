@@ -1,6 +1,8 @@
 from django.db import models
 
-class Permissao(models.Model):
+from .timestamped import TimestampedModel
+
+class Permissao(TimestampedModel):
     codigo = models.CharField(
         max_length=100,
         unique=True

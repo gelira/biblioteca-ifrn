@@ -1,6 +1,8 @@
 from django.db import models
 
-class Perfil(models.Model):
+from .timestamped import TimestampedModel
+
+class Perfil(TimestampedModel):
     descricao = models.CharField(max_length=100)
     padrao = models.BooleanField()
     max_livros = models.PositiveIntegerField()

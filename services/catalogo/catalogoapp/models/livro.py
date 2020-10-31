@@ -1,13 +1,15 @@
 import uuid
 from django.db import models
 
+from .timestamped import TimestampedModel
+
 def nome_arquivo(instance, filename):
     nome = str(instance._id)
     sub1 = nome[0]
     sub2 = nome[1]
     return '{}/{}/{}'.format(sub1, sub2, nome)
 
-class Livro(models.Model):
+class Livro(TimestampedModel):
     _id = models.UUIDField(
         unique=True, 
         editable=False, 

@@ -1,7 +1,9 @@
 import uuid
 from django.db import models
 
-class Abono(models.Model):
+from .timestamped import TimestampedModel
+
+class Abono(TimestampedModel):
     _id = models.UUIDField(
         unique=True,
         editable=False,

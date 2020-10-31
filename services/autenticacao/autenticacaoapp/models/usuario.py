@@ -2,9 +2,10 @@ from django.db import models
 from django.conf import settings
 import uuid
 
+from .timestamped import TimestampedModel
 from .perfil import Perfil
 
-class Usuario(models.Model):
+class Usuario(TimestampedModel):
     _id = models.UUIDField(
         unique=True, 
         editable=False, 

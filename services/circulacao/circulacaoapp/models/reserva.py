@@ -1,9 +1,10 @@
 import uuid
 from django.db import models
 
+from .timestamped import TimestampedModel
 from .emprestimo import Emprestimo
 
-class Reserva(models.Model):
+class Reserva(TimestampedModel):
     _id = models.UUIDField(
         unique=True,
         editable=False,

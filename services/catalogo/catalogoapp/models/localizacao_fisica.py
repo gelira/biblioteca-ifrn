@@ -1,8 +1,9 @@
 from django.db import models
 
+from .timestamped import TimestampedModel
 from .livro import Livro
 
-class LocalizacaoFisica(models.Model):
+class LocalizacaoFisica(TimestampedModel):
     livro = models.ForeignKey(
         to=Livro,
         on_delete=models.CASCADE,
