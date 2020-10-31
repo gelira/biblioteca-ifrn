@@ -1,9 +1,10 @@
 import uuid
 from django.db import models
 
+from .timestamped import TimestampedModel
 from .emprestimo import Emprestimo
 
-class Renovacao(models.Model):
+class Renovacao(TimestampedModel):
     emprestimo = models.ForeignKey(
         to=Emprestimo,
         on_delete=models.PROTECT,

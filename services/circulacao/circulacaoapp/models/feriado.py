@@ -1,7 +1,9 @@
 import uuid
 from django.db import models
 
-class Feriado(models.Model):
+from .timestamped import TimestampedModel
+
+class Feriado(TimestampedModel):
     descricao = models.CharField(
         max_length=200
     )

@@ -1,10 +1,11 @@
 import uuid
 from django.db import models
 
+from .timestamped import TimestampedModel
 from .emprestimo import Emprestimo
 from .abono import Abono
 
-class Suspensao(models.Model):
+class Suspensao(TimestampedModel):
     emprestimo = models.ForeignKey(
         to=Emprestimo,
         on_delete=models.PROTECT,

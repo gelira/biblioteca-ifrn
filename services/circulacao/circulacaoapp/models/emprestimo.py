@@ -1,7 +1,9 @@
 import uuid
 from django.db import models
 
-class Emprestimo(models.Model):
+from .timestamped import TimestampedModel
+
+class Emprestimo(TimestampedModel):
     _id = models.UUIDField(
         unique=True, 
         editable=False, 

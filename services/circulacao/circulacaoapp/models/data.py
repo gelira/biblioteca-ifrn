@@ -1,8 +1,9 @@
 from django.db import models
 
+from .timestamped import TimestampedModel
 from .feriado import Feriado
 
-class Data(models.Model):
+class Data(TimestampedModel):
     feriado = models.ForeignKey(
         to=Feriado,
         on_delete=models.CASCADE,
