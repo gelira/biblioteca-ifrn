@@ -27,6 +27,9 @@ class Usuario(TimestampedModel):
     email_pessoal = models.EmailField(blank=True)
     vinculo = models.CharField(max_length=20)
     url_foto = models.CharField(max_length=150)
+    suspensao = models.DateField(
+        null=True
+    )
 
     class Meta:
         db_table = 'usuarios'
