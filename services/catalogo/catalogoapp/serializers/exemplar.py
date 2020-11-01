@@ -53,7 +53,7 @@ class ExemplarListSerializer(serializers.ModelSerializer):
             'disponivel'
         ]
 
-class ExemplarEmprestadosSerializer(serializers.Serializer):
+class ExemplarDisponibilidadeSerializer(serializers.Serializer):
     codigos = serializers.ListField(
         child=serializers.CharField(),
         allow_empty=False

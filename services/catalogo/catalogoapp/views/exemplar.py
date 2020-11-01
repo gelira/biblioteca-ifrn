@@ -7,7 +7,7 @@ from ..models import Exemplar
 from ..serializers import (
     ExemplarSerializer,
     ExemplarConsultaSerializer,
-    ExemplarEmprestadosSerializer
+    ExemplarDisponibilidadeSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
@@ -23,7 +23,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
             return ExemplarConsultaSerializer
 
         if self.action == 'exemplares_emprestados':
-            return ExemplarEmprestadosSerializer
+            return ExemplarDisponibilidadeSerializer
         
         return ExemplarSerializer
 
