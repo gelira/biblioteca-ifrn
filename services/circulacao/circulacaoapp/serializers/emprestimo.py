@@ -74,6 +74,9 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         marcar_exemplares_emprestados.delay(self.context['request'].user['_id'], data['codigos'])
         return emprestimos
 
+    def validate_codigos(self, value):
+        return list(set(value))
+
     def validar_usuario(self, matricula, senha):
         try:
             r1 = requests.post(AUTENTICACAO_SERVICE_URL + '/token', json={
