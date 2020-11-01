@@ -153,7 +153,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             'data_devolucao': None,
             'data_limite__lt': hoje
         }).exists():
-            raise serializers.ValidationError('Usuário suspenso')
+            raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
     def validar_emprestimos_usuario(self, usuario_id, max_livros, quantidade_livros):
         emprestimos_vigentes = list(Emprestimo.objects.filter(**{
