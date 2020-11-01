@@ -22,7 +22,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         if self.action == 'consulta':
             return ExemplarConsultaSerializer
 
-        if self.action == 'exemplares_emprestados':
+        if self.action in ['exemplares_emprestados', 'exemplares_devolvidos']:
             return ExemplarDisponibilidadeSerializer
         
         return ExemplarSerializer
@@ -31,7 +31,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         if self.action == 'consulta':
             return []
 
-        if self.action == 'exemplares_emprestados':
+        if self.action in ['exemplares_emprestados', 'exemplares_devolvidos']:
             return [
                 AutenticadoPermissao(),
                 FazerEmprestimoPermissao()
@@ -53,8 +53,16 @@ class ExemplarViewSet(viewsets.ModelViewSet):
 
     @action(methods=['put'], detail=False, url_path='emprestados')
     def exemplares_emprestados(self, request):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
+        request.data['disponivel'] = False
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=204)
+
+    @action(methods=['put'], detail=False, url_path='devolvidos')
+    def exemplares_devolvidos(self, request):
+        request.data['disponivel'] = True
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=204)
