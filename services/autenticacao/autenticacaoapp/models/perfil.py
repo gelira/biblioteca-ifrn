@@ -7,6 +7,9 @@ class Perfil(TimestampedModel):
     padrao = models.BooleanField()
     max_livros = models.PositiveIntegerField()
     max_dias = models.PositiveIntegerField()
+    quantidade_renovacoes = models.PositiveIntegerField(
+        default=1
+    )
 
     class Meta:
         db_table = 'perfis'
