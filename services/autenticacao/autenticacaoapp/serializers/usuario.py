@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from ..models import Usuario, Permissao
@@ -39,3 +41,28 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
             'vinculo',
             'url_foto'
         ]
+
+class UsuarioSuspensoSerializer(serializers.Serializer):
+    usuario_id = serializers.UUIDField()
+    dias_suspensao = serializers.IntegerField()
+
+class UsuariosSuspensosSerializer(serializers.Serializer):
+    usuarios = serializers.ListField(
+        child=UsuarioSuspensoSerializer()
+    )
+
+    def create(self, data):
+        with transaction.atomic():
+            for u in data['usuarios']:
+                usuario = Usuario.objects.filter(_id=u['usuario_id']).first()
+                if usuario is None:
+                    continue
+
+                hoje = timezone.now().date()
+                if usuario.suspensao is None or usuario.suspensao < hoje:
+                    usuario.suspensao = hoje - timezone.timedelta(days=1)
+
+                usuario.suspensao += timezone.timedelta(days=u['dias_suspensao'])
+                usuario.save()
+
+        return {}

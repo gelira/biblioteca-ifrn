@@ -4,9 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from ..authentication import RedisAutenticacao
 from ..serializers import (
     UsuarioSerializer,
-    UsuarioConsultaSerializer
+    UsuarioConsultaSerializer,
+    UsuariosSuspensosSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
@@ -34,3 +36,16 @@ class ConsultaMatriculaUsuarioView(APIView):
         )
         serializer = UsuarioConsultaSerializer(user.usuario)
         return Response(data=serializer.data)
+
+class UsuariosSuspensosView(APIView):
+    authentication_classes = [RedisAutenticacao]
+    permission_classes = [
+        AutenticadoPermissao,
+        FazerEmprestimoPermissao
+    ]
+
+    def post(self, request, *args, **kwargs):
+        serializer = UsuariosSuspensosSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=200)

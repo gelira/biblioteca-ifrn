@@ -28,5 +28,6 @@ urlpatterns = [
     path('token-local', views.ObterTokenLocalView.as_view()),
     path('verificar', views.VerificarTokenView.as_view()),
     path('informacoes', views.InformacoesUsuarioView.as_view()),
-    path('matricula/<str:matricula>', views.ConsultaMatriculaUsuarioView.as_view())
+    path('matricula/<str:matricula>', views.ConsultaMatriculaUsuarioView.as_view()),
+    path('suspensoes', views.UsuariosSuspensosView.as_view()),
 ] + router.urls
