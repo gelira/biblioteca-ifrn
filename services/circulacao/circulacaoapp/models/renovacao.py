@@ -14,9 +14,7 @@ class Renovacao(TimestampedModel):
         auto_now_add=True
     )
     nova_data_limite = models.DateField()
-    agente = models.CharField(
-        max_length=100
-    )
+    usuario_id = models.UUIDField()
 
     class Meta:
         db_table = 'renovacoes'
