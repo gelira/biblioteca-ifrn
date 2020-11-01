@@ -32,7 +32,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         codigos = data['codigos']
 
         usuario = self.validar_usuario(matricula, senha)
-        self.validar_usuario_suspenso(usuario['_id'])
+        self.validar_usuario_suspenso(usuario)
 
         livros_emprestados = self.validar_emprestimos_usuario(
             usuario['_id'], 
@@ -139,20 +139,20 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         except:
             raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
-    def validar_usuario_suspenso(self, usuario_id):
-        suspenso = Suspensao.objects.filter(**{
-            'usuario_id': usuario_id,
-            'abono': None,
-            'dias_restantes__gt': 0
-        }).exists()
+    def validar_usuario_suspenso(self, usuario):
+        suspensao = usuario['suspensao']
+        hoje = timezone.now().date()
 
-        emprestimo_atrasado = Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
+        if suspensao is not None:
+            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
+            if suspensao >= hoje:
+                raise serializers.ValidationError('Usuário suspenso')
+
+        if Emprestimo.objects.filter(**{
+            'usuario_id': usuario['_id'],
             'data_devolucao': None,
-            'data_limite__lt': date.today()
-        }).exists()
-
-        if suspenso or emprestimo_atrasado:
+            'data_limite__lt': hoje
+        }).exists():
             raise serializers.ValidationError('Usuário suspenso')
 
     def validar_emprestimos_usuario(self, usuario_id, max_livros, quantidade_livros):
