@@ -20,6 +20,18 @@ def marcar_exemplares_emprestados(self, usuario_id, codigos):
         raise self.retry(exc=e, countdown=10)
 
 @shared_task(bind=True)
+def marcar_exemplares_devolvidos(self, usuario_id, codigos):
+    try:
+        r = requests.put(
+            CATALOGO_SERVICE_URL + '/exemplares/devolvidos', 
+            headers={'X-Usuario-Id': usuario_id},
+            json={'codigos': codigos}
+        )
+        r.raise_for_status()
+    except Exception as e:
+        raise self.retry(exc=e, countdown=10)
+
+@shared_task(bind=True)
 def usuarios_suspensos(self, usuario_id, usuarios):
     try:
         lista = []

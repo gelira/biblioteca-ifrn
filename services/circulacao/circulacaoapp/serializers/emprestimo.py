@@ -12,6 +12,7 @@ from ..models import (
 )
 from ..tasks import (
     marcar_exemplares_emprestados,
+    marcar_exemplares_devolvidos,
     usuarios_suspensos
 )
 
@@ -244,7 +245,9 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
+        usuario_id = self.context['request'].user['_id']
         if suspensoes:
-            usuarios_suspensos.delay(self.context['request'].user['_id'], suspensoes)
+            usuarios_suspensos.delay(usuario_id, suspensoes)
+        marcar_exemplares_devolvidos.delay(usuario_id, data['codigos'])
 
         return {}
