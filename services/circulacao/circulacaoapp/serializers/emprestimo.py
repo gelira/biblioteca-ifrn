@@ -219,9 +219,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
     def create(self, data):
         emprestimos = data['emprestimos']
         for emprestimo in emprestimos:
-            hoje = timezone.now().date()
-            if hoje > emprestimo.data_limite:
-                diff = hoje - emprestimo.data_limite
+            diff = timezone.now().date() - emprestimo.data_limite
+            if diff.days > 0:
                 Suspensao.objects.create(**{
                     'emprestimo': emprestimo,
                     'usuario_id': emprestimo.usuario_id,
