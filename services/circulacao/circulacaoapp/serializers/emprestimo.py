@@ -10,7 +10,10 @@ from ..models import (
     Suspensao, 
     Data
 )
-from ..tasks import marcar_exemplares_emprestados
+from ..tasks import (
+    marcar_exemplares_emprestados,
+    usuarios_suspensos
+)
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
@@ -238,4 +241,5 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
+        usuarios_suspensos.delay(self.context['request'].user['_id'], suspensoes)
         return {}
