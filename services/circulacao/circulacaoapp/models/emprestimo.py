@@ -24,6 +24,9 @@ class Emprestimo(TimestampedModel):
     quantidade_renovacoes = models.PositiveIntegerField(
         default=0
     )
+    maximo_renovacoes = models.BooleanField(
+        default=False
+    )
     avaliado = models.BooleanField(
         default=False
     )
