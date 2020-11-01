@@ -241,5 +241,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
-        usuarios_suspensos.delay(self.context['request'].user['_id'], suspensoes)
+        if suspensoes:
+            usuarios_suspensos.delay(self.context['request'].user['_id'], suspensoes)
+
         return {}
