@@ -52,17 +52,21 @@ class UsuariosSuspensosSerializer(serializers.Serializer):
     )
 
     def create(self, data):
+        hoje = timezone.now().date()
         with transaction.atomic():
             for u in data['usuarios']:
+                dias_suspensao = int(u['dias_suspensao'])
+                if dias_suspensao <= 0:
+                    continue
+
                 usuario = Usuario.objects.filter(_id=u['usuario_id']).first()
                 if usuario is None:
                     continue
 
-                hoje = timezone.now().date()
                 if usuario.suspensao is None or usuario.suspensao < hoje:
                     usuario.suspensao = hoje - timezone.timedelta(days=1)
 
-                usuario.suspensao += timezone.timedelta(days=u['dias_suspensao'])
+                usuario.suspensao += timezone.timedelta(days=dias_suspensao)
                 usuario.save()
 
         return {}
