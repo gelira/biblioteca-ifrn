@@ -9,6 +9,6 @@ class FazerEmprestimoPermissao(BasePermission):
         self.cliente_redis = ClienteRedis()
 
     def has_permission(self, request, view):
-        _id = str(request.user.usuario._id)
+        _id = request.user['_id'] if isinstance(request.user, dict) else str(request.user.usuario._id)
         usuario = self.cliente_redis.get(_id)
         return 'emprestimo.fazer' in usuario['lista_permissoes']

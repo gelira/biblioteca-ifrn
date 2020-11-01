@@ -19,7 +19,6 @@ class Suspensao(TimestampedModel):
     )
     usuario_id = models.UUIDField()
     total_dias = models.PositiveIntegerField()
-    dias_restantes = models.PositiveIntegerField()
 
     class Meta:
         db_table = 'suspensoes'

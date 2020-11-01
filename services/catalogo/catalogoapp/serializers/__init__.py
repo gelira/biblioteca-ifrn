@@ -9,6 +9,6 @@ from .livro import (
 from .indexador import IndexadorSerializer
 from .exemplar import (
     ExemplarSerializer,
-    ExemplarEmprestadosSerializer
+    ExemplarDisponibilidadeSerializer
 )
 from .localizacao_fisica import LocalizacaoFisicaSerializer

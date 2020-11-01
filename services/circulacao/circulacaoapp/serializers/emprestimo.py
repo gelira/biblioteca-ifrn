@@ -2,10 +2,19 @@ import os
 import requests
 from datetime import date, timedelta
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
-from ..models import Emprestimo, Suspensao, Data
-from ..tasks import marcar_exemplares_emprestados
+from ..models import (
+    Emprestimo, 
+    Suspensao, 
+    Data
+)
+from ..tasks import (
+    marcar_exemplares_emprestados,
+    marcar_exemplares_devolvidos,
+    usuarios_suspensos
+)
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
@@ -24,7 +33,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         codigos = data['codigos']
 
         usuario = self.validar_usuario(matricula, senha)
-        self.validar_usuario_suspenso(usuario['_id'])
+        self.validar_usuario_suspenso(usuario)
 
         livros_emprestados = self.validar_emprestimos_usuario(
             usuario['_id'], 
@@ -65,6 +74,9 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
         marcar_exemplares_emprestados.delay(self.context['request'].user['_id'], data['codigos'])
         return emprestimos
+
+    def validate_codigos(self, value):
+        return list(set(value))
 
     def validar_usuario(self, matricula, senha):
         try:
@@ -131,21 +143,21 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         except:
             raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
-    def validar_usuario_suspenso(self, usuario_id):
-        suspenso = Suspensao.objects.filter(**{
-            'usuario_id': usuario_id,
-            'abono': None,
-            'dias_restantes__gt': 0
-        }).exists()
+    def validar_usuario_suspenso(self, usuario):
+        suspensao = usuario['suspensao']
+        hoje = timezone.now().date()
 
-        emprestimo_atrasado = Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
+        if suspensao is not None:
+            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
+            if suspensao >= hoje:
+                raise serializers.ValidationError('Usuário suspenso')
+
+        if Emprestimo.objects.filter(**{
+            'usuario_id': usuario['_id'],
             'data_devolucao': None,
-            'data_limite__lt': date.today()
-        }).exists()
-
-        if suspenso or emprestimo_atrasado:
-            raise serializers.ValidationError('Usuário suspenso')
+            'data_limite__lt': hoje
+        }).exists():
+            raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
     def validar_emprestimos_usuario(self, usuario_id, max_livros, quantidade_livros):
         emprestimos_vigentes = list(Emprestimo.objects.filter(**{
@@ -182,3 +194,60 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
                     return hoje
             hoje = hoje + timedelta(days=1)
+
+class DevolucaoEmprestimosSerializer(serializers.Serializer):
+    codigos = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=False
+    )
+
+    def validate_codigos(self, value):
+        return list(set(value))
+
+    def validate(self, data):
+        emprestimos = []
+        codigos = data['codigos']
+        
+        for codigo in codigos:
+            emprestimo = Emprestimo.objects.filter(**{
+                'exemplar_codigo': codigo,
+                'data_devolucao': None
+            }).order_by('-created').first()
+
+            if emprestimo is not None:
+                emprestimos.append(emprestimo)
+
+        if len(emprestimos) == 0:
+            raise serializers.ValidationError('Nenhum empréstimo foi encontrado')
+
+        data['emprestimos'] = emprestimos
+        return data
+
+    def create(self, data):
+        emprestimos = data['emprestimos']
+        suspensoes = {}
+        with transaction.atomic():
+            for emprestimo in emprestimos:
+                hoje = timezone.now().date()
+                diff = hoje - emprestimo.data_limite
+                if diff.days > 0:
+                    Suspensao.objects.create(**{
+                        'emprestimo': emprestimo,
+                        'usuario_id': emprestimo.usuario_id,
+                        'total_dias': diff.days
+                    })
+
+                    u_id = str(emprestimo.usuario_id)
+                    if u_id not in suspensoes:
+                        suspensoes[u_id] = 0
+                    suspensoes[u_id] += diff.days
+
+                emprestimo.data_devolucao = hoje
+                emprestimo.save()
+
+        usuario_id = self.context['request'].user['_id']
+        if suspensoes:
+            usuarios_suspensos.delay(usuario_id, suspensoes)
+        marcar_exemplares_devolvidos.delay(usuario_id, data['codigos'])
+
+        return {}

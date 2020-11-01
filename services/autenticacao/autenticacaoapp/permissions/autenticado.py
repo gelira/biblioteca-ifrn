@@ -9,5 +9,7 @@ class AutenticadoPermissao(BasePermission):
         self.cliente_redis = ClienteRedis()
 
     def has_permission(self, request, view):
-        _id = str(request.user.usuario._id)
+        if request.user is None:
+            return False
+        _id = request.user['_id'] if isinstance(request.user, dict) else str(request.user.usuario._id)
         return self.cliente_redis.exist(_id)

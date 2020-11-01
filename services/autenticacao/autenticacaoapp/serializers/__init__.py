@@ -5,6 +5,7 @@ from .token import (
 )
 from .usuario import (
     UsuarioSerializer,
-    UsuarioConsultaSerializer
+    UsuarioConsultaSerializer,
+    UsuariosSuspensosSerializer
 )
 from .perfil import PerfilSerializer
