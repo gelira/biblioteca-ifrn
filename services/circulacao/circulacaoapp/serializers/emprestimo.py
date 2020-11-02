@@ -57,7 +57,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 e = Emprestimo(
                     usuario_id=usuario['_id'],
                     livro_id=exemplar['livro']['_id'],
-                    exemplar_codigo=exemplar['codigo']
+                    exemplar_codigo=exemplar['codigo'],
+                    exemplar_referencia=exemplar['referencia']
                 )
                 if data_limite is None:
                     if not exemplar['referencia']:
