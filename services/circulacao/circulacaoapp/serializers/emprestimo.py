@@ -1,6 +1,5 @@
 import os
 import requests
-from datetime import date, timedelta
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
@@ -18,6 +17,18 @@ from ..tasks import (
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
+
+def calcular_data_limite(max_dias=None):
+    hoje = timezone.now().date()
+
+    if max_dias is not None:
+        hoje = hoje + timezone.timedelta(days=max_dias)
+    
+    while True:
+        if hoje.weekday() < 5:
+            if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
+                return hoje
+        hoje = hoje + timezone.timedelta(days=1)
 
 class EmprestimoCreateSerializer(serializers.Serializer):
     matricula = serializers.CharField()
@@ -62,11 +73,11 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 )
                 if data_limite is None:
                     if not exemplar['referencia']:
-                        data_limite = self.calcular_data_limite(usuario['perfil']['max_dias'])
+                        data_limite = calcular_data_limite(usuario['perfil']['max_dias'])
                 
                 if data_limite_referencia is None:
                     if exemplar['referencia']:
-                        data_limite_referencia = self.calcular_data_limite()
+                        data_limite_referencia = calcular_data_limite()
 
                 e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
                 e.save()
@@ -172,7 +183,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return list(map(lambda x: str(x), emprestimos_vigentes))
 
     def emprestar_exemplar_referencia(self):
-        hoje = date.today()
+        hoje = timezone.now().date()
 
         if hoje.weekday() == 4:
             return True
@@ -180,21 +191,9 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         while hoje.weekday() < 5:
             if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
                 return False
-            hoje = hoje + timedelta(days=1)
+            hoje = hoje + timezone.timedelta(days=1)
         
         return True
-
-    def calcular_data_limite(self, max_dias=None):
-        hoje = date.today()
-
-        if max_dias is not None:
-            hoje = hoje + timedelta(days=max_dias)
-        
-        while True:
-            if hoje.weekday() < 5:
-                if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
-                    return hoje
-            hoje = hoje + timedelta(days=1)
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
     codigos = serializers.ListField(
