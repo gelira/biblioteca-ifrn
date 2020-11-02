@@ -45,20 +45,20 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
             'suspensao'
         ]
 
-class UsuarioSuspensoSerializer(serializers.Serializer):
+class UsuarioDiasSerializer(serializers.Serializer):
     usuario_id = serializers.UUIDField()
-    dias_suspensao = serializers.IntegerField()
+    dias = serializers.IntegerField()
 
 class UsuariosSuspensosSerializer(serializers.Serializer):
     usuarios = serializers.ListField(
-        child=UsuarioSuspensoSerializer()
+        child=UsuarioDiasSerializer()
     )
 
     def create(self, data):
         hoje = timezone.now().date()
         with transaction.atomic():
             for u in data['usuarios']:
-                dias_suspensao = int(u['dias_suspensao'])
+                dias_suspensao = int(u['dias'])
                 if dias_suspensao <= 0:
                     continue
 
