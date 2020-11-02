@@ -6,7 +6,8 @@ from rest_framework import serializers
 
 from ..models import (
     Emprestimo, 
-    Suspensao, 
+    Suspensao,
+    Renovacao, 
     Data
 )
 from ..tasks import (
@@ -251,3 +252,109 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         marcar_exemplares_devolvidos.delay(usuario_id, data['codigos'])
 
         return {}
+
+class RenovacaoEmprestimosSerializer(serializers.Serializer):
+    emprestimos = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False
+    )
+    faz_emprestimo = serializers.BooleanField()
+
+    def validate_emprestimos(self, value):
+        emprestimos = list(map(lambda x: str(x), value))
+        return list(set(emprestimos))
+
+    def validate(self, data):
+        emprestimos_id = data['emprestimos']
+        emprestimos = []
+        usuarios = {}
+        filtro = {}
+        hoje = timezone.now().date()
+        
+        if not data['faz_emprestimo']:
+            filtro['usuario_id'] = self.context['request'].user['_id']
+
+        for e_id in emprestimos_id:
+            filtro['_id'] = e_id
+            
+            emprestimo = Emprestimo.objects.filter(**filtro).first()
+            if emprestimo is None:
+                continue
+            
+            self.validar_emprestimo(emprestimo, hoje)
+            usuario_id = str(emprestimo.usuario_id)
+            if usuarios.get(usuario_id) is None:
+                usuarios[usuario_id] = self.validar_usuario(usuario_id, hoje)
+            
+            emprestimos.append(emprestimo)
+
+        data.update({
+            'emprestimos': emprestimos,
+            'usuarios': usuarios
+        })
+        return data
+
+    def create(self, data):
+        agente_id = self.context['request'].user['_id']
+        emprestimos = data['emprestimos']
+        usuarios = data['usuarios']
+
+        with transaction.atomic():
+            for emprestimo in emprestimos:
+                perfil = usuarios[str(emprestimo.usuario_id)]['perfil']
+                emprestimo.quantidade_renovacoes += 1
+                
+                if emprestimo.quantidade_renovacoes >= perfil['quantidade_renovacoes']:
+                    emprestimo.maximo_renovacoes = True
+                
+                nova_data = calcular_data_limite(perfil['max_dias'])
+                emprestimo.data_limite = nova_data
+                
+                Renovacao.objects.create(
+                    emprestimo=emprestimo,
+                    nova_data_limite=nova_data,
+                    usuario_id=agente_id
+                )
+                emprestimo.save()
+
+        return {}
+
+    def validar_emprestimo(self, emprestimo, hoje):
+        if emprestimo.data_devolucao is not None:
+            raise serializers.ValidationError('Não é possível renovar empréstimo devolvido')
+
+        if emprestimo.data_limite < hoje:
+            raise serializers.ValidationError('Há empréstimos atrasados')
+
+        if emprestimo.maximo_renovacoes:
+            raise serializers.ValidationError('Há empréstimos com máximo de renovações')
+
+        if emprestimo.exemplar_referencia:
+            raise serializers.ValidationError('Não é possível renovar empréstimo de exemplar referência')
+        
+    def validar_usuario(self, usuario_id, hoje):
+        usuario = self.buscar_usuario(usuario_id)
+
+        suspensao = usuario['suspensao']
+        if suspensao is not None:
+            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date() 
+            if suspensao >= hoje:
+                raise serializers.ValidationError('Usuário suspenso')
+
+        if Emprestimo.objects.filter(**{
+            'usuario_id': usuario_id,
+            'data_devolucao': None,
+            'data_limite__lt': hoje
+        }).exists():
+            raise serializers.ValidationError('Usuário com empréstimos atrasados')
+
+        return usuario
+
+    def buscar_usuario(self, usuario_id):
+        r = requests.get(AUTENTICACAO_SERVICE_URL + '/consulta', params={'id': usuario_id}, headers={
+            'X-Usuario-Id': self.context['request'].user['_id']
+        })
+        if not r.ok:
+            raise serializers.ValidationError('Erro ao buscar informações do usuário')
+
+        return r.json()
