@@ -197,13 +197,14 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return True
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
-    codigos = serializers.ListField(
-        child=serializers.CharField(),
+    emprestimos = serializers.ListField(
+        child=serializers.UUIDField(),
         allow_empty=False
     )
 
-    def validate_codigos(self, value):
-        return list(set(value))
+    def validate_emprestimos(self, value):
+        emprestimos = list(map(lambda x: str(x), value))
+        return list(set(emprestimos))
 
     def validate(self, data):
         emprestimos = []
