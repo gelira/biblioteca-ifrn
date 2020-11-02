@@ -14,6 +14,9 @@ class Emprestimo(TimestampedModel):
     exemplar_codigo = models.CharField(
         max_length=20
     )
+    exemplar_referencia = models.BooleanField(
+        default=False
+    )
     data_emprestimo = models.DateField(
         auto_now_add=True
     )
@@ -23,6 +26,9 @@ class Emprestimo(TimestampedModel):
     )
     quantidade_renovacoes = models.PositiveIntegerField(
         default=0
+    )
+    maximo_renovacoes = models.BooleanField(
+        default=False
     )
     avaliado = models.BooleanField(
         default=False

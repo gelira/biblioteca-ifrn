@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
@@ -5,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from ..authentication import RedisAutenticacao
+from ..jwt import AutenticacaoJWT
+from ..models import Usuario
 from ..serializers import (
     UsuarioSerializer,
     UsuarioConsultaSerializer,
@@ -22,19 +25,38 @@ class InformacoesUsuarioView(APIView):
         serializer = UsuarioSerializer(request.user.usuario)
         return Response(data=serializer.data)
 
-class ConsultaMatriculaUsuarioView(APIView):
+class ConsultaUsuarioView(APIView):
+    authentication_classes = [
+        RedisAutenticacao,
+        AutenticacaoJWT
+    ]
     permission_classes = [
-        IsAuthenticated,
-        AutenticadoPermissao,
-        FazerEmprestimoPermissao
+        AutenticadoPermissao
     ]
 
     def get(self, request, *args, **kwargs):
-        user = get_object_or_404(
-            User.objects.all(), 
-            username=self.kwargs['matricula']
-        )
-        serializer = UsuarioConsultaSerializer(user.usuario)
+        usuario = request.user
+
+        if FazerEmprestimoPermissao().has_permission(request, self):    
+            _id = request.GET.get('id')
+            matricula = request.GET.get('matricula')
+            
+            try:
+                uuid.UUID(_id)     
+            except:
+                _id = None
+
+            if _id is not None:
+                usuario = get_object_or_404(Usuario.objects.all(), _id=_id)
+
+            elif matricula is not None:
+                user = get_object_or_404(User.objects.all(), username=matricula)
+                usuario = user.usuario
+
+        if isinstance(usuario, dict):
+            usuario = get_object_or_404(Usuario.objects.all(), _id=usuario['_id'])
+
+        serializer = UsuarioConsultaSerializer(usuario)
         return Response(data=serializer.data)
 
 class UsuariosSuspensosView(APIView):

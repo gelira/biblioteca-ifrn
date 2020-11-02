@@ -29,6 +29,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class UsuarioConsultaSerializer(serializers.ModelSerializer):
     matricula = serializers.SerializerMethodField()
+    perfil = PerfilSerializer()
 
     def get_matricula(self, obj):
         return obj.user.username
@@ -39,7 +40,9 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
             'matricula',
             'nome_completo',
             'vinculo',
-            'url_foto'
+            'url_foto',
+            'perfil',
+            'suspensao'
         ]
 
 class UsuarioSuspensoSerializer(serializers.Serializer):
