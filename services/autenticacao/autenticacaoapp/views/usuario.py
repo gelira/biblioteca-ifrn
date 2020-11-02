@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from ..authentication import RedisAutenticacao
+from ..jwt import AutenticacaoJWT
 from ..models import Usuario
 from ..serializers import (
     UsuarioSerializer,
@@ -25,14 +26,16 @@ class InformacoesUsuarioView(APIView):
         return Response(data=serializer.data)
 
 class ConsultaUsuarioView(APIView):
+    authentication_classes = [
+        RedisAutenticacao,
+        AutenticacaoJWT
+    ]
     permission_classes = [
-        IsAuthenticated,
-        AutenticadoPermissao,
-        FazerEmprestimoPermissao
+        AutenticadoPermissao
     ]
 
     def get(self, request, *args, **kwargs):
-        usuario = request.user.usuario
+        usuario = request.user
 
         if FazerEmprestimoPermissao().has_permission(request, self):    
             _id = request.GET.get('id')
@@ -49,6 +52,9 @@ class ConsultaUsuarioView(APIView):
             elif matricula is not None:
                 user = get_object_or_404(User.objects.all(), username=matricula)
                 usuario = user.usuario
+
+        if isinstance(usuario, dict):
+            usuario = get_object_or_404(Usuario.objects.all(), _id=usuario['_id'])
 
         serializer = UsuarioConsultaSerializer(usuario)
         return Response(data=serializer.data)
