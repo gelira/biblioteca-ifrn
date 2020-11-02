@@ -22,6 +22,7 @@ from circulacaoapp import views
 router = SimpleRouter(trailing_slash=False)
 router.register('feriados', views.FeriadoViewSet)
 router.register('emprestimos', views.EmprestimoViewSet)
+router.register('abonos', views.AbonoViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

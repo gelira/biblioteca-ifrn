@@ -4,3 +4,4 @@ from .emprestimo import (
     DevolucaoEmprestimosSerializer,
     RenovacaoEmprestimosSerializer
 )
+from .abono import AbonoCreateSerializer
