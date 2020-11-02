@@ -197,23 +197,24 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return True
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
-    codigos = serializers.ListField(
-        child=serializers.CharField(),
+    emprestimos = serializers.ListField(
+        child=serializers.UUIDField(),
         allow_empty=False
     )
 
-    def validate_codigos(self, value):
-        return list(set(value))
+    def validate_emprestimos(self, value):
+        emprestimos = list(map(lambda x: str(x), value))
+        return list(set(emprestimos))
 
     def validate(self, data):
         emprestimos = []
-        codigos = data['codigos']
+        emprestimos_id = data['emprestimos']
         
-        for codigo in codigos:
+        for e_id in emprestimos_id:
             emprestimo = Emprestimo.objects.filter(**{
-                'exemplar_codigo': codigo,
+                '_id': e_id,
                 'data_devolucao': None
-            }).order_by('-created').first()
+            }).first()
 
             if emprestimo is not None:
                 emprestimos.append(emprestimo)
@@ -227,6 +228,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
     def create(self, data):
         emprestimos = data['emprestimos']
         suspensoes = {}
+        codigos = []
+
         with transaction.atomic():
             for emprestimo in emprestimos:
                 hoje = timezone.now().date()
@@ -243,13 +246,14 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                         suspensoes[u_id] = 0
                     suspensoes[u_id] += diff.days
 
+                codigos.append(emprestimo.exemplar_codigo)
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
         usuario_id = self.context['request'].user['_id']
         if suspensoes:
             usuarios_suspensos.delay(usuario_id, suspensoes)
-        marcar_exemplares_devolvidos.delay(usuario_id, data['codigos'])
+        marcar_exemplares_devolvidos.delay(usuario_id, codigos)
 
         return {}
 
