@@ -66,7 +66,7 @@ class UsuariosSuspensosView(APIView):
         FazerEmprestimoPermissao
     ]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         serializer = UsuariosSuspensosSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
