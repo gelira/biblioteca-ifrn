@@ -5,7 +5,7 @@ import requests
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 
-def _usuarios_suspensos(self, usuario_id, usuarios):
+def _usuarios_suspensos(usuario_id, usuarios):
     lista = []
     for key in usuarios.keys():
         lista.append({
