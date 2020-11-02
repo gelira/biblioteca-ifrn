@@ -41,7 +41,8 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
             'nome_completo',
             'vinculo',
             'url_foto',
-            'perfil'
+            'perfil',
+            'suspensao'
         ]
 
 class UsuarioSuspensoSerializer(serializers.Serializer):
