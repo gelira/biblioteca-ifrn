@@ -10,10 +10,10 @@ def _usuarios_suspensos(usuario_id, usuarios):
     for key in usuarios.keys():
         lista.append({
             'usuario_id': key,
-            'dias_suspensao': usuarios[key]
+            'dias': usuarios[key]
         })
 
-    r = requests.post(
+    r = requests.put(
         AUTENTICACAO_SERVICE_URL + '/suspensoes', 
         headers={'X-Usuario-Id': usuario_id},
         json={'usuarios': lista}
