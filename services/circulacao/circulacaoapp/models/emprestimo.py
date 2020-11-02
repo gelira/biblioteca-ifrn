@@ -14,6 +14,9 @@ class Emprestimo(TimestampedModel):
     exemplar_codigo = models.CharField(
         max_length=20
     )
+    exemplar_referencia = models.BooleanField(
+        default=False
+    )
     data_emprestimo = models.DateField(
         auto_now_add=True
     )
