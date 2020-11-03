@@ -19,3 +19,18 @@ def _usuarios_suspensos(usuario_id, usuarios):
         json={'usuarios': lista}
     )
     r.raise_for_status()
+
+def _usuarios_abono(usuario_id, usuarios):
+    lista = []
+    for key in usuarios.keys():
+        lista.append({
+            'usuario_id': key,
+            'dias': usuarios[key]
+        })
+
+    r = requests.put(
+        AUTENTICACAO_SERVICE_URL + '/abonos', 
+        headers={'X-Usuario-Id': usuario_id},
+        json={'usuarios': lista}
+    )
+    r.raise_for_status()
