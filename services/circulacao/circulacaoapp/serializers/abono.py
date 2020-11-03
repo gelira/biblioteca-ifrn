@@ -5,6 +5,7 @@ from ..models import (
     Abono,
     Suspensao
 )
+from ..tasks import usuarios_abono
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
     suspensoes = serializers.ListField(
@@ -51,7 +52,7 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
             )
             Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        print(data['usuarios'])
+        usuarios_abono.delay(data['usuario_id'], data['usuarios'])
         return abono
     
     class Meta:
