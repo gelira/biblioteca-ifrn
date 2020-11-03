@@ -73,3 +73,29 @@ class UsuariosSuspensosSerializer(serializers.Serializer):
                 usuario.save()
 
         return {}
+
+class UsuariosAbonoSerializer(serializers.Serializer):
+    usuarios = serializers.ListField(
+        child=UsuarioDiasSerializer()
+    )
+
+    def create(self, data):
+        hoje = timezone.now().date()
+        with transaction.atomic():
+            for u in data['usuarios']:
+                dias_suspensao = int(u['dias'])
+                if dias_suspensao <= 0:
+                    continue
+
+                usuario = Usuario.objects.filter(_id=u['usuario_id']).first()
+                if usuario is None:
+                    continue
+
+                if usuario.suspensao is None:
+                    continue
+                
+                if usuario.suspensao >= hoje:
+                    usuario.suspensao -= timezone.timedelta(days=int(u['dias']))
+                    usuario.save()
+
+        return {}
