@@ -17,9 +17,6 @@ class Reserva(TimestampedModel):
     )
     usuario_id = models.UUIDField()
     livro_id = models.UUIDField()
-    momento = models.DateTimeField(
-        auto_now_add=True
-    )
     disponivel = models.DateTimeField(
         null=True
     )
@@ -30,5 +27,5 @@ class Reserva(TimestampedModel):
     class Meta:
         db_table = 'reservas'
         ordering = [
-            '-momento'
+            '-created'
         ]
