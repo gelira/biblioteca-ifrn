@@ -6,6 +6,7 @@ from .token import (
 from .usuario import (
     UsuarioSerializer,
     UsuarioConsultaSerializer,
-    UsuariosSuspensosSerializer
+    UsuariosSuspensosSerializer,
+    UsuariosAbonoSerializer
 )
 from .perfil import PerfilSerializer

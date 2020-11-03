@@ -11,11 +11,13 @@ from ..models import Usuario
 from ..serializers import (
     UsuarioSerializer,
     UsuarioConsultaSerializer,
-    UsuariosSuspensosSerializer
+    UsuariosSuspensosSerializer,
+    UsuariosAbonoSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
-    FazerEmprestimoPermissao
+    FazerEmprestimoPermissao,
+    AbonarSuspensaoPermissao
 )
 
 User = get_user_model()
@@ -66,8 +68,21 @@ class UsuariosSuspensosView(APIView):
         FazerEmprestimoPermissao
     ]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         serializer = UsuariosSuspensosSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=200)
+
+class UsuariosAbonoView(APIView):
+    authentication_classes = [RedisAutenticacao]
+    permission_classes = [
+        AutenticadoPermissao,
+        AbonarSuspensaoPermissao
+    ]
+
+    def put(self, request, *args, **kwargs):
+        serializer = UsuariosAbonoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=200)

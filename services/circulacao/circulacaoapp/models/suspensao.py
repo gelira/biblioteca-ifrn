@@ -6,6 +6,11 @@ from .emprestimo import Emprestimo
 from .abono import Abono
 
 class Suspensao(TimestampedModel):
+    _id = models.UUIDField(
+        unique=True,
+        editable=False,
+        default=uuid.uuid4
+    )
     emprestimo = models.ForeignKey(
         to=Emprestimo,
         on_delete=models.PROTECT,
