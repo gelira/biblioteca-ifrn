@@ -1,5 +1,7 @@
 import os
 import requests
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework import serializers
 
 from ..models import Reserva
@@ -8,8 +10,23 @@ CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
-        self.validar_livro(str(value))
+        livro_id = str(value)
+        self.validar_reservas(livro_id)
+        self.validar_livro(livro_id)
         return value
+
+    def validar_reservas(self, livro_id):
+        agora = timezone.now()
+        usuario_id = self.context['request'].user['_id']
+        
+        if Reserva.objects.filter(
+            Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gt=agora),
+            usuario_id=usuario_id,
+            livro_id=livro_id,
+            cancelada=False,
+            emprestimo_id=None
+        ).exists():
+            raise serializers.ValidationError('Você tem uma reserva vigente para este livro')
 
     def validar_livro(self, livro_id):
         try:
