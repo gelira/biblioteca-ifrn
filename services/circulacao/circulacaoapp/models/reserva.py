@@ -17,7 +17,7 @@ class Reserva(TimestampedModel):
     )
     usuario_id = models.UUIDField()
     livro_id = models.UUIDField()
-    disponivel = models.DateTimeField(
+    disponibilidade_retirada = models.DateTimeField(
         null=True
     )
     cancelada = models.BooleanField(
