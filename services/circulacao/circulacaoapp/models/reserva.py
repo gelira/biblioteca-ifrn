@@ -27,5 +27,5 @@ class Reserva(TimestampedModel):
     class Meta:
         db_table = 'reservas'
         ordering = [
-            '-created'
+            'created'
         ]
