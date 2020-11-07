@@ -34,9 +34,18 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
             if not r.ok:
                 raise serializers.ValidationError('Livro não encontrado')
 
+            agora = timezone.now()
             livro = r.json()
-            if livro['exemplares_disponiveis'] > 0:
-                raise serializers.ValidationError('Há exemplares desse livro disponíveis')
+            exemplares_disponiveis = livro['exemplares_disponiveis']
+
+            if exemplares_disponiveis > 0:
+                if Reserva.objects.filter(
+                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gt=agora),
+                    livro_id=livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).count() < exemplares_disponiveis:
+                    raise serializers.ValidationError('Há exemplares desse livro disponíveis')
         
         except serializers.ValidationError as e:
             raise e
