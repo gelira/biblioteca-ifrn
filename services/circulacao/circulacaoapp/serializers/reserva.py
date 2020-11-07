@@ -4,16 +4,28 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from ..models import Reserva
+from ..models import (
+    Reserva,
+    Emprestimo
+)
 
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
         livro_id = str(value)
+        self.validar_emprestimos(livro_id)
         self.validar_reservas(livro_id)
         self.validar_livro(livro_id)
         return value
+
+    def validar_emprestimos(self, livro_id):
+        if Emprestimo.objects.filter(
+            livro_id=livro_id,
+            usuario_id=self.context['request'].user['_id'],
+            data_devolucao=None
+        ).exists():
+            raise serializers.ValidationError('Você já possui um exemplar desse livro emprestado')
 
     def validar_reservas(self, livro_id):
         agora = timezone.now()
