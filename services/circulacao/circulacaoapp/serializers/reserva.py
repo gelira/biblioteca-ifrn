@@ -14,10 +14,28 @@ CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
         livro_id = str(value)
+        self.validar_usuario_suspenso()
         self.validar_emprestimos(livro_id)
         self.validar_reservas(livro_id)
         self.validar_livro(livro_id)
         return value
+
+    def validar_usuario_suspenso(self):
+        usuario_id = self.context['request'].user['_id']
+        suspensao = self.context['request'].user['suspensao']
+        hoje = timezone.now().date()
+
+        if suspensao is not None:
+            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
+            if suspensao >= hoje:
+                raise serializers.ValidationError('Você está suspenso')
+
+        if Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
+            raise serializers.ValidationError('Você tem empréstimos atrasados')
 
     def validar_emprestimos(self, livro_id):
         if Emprestimo.objects.filter(
