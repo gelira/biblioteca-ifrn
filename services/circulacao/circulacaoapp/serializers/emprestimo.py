@@ -1,6 +1,7 @@
 import os
 import requests
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -8,6 +9,7 @@ from ..models import (
     Emprestimo, 
     Suspensao,
     Renovacao, 
+    Reserva,
     Data
 )
 from ..tasks import (
@@ -59,16 +61,20 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return data
 
     def create(self, data):
+        agora = timezone.now()
+        
         data_limite = None
         data_limite_referencia = None
+        
         usuario = data['usuario']
         emprestimos = []
 
         with transaction.atomic():
             for exemplar in data['exemplares']:
+                livro_id = exemplar['livro']['_id']
                 e = Emprestimo(
                     usuario_id=usuario['_id'],
-                    livro_id=exemplar['livro']['_id'],
+                    livro_id=livro_id,
                     exemplar_codigo=exemplar['codigo'],
                     exemplar_referencia=exemplar['referencia']
                 )
@@ -82,6 +88,17 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
                 e.save()
+
+                reserva = Reserva.objects.filter(
+                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gt=agora),
+                    usuario_id=usuario['_id'],
+                    livro_id=livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).first()
+                if reserva is not None:
+                    reserva.emprestimo = e
+                    reserva.save()
 
                 emprestimos.append(e)
 
