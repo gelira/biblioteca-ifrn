@@ -244,12 +244,13 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
+        hoje = timezone.now().date()
+        
         suspensoes = {}
         codigos = []
 
         with transaction.atomic():
             for emprestimo in emprestimos:
-                hoje = timezone.now().date()
                 diff = hoje - emprestimo.data_limite
                 if diff.days > 0:
                     Suspensao.objects.create(**{
@@ -266,6 +267,16 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 codigos.append(emprestimo.exemplar_codigo)
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
+
+                reserva = Reserva.objects.filter(
+                    disponibilidade_retirada=None,
+                    livro_id=emprestimo.livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).first()
+                if reserva is not None:
+                    reserva.disponibilidade_retirada = calcular_data_limite(1)
+                    reserva.save()
 
         usuario_id = self.context['request'].user['_id']
         if suspensoes:
