@@ -44,19 +44,19 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             usuario['perfil']['max_livros'], 
             len(codigos)
         )
-        exemplares = self.validar_codigos(codigos, livros_emprestados, usuario['_id'])
+        exemplares, reservas = self.validar_codigos(codigos, livros_emprestados, usuario['_id'])
 
         data['usuario'] = usuario
         data['exemplares'] = exemplares
+        data['reservas'] = reservas
         return data
 
     def create(self, data):
-        hoje = timezone.now().date()
-        
         data_limite = None
         data_limite_referencia = None
         
         usuario = data['usuario']
+        reservas = data['reservas']
         emprestimos = []
 
         with transaction.atomic():
@@ -79,13 +79,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
                 e.save()
 
-                reserva = Reserva.objects.filter(
-                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
-                    usuario_id=usuario['_id'],
-                    livro_id=livro_id,
-                    cancelada=False,
-                    emprestimo_id=None
-                ).first()
+                reserva = reservas.get(livro_id)
                 if reserva is not None:
                     reserva.emprestimo = e
                     reserva.save()
@@ -180,7 +174,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 livros_emprestados.append(livro_id)
                 exemplares.append(exemplar)
 
-            return exemplares
+            return exemplares, reservas
 
         except serializers.ValidationError as e:
             raise e
