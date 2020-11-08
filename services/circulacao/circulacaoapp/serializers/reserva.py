@@ -18,6 +18,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
         self.validar_emprestimos(livro_id)
         self.validar_reservas(livro_id)
         self.validar_livro(livro_id)
+        self.validar_quantidade_reservas_emprestimos()
         return value
 
     def validar_usuario_suspenso(self):
@@ -82,6 +83,24 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
         except:
             raise serializers.ValidationError('Serviço demorou muito a responder')
+
+    def validar_quantidade_reservas_emprestimos(self):
+        usuario_id = self.context['request'].user['_id']
+        hoje = timezone.now().date()
+
+        emprestimos = Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None
+        ).count()
+        reservas = Reserva.objects.filter(
+            Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
+            usuario_id=usuario_id,
+            cancelada=False,
+            emprestimo_id=None
+        ).count()
+
+        if emprestimos + reservas + 1 > self.context['request'].user['perfil']['max_livros']:
+            raise serializers.ValidationError('Seus empréstimos + reservas estão no limite')
 
     def create(self, data):
         return Reserva.objects.create(
