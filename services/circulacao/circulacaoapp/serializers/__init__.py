@@ -5,3 +5,4 @@ from .emprestimo import (
     RenovacaoEmprestimosSerializer
 )
 from .abono import AbonoCreateSerializer
+from .reserva import ReservaCreateSerializer

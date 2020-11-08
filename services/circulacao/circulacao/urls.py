@@ -23,6 +23,7 @@ router = SimpleRouter(trailing_slash=False)
 router.register('feriados', views.FeriadoViewSet)
 router.register('emprestimos', views.EmprestimoViewSet)
 router.register('abonos', views.AbonoViewSet)
+router.register('reservas', views.ReservaViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

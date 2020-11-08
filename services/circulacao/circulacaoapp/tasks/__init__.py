@@ -9,6 +9,9 @@ from circulacaoapp.tasks.usuario import (
     _usuarios_suspensos,
     _usuarios_abono
 )
+from circulacaoapp.tasks.reserva import (
+    _verificar_reserva
+)
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
 def marcar_exemplares_emprestados(usuario_id, codigos):
@@ -25,3 +28,7 @@ def usuarios_suspensos(usuario_id, usuarios):
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
 def usuarios_abono(usuario_id, usuarios):
     _usuarios_abono(usuario_id, usuarios)
+
+@shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
+def verificar_reserva(reserva_id):
+    _verificar_reserva(reserva_id)

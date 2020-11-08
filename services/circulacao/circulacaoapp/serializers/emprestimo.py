@@ -1,35 +1,27 @@
 import os
 import requests
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
+from ..utils import calcular_data_limite
 from ..models import (
     Emprestimo, 
     Suspensao,
     Renovacao, 
+    Reserva,
     Data
 )
 from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
-    usuarios_suspensos
+    usuarios_suspensos,
+    verificar_reserva
 )
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
-
-def calcular_data_limite(max_dias=None):
-    hoje = timezone.now().date()
-
-    if max_dias is not None:
-        hoje = hoje + timezone.timedelta(days=max_dias)
-    
-    while True:
-        if hoje.weekday() < 5:
-            if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
-                return hoje
-        hoje = hoje + timezone.timedelta(days=1)
 
 class EmprestimoCreateSerializer(serializers.Serializer):
     matricula = serializers.CharField()
@@ -52,23 +44,27 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             usuario['perfil']['max_livros'], 
             len(codigos)
         )
-        exemplares = self.validar_codigos(codigos, livros_emprestados)
+        exemplares, reservas = self.validar_codigos(codigos, livros_emprestados, usuario['_id'])
 
         data['usuario'] = usuario
         data['exemplares'] = exemplares
+        data['reservas'] = reservas
         return data
 
     def create(self, data):
         data_limite = None
         data_limite_referencia = None
+        
         usuario = data['usuario']
+        reservas = data['reservas']
         emprestimos = []
 
         with transaction.atomic():
             for exemplar in data['exemplares']:
+                livro_id = exemplar['livro']['_id']
                 e = Emprestimo(
                     usuario_id=usuario['_id'],
-                    livro_id=exemplar['livro']['_id'],
+                    livro_id=livro_id,
                     exemplar_codigo=exemplar['codigo'],
                     exemplar_referencia=exemplar['referencia']
                 )
@@ -82,6 +78,11 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 e.data_limite = data_limite_referencia if exemplar['referencia'] else data_limite
                 e.save()
+
+                reserva = reservas.get(livro_id)
+                if reserva is not None:
+                    reserva.emprestimo = e
+                    reserva.save()
 
                 emprestimos.append(e)
 
@@ -118,10 +119,14 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         except:
             raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
-    def validar_codigos(self, codigos, livros_emprestados):
+    def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
+            hoje = timezone.now().date()
+
             emprestar_referencia = None
             exemplares = []
+            reservas = {}
+
             for codigo in codigos:
                 r = requests.get(CATALOGO_SERVICE_URL + '/exemplares/consulta/' + codigo)
                 if not r.ok:
@@ -144,11 +149,32 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 livro_id = exemplar['livro']['_id']
                 if livro_id in livros_emprestados:
                     raise serializers.ValidationError('Usuário não pode pegar dois exemplares do mesmo livro')
+
+                reserva = Reserva.objects.filter(
+                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
+                    usuario_id=usuario_id,
+                    livro_id=livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).first()
+
+                if reserva is not None:
+                    reservas[livro_id] = reserva
+                else:
+                    exemplares_disponiveis = exemplar['livro']['exemplares_disponiveis']
+                    qtd_reservas = Reserva.objects.filter(
+                        Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
+                        livro_id=livro_id,
+                        cancelada=False,
+                        emprestimo_id=None
+                    ).count()
+                    if exemplares_disponiveis <= qtd_reservas:
+                        raise serializers.ValidationError('Existem reservas para o exemplar {}'.format(codigo))
                 
                 livros_emprestados.append(livro_id)
                 exemplares.append(exemplar)
 
-            return exemplares
+            return exemplares, reservas
 
         except serializers.ValidationError as e:
             raise e
@@ -227,12 +253,15 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
+        hoje = timezone.now().date()
+        disponibilidade_retirada = None
+        
         suspensoes = {}
         codigos = []
+        reservas = []
 
         with transaction.atomic():
             for emprestimo in emprestimos:
-                hoje = timezone.now().date()
                 diff = hoje - emprestimo.data_limite
                 if diff.days > 0:
                     Suspensao.objects.create(**{
@@ -250,10 +279,36 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
+                reserva = Reserva.objects.filter(
+                    disponibilidade_retirada=None,
+                    livro_id=emprestimo.livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).first()
+                if reserva is not None:
+                    if disponibilidade_retirada is None:
+                        disponibilidade_retirada = calcular_data_limite(1)
+                    reserva.disponibilidade_retirada = disponibilidade_retirada
+
+                    reserva.save()
+                    reservas.append(reserva)
+
         usuario_id = self.context['request'].user['_id']
         if suspensoes:
             usuarios_suspensos.delay(usuario_id, suspensoes)
         marcar_exemplares_devolvidos.delay(usuario_id, codigos)
+
+        for reserva in reservas:
+            data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
+            eta = timezone.datetime(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=1,
+                minute=36,
+                tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
+            )
+            verificar_reserva.apply_async([str(reserva._id)], eta=eta)
 
         return {}
 
