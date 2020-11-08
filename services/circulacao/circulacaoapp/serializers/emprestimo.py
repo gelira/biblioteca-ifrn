@@ -16,7 +16,8 @@ from ..models import (
 from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
-    usuarios_suspensos
+    usuarios_suspensos,
+    verificar_reserva
 )
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
@@ -237,6 +238,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         
         suspensoes = {}
         codigos = []
+        reservas = []
 
         with transaction.atomic():
             for emprestimo in emprestimos:
@@ -266,11 +268,24 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 if reserva is not None:
                     reserva.disponibilidade_retirada = calcular_data_limite(1)
                     reserva.save()
+                    reservas.append(reserva)
 
         usuario_id = self.context['request'].user['_id']
         if suspensoes:
             usuarios_suspensos.delay(usuario_id, suspensoes)
         marcar_exemplares_devolvidos.delay(usuario_id, codigos)
+
+        for reserva in reservas:
+            data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
+            eta = timezone.datetime(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=1,
+                minute=36,
+                tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
+            )
+            verificar_reserva.apply_async([str(reserva._id)], eta=eta)
 
         return {}
 
