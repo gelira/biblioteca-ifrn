@@ -44,7 +44,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             usuario['perfil']['max_livros'], 
             len(codigos)
         )
-        exemplares = self.validar_codigos(codigos, livros_emprestados)
+        exemplares = self.validar_codigos(codigos, livros_emprestados, usuario['_id'])
 
         data['usuario'] = usuario
         data['exemplares'] = exemplares
@@ -125,10 +125,14 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         except:
             raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
-    def validar_codigos(self, codigos, livros_emprestados):
+    def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
+            hoje = timezone.now().date()
+
             emprestar_referencia = None
             exemplares = []
+            reservas = {}
+
             for codigo in codigos:
                 r = requests.get(CATALOGO_SERVICE_URL + '/exemplares/consulta/' + codigo)
                 if not r.ok:
@@ -151,6 +155,27 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 livro_id = exemplar['livro']['_id']
                 if livro_id in livros_emprestados:
                     raise serializers.ValidationError('Usuário não pode pegar dois exemplares do mesmo livro')
+
+                reserva = Reserva.objects.filter(
+                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
+                    usuario_id=usuario_id,
+                    livro_id=livro_id,
+                    cancelada=False,
+                    emprestimo_id=None
+                ).first()
+
+                if reserva is not None:
+                    reservas[livro_id] = reserva
+                else:
+                    exemplares_disponiveis = exemplar['livro']['exemplares_disponiveis']
+                    qtd_reservas = Reserva.objects.filter(
+                        Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
+                        livro_id=livro_id,
+                        cancelada=False,
+                        emprestimo_id=None
+                    ).count()
+                    if exemplares_disponiveis <= qtd_reservas:
+                        raise serializers.ValidationError('Existem reservas para o exemplar {}'.format(codigo))
                 
                 livros_emprestados.append(livro_id)
                 exemplares.append(exemplar)
