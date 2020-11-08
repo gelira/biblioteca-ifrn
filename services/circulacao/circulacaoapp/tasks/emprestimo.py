@@ -13,7 +13,6 @@ def _marcar_exemplares_emprestados(usuario_id, codigos):
     )
     r.raise_for_status()
 
-
 def _marcar_exemplares_devolvidos(usuario_id, codigos):
     r = requests.put(
         CATALOGO_SERVICE_URL + '/exemplares/devolvidos', 
