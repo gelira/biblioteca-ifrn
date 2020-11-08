@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
+from ..utils import calcular_data_limite
 from ..models import (
     Emprestimo, 
     Suspensao,
@@ -20,18 +21,6 @@ from ..tasks import (
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
-
-def calcular_data_limite(max_dias=None):
-    hoje = timezone.now().date()
-
-    if max_dias is not None:
-        hoje = hoje + timezone.timedelta(days=max_dias)
-    
-    while True:
-        if hoje.weekday() < 5:
-            if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
-                return hoje
-        hoje = hoje + timezone.timedelta(days=1)
 
 class EmprestimoCreateSerializer(serializers.Serializer):
     matricula = serializers.CharField()
