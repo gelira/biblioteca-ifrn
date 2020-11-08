@@ -51,7 +51,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return data
 
     def create(self, data):
-        agora = timezone.now()
+        hoje = timezone.now().date()
         
         data_limite = None
         data_limite_referencia = None
@@ -80,7 +80,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 e.save()
 
                 reserva = Reserva.objects.filter(
-                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gt=agora),
+                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
                     usuario_id=usuario['_id'],
                     livro_id=livro_id,
                     cancelada=False,
