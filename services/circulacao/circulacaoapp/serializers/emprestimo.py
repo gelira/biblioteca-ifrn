@@ -235,6 +235,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
     def create(self, data):
         emprestimos = data['emprestimos']
         hoje = timezone.now().date()
+        disponibilidade_retirada = None
         
         suspensoes = {}
         codigos = []
@@ -266,7 +267,10 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     emprestimo_id=None
                 ).first()
                 if reserva is not None:
-                    reserva.disponibilidade_retirada = calcular_data_limite(1)
+                    if disponibilidade_retirada is None:
+                        disponibilidade_retirada = calcular_data_limite(1)
+                    reserva.disponibilidade_retirada = disponibilidade_retirada
+
                     reserva.save()
                     reservas.append(reserva)
 
