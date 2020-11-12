@@ -390,6 +390,14 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
 
         if emprestimo.exemplar_referencia:
             raise serializers.ValidationError('Não é possível renovar empréstimo de exemplar referência')
+
+        if Reserva.objects.filter(
+            livro_id=emprestimo.livro_id,
+            emprestimo_id=None,
+            cancelada=False,
+            disponibilidade_retirada=None,
+        ).exists():
+            raise serializers.ValidationError('Existem reservas para esse exemplar, não é possível renovar o empréstimo')
         
     def validar_usuario(self, usuario_id, hoje):
         usuario = self.buscar_usuario(usuario_id)
