@@ -1,5 +1,6 @@
 import os
 import requests
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
@@ -8,6 +9,8 @@ from ..models import (
     Reserva,
     Emprestimo
 )
+from ..utils import calcular_data_limite
+from ..tasks import verificar_reserva
 
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
@@ -113,3 +116,54 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
         fields = [
             'livro_id'
         ]
+
+class CancelarReservaSerializer(serializers.Serializer):
+    reserva = serializers.UUIDField()
+
+    def validate_reserva(self, value):
+        reserva = Reserva.objects.filter(
+            _id=value,
+            usuario_id=self.context['request'].user['_id']
+        ).first()
+
+        if reserva is None:
+            raise serializers.ValidationError('Reserva não encontrada')
+
+        if reserva.cancelada:
+            raise serializers.ValidationError('Reserva já cancelada')
+
+        if reserva.emprestimo_id is not None:
+            raise serializers.ValidationError('Reserva já atendida')
+
+        return reserva
+
+    def create(self, data):
+        with transaction.atomic():
+            reserva = data['reserva']
+            reserva.cancelada = True
+            reserva.save()
+
+            if reserva.disponibilidade_retirada is not None:
+                proxima_reserva = Reserva.objects.filter(
+                    disponibilidade_retirada=None,
+                    livro_id=reserva.livro_id,
+                    emprestimo_id=None,
+                    cancelada=False
+                ).first()
+
+                if proxima_reserva is not None:
+                    proxima_reserva.disponibilidade_retirada = calcular_data_limite(1)
+                    proxima_reserva.save()
+
+                    data = proxima_reserva.disponibilidade_retirada + timezone.timedelta(days=1)
+                    eta = timezone.datetime(
+                        year=data.year,
+                        month=data.month,
+                        day=data.day,
+                        hour=1,
+                        minute=36,
+                        tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
+                    )
+                    verificar_reserva.apply_async([str(proxima_reserva._id)], eta=eta)
+
+        return {}
