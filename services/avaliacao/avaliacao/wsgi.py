@@ -8,9 +8,10 @@ https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
 """
 
 import os
-
+import dotenv
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'avaliacao.settings')
+dotenv.read_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'catalogo.settings')
 
 application = get_wsgi_application()
