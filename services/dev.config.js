@@ -31,6 +31,14 @@ module.exports = {
       args: 'runserver 8003'
     },
     {
+      name: 'avaliacao-dev',
+      interpreter,
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
+      script: './manage.py',
+      args: 'runserver 8004'
+    },
+    
+    {
       name: 'circulacao-worker-dev',
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
