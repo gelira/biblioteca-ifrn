@@ -15,7 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
+from avaliacaoapp import views
+
+router = SimpleRouter(trailing_slash=False)
+router.register('tags', views.TagViewSet)
+
+urlpatterns = router.urls
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+# ]
