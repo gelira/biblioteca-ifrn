@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 
 from ..models import Emprestimo
 from ..serializers import (
+    EmprestimoRetrieveSerializer,
     EmprestimoCreateSerializer,
     DevolucaoEmprestimosSerializer,
     RenovacaoEmprestimosSerializer
@@ -30,6 +31,8 @@ class EmprestimoViewSet(ModelViewSet):
             return DevolucaoEmprestimosSerializer
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
+        if self.action == 'retrieve':
+            return EmprestimoRetrieveSerializer
         return EmprestimoCreateSerializer
 
     def create(self, request, *args, **kwargs):

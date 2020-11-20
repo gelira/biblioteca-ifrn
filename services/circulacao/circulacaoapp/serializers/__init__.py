@@ -1,5 +1,6 @@
 from .feriado import FeriadoCreateSerializer
 from .emprestimo import (
+    EmprestimoRetrieveSerializer,
     EmprestimoCreateSerializer,
     DevolucaoEmprestimosSerializer,
     RenovacaoEmprestimosSerializer
