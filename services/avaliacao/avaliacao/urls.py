@@ -21,6 +21,7 @@ from avaliacaoapp import views
 
 router = SimpleRouter(trailing_slash=False)
 router.register('tags', views.TagViewSet)
+router.register('avaliacoes', views.AvaliacaoViewSet)
 
 urlpatterns = router.urls
 
