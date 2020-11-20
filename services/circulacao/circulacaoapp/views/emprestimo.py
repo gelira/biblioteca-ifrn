@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -14,11 +15,15 @@ from ..permissions import (
 )
 
 class EmprestimoViewSet(ModelViewSet):
+    lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     queryset = Emprestimo.objects.all()
     permission_classes = [
         AutenticadoPermissao,
         FazerEmprestimoPermissao
     ]
+    
+    def get_object(self):
+        return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
 
     def get_serializer_class(self):
         if self.action == 'devolucoes':
