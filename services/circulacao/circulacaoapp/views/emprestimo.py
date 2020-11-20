@@ -39,6 +39,11 @@ class EmprestimoViewSet(ModelViewSet):
             return EmprestimoRetrieveSerializer
         return EmprestimoCreateSerializer
 
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [AutenticadoPermissao()]
+        return super().get_permissions()
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
