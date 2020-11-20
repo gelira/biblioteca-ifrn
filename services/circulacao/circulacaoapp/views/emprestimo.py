@@ -24,7 +24,11 @@ class EmprestimoViewSet(ModelViewSet):
     ]
     
     def get_object(self):
-        return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
+        return get_object_or_404(
+            self.queryset, 
+            _id=self.kwargs['pk'],
+            usuario_id=self.request.user['_id']
+        )
 
     def get_serializer_class(self):
         if self.action == 'devolucoes':
