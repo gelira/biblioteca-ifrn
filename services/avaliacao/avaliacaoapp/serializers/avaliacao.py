@@ -19,6 +19,11 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     def validate_tags(self, value):
         return Tag.objects.filter(_id__in=value).all()
 
+    def validate_nota(self, value):
+        if value < 1 or value > 10:
+            raise serializers.ValidationError('Nota deve estar entre 1 e 10')
+        return value 
+
     def validate(self, data):
         emprestimo_id = str(data['emprestimo_id'])
         data['livro_id'] = self.validar_emprestimo(emprestimo_id)
