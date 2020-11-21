@@ -6,6 +6,7 @@ from ..models import (
     Avaliacao,
     Tag
 )
+from ..tasks import emprestimo_avaliado
 
 CIRCULACAO_SERVICE_URL = os.getenv('CIRCULACAO_SERVICE_URL')
 
@@ -30,6 +31,15 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         data['usuario_id'] = self.context['request'].user['_id']
 
         return data
+
+    def create(self, data):
+        usuario_id = data['usuario_id']
+        emprestimo_id = str(data['emprestimo_id'])
+
+        retorno = super().create(data)
+        emprestimo_avaliado.apply_async((usuario_id, emprestimo_id), queue='avaliacao')
+
+        return retorno
 
     def validar_emprestimo(self, emprestimo_id):
         if Avaliacao.objects.filter(emprestimo_id=emprestimo_id).exists():
