@@ -8,6 +8,7 @@ from ..models import (
 )
 from ..tasks import emprestimo_avaliado
 
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 CIRCULACAO_SERVICE_URL = os.getenv('CIRCULACAO_SERVICE_URL')
 
 class AvaliacaoCreateSerializer(serializers.ModelSerializer):
@@ -37,7 +38,7 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         emprestimo_id = str(data['emprestimo_id'])
 
         retorno = super().create(data)
-        emprestimo_avaliado.apply_async((usuario_id, emprestimo_id), queue='avaliacao')
+        emprestimo_avaliado.apply_async([usuario_id, emprestimo_id], queue=PROJECT_NAME)
 
         return retorno
 

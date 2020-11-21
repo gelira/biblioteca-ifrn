@@ -20,6 +20,7 @@ from ..tasks import (
     verificar_reserva
 )
 
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
@@ -94,7 +95,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 emprestimos.append(e)
 
-        marcar_exemplares_emprestados.delay(self.context['request'].user['_id'], data['codigos'])
+        marcar_exemplares_emprestados.apply_async([self.context['request'].user['_id'], data['codigos']], queue=PROJECT_NAME)
         return emprestimos
 
     def validate_codigos(self, value):
@@ -303,8 +304,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
         usuario_id = self.context['request'].user['_id']
         if suspensoes:
-            usuarios_suspensos.delay(usuario_id, suspensoes)
-        marcar_exemplares_devolvidos.delay(usuario_id, codigos)
+            usuarios_suspensos.apply_async([usuario_id, suspensoes], queue=PROJECT_NAME)
+        marcar_exemplares_devolvidos.apply_async([usuario_id, codigos], queue=PROJECT_NAME)
 
         for reserva in reservas:
             data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
@@ -316,7 +317,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 minute=36,
                 tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
             )
-            verificar_reserva.apply_async([str(reserva._id)], eta=eta)
+            verificar_reserva.apply_async([str(reserva._id)], eta=eta, queue=PROJECT_NAME)
 
         return {}
 

@@ -12,6 +12,7 @@ from ..models import (
 from ..utils import calcular_data_limite
 from ..tasks import verificar_reserva
 
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
@@ -164,6 +165,6 @@ class CancelarReservaSerializer(serializers.Serializer):
                         minute=36,
                         tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
                     )
-                    verificar_reserva.apply_async([str(proxima_reserva._id)], eta=eta)
+                    verificar_reserva.apply_async([str(proxima_reserva._id)], eta=eta, queue=PROJECT_NAME)
 
         return {}
