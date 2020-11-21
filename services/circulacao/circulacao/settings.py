@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from kombu import Queue, Exchange
+
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -139,6 +142,12 @@ REST_FRAMEWORK = {
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
-CELERY_EVENT_QUEUE_EXPIRES = int(os.getenv('CELERY_EVENT_QUEUE_EXPIRES'))
+CELERY_QUEUES = [
+    Queue(
+        PROJECT_NAME,
+        Exchange(PROJECT_NAME),
+        routing_key=PROJECT_NAME
+    )
+]
 
-CELERY_EVENT_QUEUE_TTL = int(os.getenv('CELERY_EVENT_QUEUE_TTL'))
+CELERY_DEFAULT_QUEUE = PROJECT_NAME

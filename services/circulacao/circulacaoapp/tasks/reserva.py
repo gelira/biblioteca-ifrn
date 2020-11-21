@@ -1,10 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
 from django.db import transaction
 from django.utils import timezone
 from circulacao.celery import app
 from circulacaoapp.models import Reserva
 from circulacaoapp.utils import calcular_data_limite
+
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 def _verificar_reserva(reserva_id):
     with transaction.atomic():
@@ -40,4 +43,4 @@ def _verificar_reserva(reserva_id):
             minute=36,
             tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
         )
-        app.send_task('circulacaoapp.tasks.verificar_reserva', [str(proxima_reserva._id)], eta=eta)
+        app.send_task('circulacaoapp.tasks.verificar_reserva', [str(proxima_reserva._id)], eta=eta, queue=PROJECT_NAME)

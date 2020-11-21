@@ -1,3 +1,4 @@
+import os
 from django.db import transaction
 from rest_framework import serializers
 
@@ -6,6 +7,8 @@ from ..models import (
     Suspensao
 )
 from ..tasks import usuarios_abono
+
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
     suspensoes = serializers.ListField(
@@ -52,7 +55,7 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
             )
             Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        usuarios_abono.delay(data['usuario_id'], data['usuarios'])
+        usuarios_abono.apply_async([data['usuario_id'], data['usuarios']], queue=PROJECT_NAME)
         return abono
     
     class Meta:
