@@ -40,7 +40,7 @@ class EmprestimoViewSet(ModelViewSet):
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
-        if self.action == 'retrieve':
+        if self.action in ['retrieve', 'emprestimo_avaliado']:
             return [AutenticadoPermissao()]
         return super().get_permissions()
 
