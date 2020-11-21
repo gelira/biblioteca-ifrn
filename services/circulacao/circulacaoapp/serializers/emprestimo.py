@@ -23,6 +23,14 @@ from ..tasks import (
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 
+class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Emprestimo
+        exclude = [
+            'id',
+            'usuario_id'
+        ]
+
 class EmprestimoCreateSerializer(serializers.Serializer):
     matricula = serializers.CharField()
     senha = serializers.CharField()

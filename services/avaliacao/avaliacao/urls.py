@@ -1,4 +1,4 @@
-"""gateway URL Configuration
+"""avaliacao URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
@@ -15,13 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
-from gatewayapp import views
+from avaliacaoapp import views
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('autenticacao/<path:path>', views.AutenticacaoProxyView.as_view()),
-    path('catalogo/<path:path>', views.CatalogoProxyView.as_view()),
-    path('circulacao/<path:path>', views.CirculacaoProxyView.as_view()),
-    path('avaliacao/<path:path>', views.AvaliacaoProxyView.as_view()),
-]
+router = SimpleRouter(trailing_slash=False)
+router.register('tags', views.TagViewSet)
+router.register('avaliacoes', views.AvaliacaoViewSet)
+
+urlpatterns = router.urls
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+# ]

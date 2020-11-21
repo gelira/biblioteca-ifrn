@@ -31,10 +31,24 @@ module.exports = {
       args: 'runserver 8003'
     },
     {
+      name: 'avaliacao-dev',
+      interpreter,
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
+      script: './manage.py',
+      args: 'runserver 8004'
+    },
+    
+    {
       name: 'circulacao-worker-dev',
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
-      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m celery -A circulacao worker -l info'
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m celery -A circulacao worker -l info -n circulacaoworker'
+    },
+    {
+      name: 'avaliacao-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao'
     }
   ],
 };

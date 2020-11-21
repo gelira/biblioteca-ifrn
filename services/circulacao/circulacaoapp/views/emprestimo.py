@@ -1,9 +1,11 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from ..models import Emprestimo
 from ..serializers import (
+    EmprestimoRetrieveSerializer,
     EmprestimoCreateSerializer,
     DevolucaoEmprestimosSerializer,
     RenovacaoEmprestimosSerializer
@@ -14,18 +16,33 @@ from ..permissions import (
 )
 
 class EmprestimoViewSet(ModelViewSet):
+    lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     queryset = Emprestimo.objects.all()
     permission_classes = [
         AutenticadoPermissao,
         FazerEmprestimoPermissao
     ]
+    
+    def get_object(self):
+        return get_object_or_404(
+            self.queryset, 
+            _id=self.kwargs['pk'],
+            usuario_id=self.request.user['_id']
+        )
 
     def get_serializer_class(self):
         if self.action == 'devolucoes':
             return DevolucaoEmprestimosSerializer
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
+        if self.action == 'retrieve':
+            return EmprestimoRetrieveSerializer
         return EmprestimoCreateSerializer
+
+    def get_permissions(self):
+        if self.action in ['retrieve', 'emprestimo_avaliado']:
+            return [AutenticadoPermissao()]
+        return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -46,4 +63,11 @@ class EmprestimoViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(status=200)
+
+    @action(methods=['patch'], detail=True, url_path='avaliado')
+    def emprestimo_avaliado(self, request, pk=None):
+        emprestimo = self.get_object()
+        emprestimo.avaliado = True
+        emprestimo.save()
         return Response(status=200)
