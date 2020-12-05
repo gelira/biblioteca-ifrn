@@ -69,8 +69,6 @@ class UtilizarCodigoPromocaoSerializer(serializers.Serializer):
             _id = str(usuario._id)
             codigo = data['codigo']
 
-            codigo.codigo_utilizado = codigo.codigo
-            codigo.codigo = ''
             codigo.bolsista = usuario
             codigo.save()
 
