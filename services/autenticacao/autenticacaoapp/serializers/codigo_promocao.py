@@ -15,7 +15,8 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
             codigo = str(uuid.uuid4())[:6].upper()
             if not CodigoPromocao.objects.filter(
                 codigo=codigo,
-                validade__gte=timezone.now()
+                validade__gte=timezone.now(),
+                bolsista=None
             ).exists():
                 return codigo
 
