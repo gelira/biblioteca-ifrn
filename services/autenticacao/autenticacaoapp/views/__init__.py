@@ -10,3 +10,4 @@ from .usuario import (
     UsuariosAbonoView
 )
 from .perfil import PerfilViewSet
+from .promocao import PromocaoViewSet

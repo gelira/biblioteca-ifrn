@@ -21,6 +21,7 @@ from autenticacaoapp import views
 
 router = SimpleRouter(trailing_slash=False)
 router.register('perfis', views.PerfilViewSet)
+router.register('promocao', views.PromocaoViewSet)
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
