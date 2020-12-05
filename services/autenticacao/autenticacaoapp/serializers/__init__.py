@@ -10,4 +10,7 @@ from .usuario import (
     UsuariosAbonoSerializer
 )
 from .perfil import PerfilSerializer
-from .codigo_promocao import CodigoPromocaoCreateSerializer
+from .codigo_promocao import (
+    CodigoPromocaoCreateSerializer,
+    UtilizarCodigoPromocaoSerializer
+)
