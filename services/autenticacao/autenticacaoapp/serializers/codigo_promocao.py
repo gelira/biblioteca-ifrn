@@ -15,7 +15,8 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
             codigo = str(uuid.uuid4())[:6].upper()
             if not CodigoPromocao.objects.filter(
                 codigo=codigo,
-                validade__gte=timezone.now()
+                validade__gte=timezone.now(),
+                bolsista=None
             ).exists():
                 return codigo
 
@@ -68,8 +69,6 @@ class UtilizarCodigoPromocaoSerializer(serializers.Serializer):
             _id = str(usuario._id)
             codigo = data['codigo']
 
-            codigo.codigo_utilizado = codigo.codigo
-            codigo.codigo = ''
             codigo.bolsista = usuario
             codigo.save()
 

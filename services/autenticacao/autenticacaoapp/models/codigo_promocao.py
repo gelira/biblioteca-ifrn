@@ -7,10 +7,6 @@ class CodigoPromocao(TimestampedModel):
     codigo = models.CharField(
         max_length=20
     )
-    codigo_utilizado = models.CharField(
-        max_length=20,
-        blank=True
-    )
     validade = models.DateTimeField()
     usuario = models.ForeignKey(
         to=Usuario,
