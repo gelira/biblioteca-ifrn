@@ -11,7 +11,10 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
     def create_codigo(self):
         while True:
             codigo = str(uuid.uuid4())[:6].upper()
-            if not CodigoPromocao.objects.filter(codigo=codigo).exists():
+            if not CodigoPromocao.objects.filter(
+                codigo=codigo,
+                validade__gte=timezone.now()
+            ).exists():
                 return codigo
 
     def get_usuario(self):
