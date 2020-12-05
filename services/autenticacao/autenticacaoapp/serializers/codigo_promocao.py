@@ -36,3 +36,9 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
         fields = [
             'codigo'
         ]
+        extra_kwargs = {
+            'codigo': {
+                'read_only': True
+            }
+        }
+
