@@ -51,6 +51,13 @@ module.exports = {
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao'
+    },
+    {
+      name: 'notificacao-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/notificacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao'
     }
   ],
 };
