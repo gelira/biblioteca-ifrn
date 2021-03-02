@@ -19,10 +19,12 @@ from ..tasks import (
     usuarios_suspensos,
     verificar_reserva
 )
+from circulacao.celery import app
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
+NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
 
 class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,6 +70,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         reservas = data['reservas']
         emprestimos = []
 
+        exemplares_email = []
+
         with transaction.atomic():
             for exemplar in data['exemplares']:
                 livro_id = exemplar['livro']['_id']
@@ -95,7 +99,19 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 emprestimos.append(e)
 
-        marcar_exemplares_emprestados.apply_async([self.context['request'].user['_id'], data['codigos']], queue=PROJECT_NAME)
+                exemplares_email.append({
+                    'titulo': exemplar['livro']['titulo'],
+                    'codigo': exemplar['codigo'],
+                    'referencia': exemplar['referencia'],
+                    'data_limite': e.data_limite.strftime('%d/%m/%Y')
+                })
+
+        self.enviar_comprovante(usuario, exemplares_email)
+        marcar_exemplares_emprestados.apply_async(
+            [self.context['request'].user['_id'], 
+            data['codigos']], 
+            queue=PROJECT_NAME
+        )
         return emprestimos
 
     def validate_codigos(self, value):
@@ -230,6 +246,29 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             hoje = hoje + timezone.timedelta(days=1)
         
         return True
+
+    def enviar_comprovante(self, usuario, exemplares):
+        user = self.context['request'].user
+        agora = timezone.now()
+
+        emails = [usuario['email_institucional']]
+        if usuario['email_pessoal']:
+            emails.append(usuario['email_pessoal'])
+
+        contexto_email = {
+            'nome_usuario': usuario['nome'],
+            'data': agora.strftime('%d/%m/%Y'),
+            'hora': agora.strftime('%H:%M:%S'),
+            'nome_atendente': user['nome'],
+            'matricula_atendente': user['matricula'],
+            'exemplares': exemplares
+        }
+
+        app.send_task(
+            'notificacaoapp.tasks.comprovante_emprestimo', 
+            [contexto_email, emails], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
     emprestimos = serializers.ListField(
