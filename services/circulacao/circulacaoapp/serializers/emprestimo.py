@@ -216,18 +216,18 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             if suspensao >= hoje:
                 raise serializers.ValidationError('Usuário suspenso')
 
-        if Emprestimo.objects.filter(**{
-            'usuario_id': usuario['_id'],
-            'data_devolucao': None,
-            'data_limite__lt': hoje
-        }).exists():
+        if Emprestimo.objects.filter(
+            usuario_id=usuario['_id'],
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
             raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
     def validar_emprestimos_usuario(self, usuario_id, max_livros, quantidade_livros):
-        emprestimos_vigentes = list(Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
-            'data_devolucao': None
-        }).values_list('livro_id', flat=True).all())
+        emprestimos_vigentes = list(Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None
+        ).values_list('livro_id', flat=True).all())
 
         if (len(emprestimos_vigentes) + quantidade_livros) > max_livros:
             raise serializers.ValidationError('Atingido o limite de livros para o usuário')
@@ -285,10 +285,10 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         emprestimos_id = data['emprestimos']
         
         for e_id in emprestimos_id:
-            emprestimo = Emprestimo.objects.filter(**{
-                '_id': e_id,
-                'data_devolucao': None
-            }).first()
+            emprestimo = Emprestimo.objects.filter(
+                _id=e_id,
+                data_devolucao=None
+            ).first()
 
             if emprestimo is not None:
                 emprestimos.append(emprestimo)
@@ -312,11 +312,11 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
             for emprestimo in emprestimos:
                 diff = hoje - emprestimo.data_limite
                 if diff.days > 0:
-                    Suspensao.objects.create(**{
-                        'emprestimo': emprestimo,
-                        'usuario_id': emprestimo.usuario_id,
-                        'total_dias': diff.days
-                    })
+                    Suspensao.objects.create(
+                        emprestimo=emprestimo,
+                        usuario_id=emprestimo.usuario_id,
+                        total_dias=diff.days
+                    )
 
                     u_id = str(emprestimo.usuario_id)
                     if u_id not in suspensoes:
@@ -456,11 +456,11 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
             if suspensao >= hoje:
                 raise serializers.ValidationError('Usuário suspenso')
 
-        if Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
-            'data_devolucao': None,
-            'data_limite__lt': hoje
-        }).exists():
+        if Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
             raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
         return usuario
