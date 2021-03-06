@@ -17,7 +17,8 @@ from ..serializers import (
 from ..permissions import (
     AutenticadoPermissao,
     FazerEmprestimoPermissao,
-    AbonarSuspensaoPermissao
+    AbonarSuspensaoPermissao,
+    ConsultarUsuarioPermissao
 )
 
 User = get_user_model()
@@ -39,7 +40,7 @@ class ConsultaUsuarioView(APIView):
     def get(self, request, *args, **kwargs):
         usuario = request.user
 
-        if FazerEmprestimoPermissao().has_permission(request, self):    
+        if ConsultarUsuarioPermissao().has_permission(request, self):    
             _id = request.GET.get('id')
             matricula = request.GET.get('matricula')
             
