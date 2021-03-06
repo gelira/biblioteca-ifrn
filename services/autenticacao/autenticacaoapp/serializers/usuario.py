@@ -42,7 +42,9 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
             'vinculo',
             'url_foto',
             'perfil',
-            'suspensao'
+            'suspensao',
+            'email_institucional',
+            'email_pessoal'
         ]
 
 class UsuarioDiasSerializer(serializers.Serializer):
