@@ -40,7 +40,7 @@ class ConsultaUsuarioView(APIView):
     def get(self, request, *args, **kwargs):
         usuario = request.user
 
-        if ConsultarUsuarioPermissao().has_permission(request, self):    
+        if FazerEmprestimoPermissao().has_permission(request, self):    
             _id = request.GET.get('id')
             matricula = request.GET.get('matricula')
             
@@ -59,7 +59,10 @@ class ConsultaUsuarioView(APIView):
         if isinstance(usuario, dict):
             usuario = get_object_or_404(Usuario.objects.all(), _id=usuario['_id'])
 
-        serializer = UsuarioConsultaSerializer(usuario)
+        serializer = UsuarioConsultaSerializer(
+            usuario,
+            consultar_usuario=ConsultarUsuarioPermissao().has_permission(request, self)
+        )
         return Response(data=serializer.data)
 
 class UsuariosSuspensosView(APIView):
