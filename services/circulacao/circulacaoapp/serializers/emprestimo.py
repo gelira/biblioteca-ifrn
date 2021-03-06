@@ -25,6 +25,7 @@ PROJECT_NAME = os.getenv('PROJECT_NAME')
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
+USUARIO_SISTEMA_ID = os.getenv('USUARIO_SISTEMA_ID')
 
 class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -465,9 +466,11 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         return usuario
 
     def buscar_usuario(self, usuario_id):
-        r = requests.get(AUTENTICACAO_SERVICE_URL + '/consulta', params={'id': usuario_id}, headers={
-            'X-Usuario-Id': self.context['request'].user['_id']
-        })
+        r = requests.get(
+            AUTENTICACAO_SERVICE_URL + '/consulta', 
+            params={ 'id': usuario_id }, 
+            headers={ 'X-Usuario-Id': USUARIO_SISTEMA_ID }
+        )
         if not r.ok:
             raise serializers.ValidationError('Erro ao buscar informações do usuário')
 
