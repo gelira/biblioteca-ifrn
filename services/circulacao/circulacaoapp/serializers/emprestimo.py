@@ -108,8 +108,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
         self.enviar_comprovante(usuario, exemplares_email)
         marcar_exemplares_emprestados.apply_async(
-            [self.context['request'].user['_id'], 
-            data['codigos']], 
+            [self.context['request'].user['_id'], data['codigos']], 
             queue=PROJECT_NAME
         )
         return emprestimos
