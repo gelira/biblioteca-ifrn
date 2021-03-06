@@ -11,4 +11,7 @@ class RedisAutenticacao(BaseAuthentication):
         if usuario_id is not None:
             usuario = cliente_redis.get(usuario_id)
             
+        if usuario is None:
+            return None
+
         return usuario, None
