@@ -17,7 +17,8 @@ from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
     usuarios_suspensos,
-    verificar_reserva
+    verificar_reserva,
+    enviar_comprovantes_devolucao
 )
 from circulacao.celery import app
 
@@ -301,12 +302,16 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
-        hoje = timezone.now().date()
+        agora = timezone.now()
+        hoje = agora.date()
         disponibilidade_retirada = None
         
         suspensoes = {}
         codigos = []
         reservas = []
+
+        comprovantes = []
+        atendente = self.context['request'].user
 
         with transaction.atomic():
             for emprestimo in emprestimos:
@@ -341,10 +346,23 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     reserva.save()
                     reservas.append(reserva)
 
-        usuario_id = self.context['request'].user['_id']
+                comprovantes.append({
+                    'usuario_id': str(emprestimo.usuario_id),
+                    'livro_id': str(emprestimo.livro_id),
+                    'atraso': diff.days,
+                    'data': agora.strftime('%d/%m/%Y'),
+                    'hora': agora.strftime('%H:%M:%S'),
+                    'exemplar_codigo': emprestimo.exemplar_codigo,
+                    'referencia': emprestimo.exemplar_referencia,
+                    'nome_atendente': atendente['nome'],
+                    'matricula_atendente': atendente['matricula']
+                })
+
+        usuario_id = atendente['_id']
         if suspensoes:
             usuarios_suspensos.apply_async([usuario_id, suspensoes], queue=PROJECT_NAME)
         marcar_exemplares_devolvidos.apply_async([usuario_id, codigos], queue=PROJECT_NAME)
+        enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:
             data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
