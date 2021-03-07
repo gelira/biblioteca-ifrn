@@ -41,10 +41,15 @@ class LivroViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return LivroListSerializer
+
         if self.action == 'retrieve':
+            if self.request.GET.get('min'):
+                return LivroSerializer
             return LivroRetrieveSerializer
+        
         if self.action == 'pesquisa':
             return LivroPesquisaSerializer
+        
         return LivroSerializer
 
     @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])

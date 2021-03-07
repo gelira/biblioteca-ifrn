@@ -43,21 +43,21 @@ module.exports = {
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
-        'celery -A circulacao worker -l info -n circulacaoworker -Q circulacao'
+        'celery -A circulacao worker -l info -n circulacaoworker -Q circulacao -f worker.log'
     },
     {
       name: 'avaliacao-worker-dev',
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
-        'celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao'
+        'celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao -f worker.log'
     },
     {
       name: 'notificacao-worker-dev',
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/notificacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
-        'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao'
+        'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao -f worker.log'
     }
   ],
 };

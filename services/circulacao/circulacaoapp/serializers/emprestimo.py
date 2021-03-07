@@ -17,7 +17,8 @@ from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
     usuarios_suspensos,
-    verificar_reserva
+    verificar_reserva,
+    enviar_comprovantes_devolucao
 )
 from circulacao.celery import app
 
@@ -25,6 +26,7 @@ PROJECT_NAME = os.getenv('PROJECT_NAME')
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
+USUARIO_SISTEMA_ID = os.getenv('USUARIO_SISTEMA_ID')
 
 class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,8 +110,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
         self.enviar_comprovante(usuario, exemplares_email)
         marcar_exemplares_emprestados.apply_async(
-            [self.context['request'].user['_id'], 
-            data['codigos']], 
+            [data['codigos']], 
             queue=PROJECT_NAME
         )
         return emprestimos
@@ -216,18 +217,18 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             if suspensao >= hoje:
                 raise serializers.ValidationError('Usuário suspenso')
 
-        if Emprestimo.objects.filter(**{
-            'usuario_id': usuario['_id'],
-            'data_devolucao': None,
-            'data_limite__lt': hoje
-        }).exists():
+        if Emprestimo.objects.filter(
+            usuario_id=usuario['_id'],
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
             raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
     def validar_emprestimos_usuario(self, usuario_id, max_livros, quantidade_livros):
-        emprestimos_vigentes = list(Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
-            'data_devolucao': None
-        }).values_list('livro_id', flat=True).all())
+        emprestimos_vigentes = list(Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None
+        ).values_list('livro_id', flat=True).all())
 
         if (len(emprestimos_vigentes) + quantidade_livros) > max_livros:
             raise serializers.ValidationError('Atingido o limite de livros para o usuário')
@@ -285,10 +286,10 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         emprestimos_id = data['emprestimos']
         
         for e_id in emprestimos_id:
-            emprestimo = Emprestimo.objects.filter(**{
-                '_id': e_id,
-                'data_devolucao': None
-            }).first()
+            emprestimo = Emprestimo.objects.filter(
+                _id=e_id,
+                data_devolucao=None
+            ).first()
 
             if emprestimo is not None:
                 emprestimos.append(emprestimo)
@@ -301,22 +302,26 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
-        hoje = timezone.now().date()
+        agora = timezone.now()
+        hoje = agora.date()
         disponibilidade_retirada = None
         
         suspensoes = {}
         codigos = []
         reservas = []
 
+        comprovantes = []
+        atendente = self.context['request'].user
+
         with transaction.atomic():
             for emprestimo in emprestimos:
                 diff = hoje - emprestimo.data_limite
                 if diff.days > 0:
-                    Suspensao.objects.create(**{
-                        'emprestimo': emprestimo,
-                        'usuario_id': emprestimo.usuario_id,
-                        'total_dias': diff.days
-                    })
+                    Suspensao.objects.create(
+                        emprestimo=emprestimo,
+                        usuario_id=emprestimo.usuario_id,
+                        total_dias=diff.days
+                    )
 
                     u_id = str(emprestimo.usuario_id)
                     if u_id not in suspensoes:
@@ -341,10 +346,23 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     reserva.save()
                     reservas.append(reserva)
 
-        usuario_id = self.context['request'].user['_id']
+                comprovantes.append({
+                    'usuario_id': str(emprestimo.usuario_id),
+                    'livro_id': str(emprestimo.livro_id),
+                    'atraso': diff.days,
+                    'data': agora.strftime('%d/%m/%Y'),
+                    'hora': agora.strftime('%H:%M:%S'),
+                    'exemplar_codigo': emprestimo.exemplar_codigo,
+                    'referencia': emprestimo.exemplar_referencia,
+                    'nome_atendente': atendente['nome'],
+                    'matricula_atendente': atendente['matricula']
+                })
+
+        usuario_id = atendente['_id']
         if suspensoes:
-            usuarios_suspensos.apply_async([usuario_id, suspensoes], queue=PROJECT_NAME)
-        marcar_exemplares_devolvidos.apply_async([usuario_id, codigos], queue=PROJECT_NAME)
+            usuarios_suspensos.apply_async([suspensoes], queue=PROJECT_NAME)
+        marcar_exemplares_devolvidos.apply_async([codigos], queue=PROJECT_NAME)
+        enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:
             data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
@@ -456,19 +474,21 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
             if suspensao >= hoje:
                 raise serializers.ValidationError('Usuário suspenso')
 
-        if Emprestimo.objects.filter(**{
-            'usuario_id': usuario_id,
-            'data_devolucao': None,
-            'data_limite__lt': hoje
-        }).exists():
+        if Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
             raise serializers.ValidationError('Usuário com empréstimos atrasados')
 
         return usuario
 
     def buscar_usuario(self, usuario_id):
-        r = requests.get(AUTENTICACAO_SERVICE_URL + '/consulta', params={'id': usuario_id}, headers={
-            'X-Usuario-Id': self.context['request'].user['_id']
-        })
+        r = requests.get(
+            AUTENTICACAO_SERVICE_URL + '/consulta', 
+            params={ 'id': usuario_id }, 
+            headers={ 'X-Usuario-Id': USUARIO_SISTEMA_ID }
+        )
         if not r.ok:
             raise serializers.ValidationError('Erro ao buscar informações do usuário')
 

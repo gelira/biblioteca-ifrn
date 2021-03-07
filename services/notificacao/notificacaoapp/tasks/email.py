@@ -16,3 +16,14 @@ def comprovante_emprestimo(contexto, emails):
         emails,
         html_message=msg_html
     )
+
+def comprovante_devolucao(contexto, emails):
+    msg_plain = render_to_string('comprovante_devolucao.txt', contexto)
+    msg_html = render_to_string('comprovante_devolucao.html', contexto)
+    send_mail(
+        'Comprovante de Devolução',
+        msg_plain,
+        EMAIL_SENDER,
+        emails,
+        html_message=msg_html
+    )

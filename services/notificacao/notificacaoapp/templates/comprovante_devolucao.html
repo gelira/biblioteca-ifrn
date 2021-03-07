@@ -1,0 +1,18 @@
+<h2>Comprovante de Devolução</h2>
+
+<h4>Olá, {{ nome_usuario }}!</h4>
+<p>Aqui está o seu comprovante de devolução feito em <strong>{{ data }}</strong>, às <strong>{{ hora }}</strong>:</p>
+<br>
+<p>Título: <strong>{{ titulo }}</strong></p>
+<ul>
+  <li>Código: <strong>{{ exemplar_codigo }}{% if referencia %} (EXEMPLAR DE REFERENCIA){% endif %}</strong></li>
+  <li>
+    {% if atraso > 0 %}
+      Devolvido com atraso de <strong>{{ atraso }} dia(s)</strong> 
+    {% else %}
+      Devolvido <strong>sem atraso</strong>
+    {% endif %}
+  </li>
+</ul>
+<br>
+<p>Atendente: <strong>{{ nome_atendente }} ({{ matricula_atendente }})</strong></p>

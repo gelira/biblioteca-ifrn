@@ -29,20 +29,39 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class UsuarioConsultaSerializer(serializers.ModelSerializer):
     matricula = serializers.SerializerMethodField()
+    email_institucional = serializers.SerializerMethodField()
+    email_pessoal = serializers.SerializerMethodField()
     perfil = PerfilSerializer()
+
+    def __init__(self, *args, **kwargs):
+        self.consultar_usuario = kwargs.pop('consultar_usuario', False)
+        super().__init__(*args, **kwargs)
 
     def get_matricula(self, obj):
         return obj.user.username
+
+    def get_email_institucional(self, obj):
+        if self.consultar_usuario:
+            return obj.email_institucional
+        return None
+
+    def get_email_pessoal(self, obj):
+        if self.consultar_usuario:
+            return obj.email_pessoal
+        return None
 
     class Meta:
         model = Usuario
         fields = [
             'matricula',
+            'nome',
             'nome_completo',
             'vinculo',
             'url_foto',
             'perfil',
-            'suspensao'
+            'suspensao',
+            'email_institucional',
+            'email_pessoal'
         ]
 
 class UsuarioDiasSerializer(serializers.Serializer):

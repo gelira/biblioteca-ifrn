@@ -55,7 +55,7 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
             )
             Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        usuarios_abono.apply_async([data['usuario_id'], data['usuarios']], queue=PROJECT_NAME)
+        usuarios_abono.apply_async([data['usuarios']], queue=PROJECT_NAME)
         return abono
     
     class Meta:

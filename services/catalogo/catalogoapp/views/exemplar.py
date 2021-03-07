@@ -12,7 +12,8 @@ from ..serializers import (
 from ..permissions import (
     AutenticadoPermissao,
     LivroModificarPermissao,
-    FazerEmprestimoPermissao
+    FazerEmprestimoPermissao,
+    AlterarDisponibilidadePermissao
 )
 
 class ExemplarViewSet(viewsets.ModelViewSet):
@@ -34,7 +35,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         if self.action in ['exemplares_emprestados', 'exemplares_devolvidos']:
             return [
                 AutenticadoPermissao(),
-                FazerEmprestimoPermissao()
+                AlterarDisponibilidadePermissao()
             ]
 
         return [

@@ -4,3 +4,4 @@ from .livro import (
     LivroModificarPermissao
 )
 from .emprestimo import FazerEmprestimoPermissao
+from .exemplar import AlterarDisponibilidadePermissao
