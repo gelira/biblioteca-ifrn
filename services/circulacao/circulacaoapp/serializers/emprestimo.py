@@ -249,7 +249,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return True
 
     def enviar_comprovante(self, usuario, exemplares):
-        user = self.context['request'].user
+        atendente = self.context['request'].user
         agora = timezone.localtime()
 
         emails = [usuario['email_institucional']]
@@ -260,8 +260,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             'nome_usuario': usuario['nome'],
             'data': agora.strftime('%d/%m/%Y'),
             'hora': agora.strftime('%H:%M:%S'),
-            'nome_atendente': user['nome'],
-            'matricula_atendente': user['matricula'],
+            'nome_atendente': atendente['nome'],
+            'matricula_atendente': atendente['matricula'],
             'exemplares': exemplares
         }
 
