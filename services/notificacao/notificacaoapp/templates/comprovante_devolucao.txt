@@ -1,0 +1,14 @@
+Comprovante de Devolução
+
+Olá, {{ nome_usuario }}!
+Aqui está o seu comprovante de devolução feito em {{ data }}, às {{ hora }}:
+
+Título: {{ titulo }}
+-> Código: {{ exemplar_codigo }}{% if referencia %} (EXEMPLAR DE REFERENCIA){% endif %}
+{% if atraso > 0 %}
+-> Devolvido com atraso de {{ atraso }} dia(s) 
+{% else %}
+-> Devolvido sem atraso
+{% endif %}
+
+Atendente: {{ nome_atendente }} ({{ matricula_atendente }})
