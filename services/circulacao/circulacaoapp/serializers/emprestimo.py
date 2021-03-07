@@ -250,7 +250,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def enviar_comprovante(self, usuario, exemplares):
         user = self.context['request'].user
-        agora = timezone.now()
+        agora = timezone.localtime()
 
         emails = [usuario['email_institucional']]
         if usuario['email_pessoal']:
@@ -302,7 +302,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
-        agora = timezone.now()
+        agora = timezone.localtime()
         hoje = agora.date()
         disponibilidade_retirada = None
         
