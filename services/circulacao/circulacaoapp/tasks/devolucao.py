@@ -14,8 +14,8 @@ def _enviar_comprovantes_devolucao(comprovantes):
     livros = {}
 
     for comprovante in comprovantes:
-        usuario_id = comprovante.pop('usuario_id')
-        livro_id = comprovante.pop('livro_id')
+        usuario_id = comprovante['usuario_id']
+        livro_id = comprovante['livro_id']
 
         if usuario_id not in usuarios:
             r = requests.get(
