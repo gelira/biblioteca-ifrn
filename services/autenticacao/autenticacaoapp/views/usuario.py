@@ -17,8 +17,9 @@ from ..serializers import (
 from ..permissions import (
     AutenticadoPermissao,
     FazerEmprestimoPermissao,
-    AbonarSuspensaoPermissao,
-    ConsultarUsuarioPermissao
+    ConsultarUsuarioPermissao,
+    SuspenderUsuarioPermissao,
+    AbonarUsuarioPermissao
 )
 
 User = get_user_model()
@@ -69,7 +70,7 @@ class UsuariosSuspensosView(APIView):
     authentication_classes = [RedisAutenticacao]
     permission_classes = [
         AutenticadoPermissao,
-        FazerEmprestimoPermissao
+        SuspenderUsuarioPermissao
     ]
 
     def put(self, request, *args, **kwargs):
@@ -82,7 +83,7 @@ class UsuariosAbonoView(APIView):
     authentication_classes = [RedisAutenticacao]
     permission_classes = [
         AutenticadoPermissao,
-        AbonarSuspensaoPermissao
+        AbonarUsuarioPermissao
     ]
 
     def put(self, request, *args, **kwargs):
