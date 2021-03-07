@@ -110,7 +110,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
         self.enviar_comprovante(usuario, exemplares_email)
         marcar_exemplares_emprestados.apply_async(
-            [self.context['request'].user['_id'], data['codigos']], 
+            [data['codigos']], 
             queue=PROJECT_NAME
         )
         return emprestimos
@@ -360,8 +360,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
         usuario_id = atendente['_id']
         if suspensoes:
-            usuarios_suspensos.apply_async([usuario_id, suspensoes], queue=PROJECT_NAME)
-        marcar_exemplares_devolvidos.apply_async([usuario_id, codigos], queue=PROJECT_NAME)
+            usuarios_suspensos.apply_async([suspensoes], queue=PROJECT_NAME)
+        marcar_exemplares_devolvidos.apply_async([codigos], queue=PROJECT_NAME)
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:

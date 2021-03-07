@@ -17,20 +17,20 @@ from circulacaoapp.tasks.devolucao import (
 )
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
-def marcar_exemplares_emprestados(usuario_id, codigos):
-    _marcar_exemplares_emprestados(usuario_id, codigos)
+def marcar_exemplares_emprestados(codigos):
+    _marcar_exemplares_emprestados(codigos)
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
-def marcar_exemplares_devolvidos(usuario_id, codigos):
-    _marcar_exemplares_devolvidos(usuario_id, codigos)
+def marcar_exemplares_devolvidos(codigos):
+    _marcar_exemplares_devolvidos(codigos)
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
-def usuarios_suspensos(usuario_id, usuarios):
-    _usuarios_suspensos(usuario_id, usuarios)
+def usuarios_suspensos(usuarios):
+    _usuarios_suspensos(usuarios)
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
-def usuarios_abono(usuario_id, usuarios):
-    _usuarios_abono(usuario_id, usuarios)
+def usuarios_abono(usuarios):
+    _usuarios_abono(usuarios)
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
 def verificar_reserva(reserva_id):
