@@ -13,8 +13,6 @@ def _enviar_comprovantes_devolucao(comprovantes):
     usuarios = {}
     livros = {}
 
-    print(comprovantes)
-
     for comprovante in comprovantes:
         usuario_id = comprovante.pop('usuario_id')
         livro_id = comprovante.pop('livro_id')
