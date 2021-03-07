@@ -54,6 +54,7 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'matricula',
+            'nome',
             'nome_completo',
             'vinculo',
             'url_foto',
