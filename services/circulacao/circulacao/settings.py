@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+from __future__ import absolute_import, unicode_literals
+
 import os
 from kombu import Queue, Exchange
+from celery.schedules import crontab 
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 
@@ -152,3 +155,15 @@ CELERY_QUEUES = [
 ]
 
 CELERY_DEFAULT_QUEUE = PROJECT_NAME
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BEAT_SCHEDULE = {
+    'verificacao-reservas': {
+        'task': 'circulacaoapp.tasks.verificar_reservas',
+        'schedule': crontab(hour=2, minute=0),
+        'options': {
+            'queue': PROJECT_NAME
+        }
+    }
+}
