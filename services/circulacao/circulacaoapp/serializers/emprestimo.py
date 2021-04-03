@@ -17,7 +17,6 @@ from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
     usuarios_suspensos,
-    verificar_reserva,
     enviar_comprovantes_devolucao
 )
 from circulacao.celery import app
@@ -365,16 +364,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:
-            data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
-            eta = timezone.datetime(
-                year=data.year,
-                month=data.month,
-                day=data.day,
-                hour=1,
-                minute=36,
-                tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
-            )
-            verificar_reserva.apply_async([str(reserva._id)], eta=eta, queue=PROJECT_NAME)
+            pass
 
         return {}
 
