@@ -8,8 +8,10 @@ click==7.1.2
 click-didyoumean==0.0.3
 click-repl==0.1.6
 Django==3.0.8
+django-celery-beat==2.2.0
 django-dotenv==1.4.2
 django-revproxy==0.10.0
+django-timezone-field==4.1.2
 djangorestframework==3.11.0
 djangorestframework-simplejwt==4.4.0
 future==0.18.2
@@ -21,6 +23,8 @@ Pillow==7.2.0
 prompt-toolkit==3.0.8
 psycopg2-binary==2.8.5
 PyJWT==1.7.1
+python-crontab==2.5.1
+python-dateutil==2.8.1
 pytz==2020.1
 redis==3.5.3
 requests==2.24.0
