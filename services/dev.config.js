@@ -58,6 +58,14 @@ module.exports = {
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/notificacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao -f worker.log'
-    }
+    },
+
+    {
+      name: 'circulacao-beat-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A circulacao beat -l info -S django_celery_beat.schedulers:DatabaseScheduler -f beat.log'
+    },
   ],
 };
