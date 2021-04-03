@@ -17,7 +17,6 @@ from ..tasks import (
     marcar_exemplares_emprestados,
     marcar_exemplares_devolvidos,
     usuarios_suspensos,
-    verificar_reserva,
     enviar_comprovantes_devolucao
 )
 from circulacao.celery import app
@@ -249,8 +248,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return True
 
     def enviar_comprovante(self, usuario, exemplares):
-        user = self.context['request'].user
-        agora = timezone.now()
+        atendente = self.context['request'].user
+        agora = timezone.localtime()
 
         emails = [usuario['email_institucional']]
         if usuario['email_pessoal']:
@@ -260,8 +259,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             'nome_usuario': usuario['nome'],
             'data': agora.strftime('%d/%m/%Y'),
             'hora': agora.strftime('%H:%M:%S'),
-            'nome_atendente': user['nome'],
-            'matricula_atendente': user['matricula'],
+            'nome_atendente': atendente['nome'],
+            'matricula_atendente': atendente['matricula'],
             'exemplares': exemplares
         }
 
@@ -302,7 +301,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
     def create(self, data):
         emprestimos = data['emprestimos']
-        agora = timezone.now()
+        agora = timezone.localtime()
         hoje = agora.date()
         disponibilidade_retirada = None
         
@@ -365,16 +364,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:
-            data = reserva.disponibilidade_retirada + timezone.timedelta(days=1)
-            eta = timezone.datetime(
-                year=data.year,
-                month=data.month,
-                day=data.day,
-                hour=1,
-                minute=36,
-                tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
-            )
-            verificar_reserva.apply_async([str(reserva._id)], eta=eta, queue=PROJECT_NAME)
+            pass
 
         return {}
 

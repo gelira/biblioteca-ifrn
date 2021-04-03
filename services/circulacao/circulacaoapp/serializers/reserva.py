@@ -10,7 +10,6 @@ from ..models import (
     Emprestimo
 )
 from ..utils import calcular_data_limite
-from ..tasks import verificar_reserva
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
@@ -155,16 +154,5 @@ class CancelarReservaSerializer(serializers.Serializer):
                 if proxima_reserva is not None:
                     proxima_reserva.disponibilidade_retirada = calcular_data_limite(1)
                     proxima_reserva.save()
-
-                    data = proxima_reserva.disponibilidade_retirada + timezone.timedelta(days=1)
-                    eta = timezone.datetime(
-                        year=data.year,
-                        month=data.month,
-                        day=data.day,
-                        hour=1,
-                        minute=36,
-                        tzinfo=timezone.pytz.timezone('America/Sao_Paulo')
-                    )
-                    verificar_reserva.apply_async([str(proxima_reserva._id)], eta=eta, queue=PROJECT_NAME)
 
         return {}
