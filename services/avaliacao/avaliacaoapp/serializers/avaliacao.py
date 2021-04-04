@@ -1,15 +1,10 @@
-import os
-import requests
 from rest_framework import serializers
 
 from ..models import (
     Avaliacao,
     Tag
 )
-from ..tasks import emprestimo_avaliado
-
-PROJECT_NAME = os.getenv('PROJECT_NAME')
-CIRCULACAO_SERVICE_URL = os.getenv('CIRCULACAO_SERVICE_URL')
+from .. import calls 
 
 class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
@@ -38,7 +33,7 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         emprestimo_id = str(data['emprestimo_id'])
 
         retorno = super().create(data)
-        emprestimo_avaliado.apply_async([usuario_id, emprestimo_id], queue=PROJECT_NAME)
+        calls.circulacao.task_emprestimo_avaliado(emprestimo_id)
 
         return retorno
 
@@ -47,9 +42,7 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Empréstimo já avaliado')
         
         try:
-            r = requests.get(CIRCULACAO_SERVICE_URL + '/emprestimos/' + emprestimo_id, headers={
-                'X-Usuario-Id': self.context['request'].user['_id']
-            })
+            r = calls.circulacao.api_get_emprestimo(emprestimo_id, self.context['request'].user['_id'])
             if not r.ok:
                 raise serializers.ValidationError('Erro ao buscar informações do empréstimo')
 
