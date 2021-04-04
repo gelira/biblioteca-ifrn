@@ -15,7 +15,7 @@ def api_get_emprestimo(emprestimo_id, usuario_id):
 
 def task_emprestimo_avaliado(emprestimo_id):
     app.send_task(
-        'circulacaoapp.taks.emprestimo_avaliado',
+        'circulacaoapp.tasks.emprestimo_avaliado',
         [emprestimo_id],
         queue=CIRCULACAO_QUEUE
     )
