@@ -1,5 +1,3 @@
-import os
-import requests
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -10,9 +8,7 @@ from ..models import (
     Emprestimo
 )
 from ..utils import calcular_data_limite
-
-PROJECT_NAME = os.getenv('PROJECT_NAME')
-CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
+from .. import calls
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
@@ -64,7 +60,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
     def validar_livro(self, livro_id):
         try:
-            r = requests.get(CATALOGO_SERVICE_URL + '/livros/' + livro_id)
+            r = calls.catalogo.api_get_livro(livro_id)
             if not r.ok:
                 raise serializers.ValidationError('Livro não encontrado')
 
