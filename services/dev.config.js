@@ -66,6 +66,13 @@ module.exports = {
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A catalogo worker -l info -n catalogoworker -Q catalogo -f worker.log'
     },
+    {
+      name: 'autenticacao-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/autenticacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A autenticacao worker -l info -n autenticacaoworker -Q autenticacao -f worker.log'
+    },
 
     {
       name: 'circulacao-beat-dev',
