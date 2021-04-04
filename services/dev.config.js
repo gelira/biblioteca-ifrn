@@ -59,6 +59,13 @@ module.exports = {
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao -f worker.log'
     },
+    {
+      name: 'catalogo-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/catalogo',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A catalogo worker -l info -n catalogoworker -Q catalogo -f worker.log'
+    },
 
     {
       name: 'circulacao-beat-dev',
