@@ -52,21 +52,3 @@ class ExemplarListSerializer(serializers.ModelSerializer):
             'referencia',
             'disponivel'
         ]
-
-class ExemplarDisponibilidadeSerializer(serializers.Serializer):
-    codigos = serializers.ListField(
-        child=serializers.CharField(),
-        allow_empty=False
-    )
-    disponivel = serializers.BooleanField()
-
-    def validate_codigos(self, codigos):
-        codigos = list(set(codigos))
-        quantidade_exemplares = Exemplar.objects.filter(codigo__in=codigos).count()
-        if quantidade_exemplares != len(codigos):
-            raise serializers.ValidationError('Foram informados códigos inválidos')
-        return codigos
-
-    def create(self, data):
-        Exemplar.objects.filter(codigo__in=data['codigos']).update(disponivel=data['disponivel'])
-        return data

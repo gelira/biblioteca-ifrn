@@ -6,14 +6,11 @@ from rest_framework.decorators import action
 from ..models import Exemplar
 from ..serializers import (
     ExemplarSerializer,
-    ExemplarConsultaSerializer,
-    ExemplarDisponibilidadeSerializer
+    ExemplarConsultaSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
-    LivroModificarPermissao,
-    FazerEmprestimoPermissao,
-    AlterarDisponibilidadePermissao
+    LivroModificarPermissao
 )
 
 class ExemplarViewSet(viewsets.ModelViewSet):
@@ -22,21 +19,12 @@ class ExemplarViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'consulta':
             return ExemplarConsultaSerializer
-
-        if self.action in ['exemplares_emprestados', 'exemplares_devolvidos']:
-            return ExemplarDisponibilidadeSerializer
         
         return ExemplarSerializer
 
     def get_permissions(self):
         if self.action == 'consulta':
             return []
-
-        if self.action in ['exemplares_emprestados', 'exemplares_devolvidos']:
-            return [
-                AutenticadoPermissao(),
-                AlterarDisponibilidadePermissao()
-            ]
 
         return [
             AutenticadoPermissao(),
@@ -51,19 +39,3 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         serializer = serializer_class(exemplar)
         
         return Response(data=serializer.data, status=200)
-
-    @action(methods=['put'], detail=False, url_path='emprestados')
-    def exemplares_emprestados(self, request):
-        request.data['disponivel'] = False
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=204)
-
-    @action(methods=['put'], detail=False, url_path='devolvidos')
-    def exemplares_devolvidos(self, request):
-        request.data['disponivel'] = True
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=204)
