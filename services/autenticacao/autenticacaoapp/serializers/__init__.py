@@ -5,9 +5,7 @@ from .token import (
 )
 from .usuario import (
     UsuarioSerializer,
-    UsuarioConsultaSerializer,
-    UsuariosSuspensosSerializer,
-    UsuariosAbonoSerializer
+    UsuarioConsultaSerializer
 )
 from .perfil import PerfilSerializer
 from .codigo_promocao import (

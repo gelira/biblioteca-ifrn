@@ -3,23 +3,18 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 from ..authentication import RedisAutenticacao
 from ..jwt import AutenticacaoJWT
 from ..models import Usuario
 from ..serializers import (
     UsuarioSerializer,
-    UsuarioConsultaSerializer,
-    UsuariosSuspensosSerializer,
-    UsuariosAbonoSerializer
+    UsuarioConsultaSerializer
 )
 from ..permissions import (
     AutenticadoPermissao,
     FazerEmprestimoPermissao,
-    ConsultarUsuarioPermissao,
-    SuspenderUsuarioPermissao,
-    AbonarUsuarioPermissao
+    ConsultarUsuarioPermissao
 )
 
 User = get_user_model()
@@ -65,29 +60,3 @@ class ConsultaUsuarioView(APIView):
             consultar_usuario=ConsultarUsuarioPermissao().has_permission(request, self)
         )
         return Response(data=serializer.data)
-
-class UsuariosSuspensosView(APIView):
-    authentication_classes = [RedisAutenticacao]
-    permission_classes = [
-        AutenticadoPermissao,
-        SuspenderUsuarioPermissao
-    ]
-
-    def put(self, request, *args, **kwargs):
-        serializer = UsuariosSuspensosSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=200)
-
-class UsuariosAbonoView(APIView):
-    authentication_classes = [RedisAutenticacao]
-    permission_classes = [
-        AutenticadoPermissao,
-        AbonarUsuarioPermissao
-    ]
-
-    def put(self, request, *args, **kwargs):
-        serializer = UsuariosAbonoSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=200)
