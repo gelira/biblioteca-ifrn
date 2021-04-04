@@ -23,7 +23,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
     def validar_usuario_suspenso(self):
         usuario_id = self.context['request'].user['_id']
         suspensao = self.context['request'].user['suspensao']
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         if suspensao is not None:
             suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
@@ -46,7 +46,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Você já possui um exemplar desse livro emprestado')
 
     def validar_reservas(self, livro_id):
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
         usuario_id = self.context['request'].user['_id']
         
         if Reserva.objects.filter(
@@ -64,7 +64,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
             if not r.ok:
                 raise serializers.ValidationError('Livro não encontrado')
 
-            hoje = timezone.now().date()
+            hoje = timezone.localdate()
             livro = r.json()
             exemplares_disponiveis = livro['exemplares_disponiveis']
 
@@ -85,7 +85,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
     def validar_quantidade_reservas_emprestimos(self):
         usuario_id = self.context['request'].user['_id']
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         emprestimos = Emprestimo.objects.filter(
             usuario_id=usuario_id,

@@ -129,7 +129,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
-            hoje = timezone.now().date()
+            hoje = timezone.localdate()
 
             emprestar_referencia = None
             exemplares = []
@@ -192,7 +192,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_usuario_suspenso(self, usuario):
         suspensao = usuario['suspensao']
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         if suspensao is not None:
             suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
@@ -218,7 +218,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return list(map(lambda x: str(x), emprestimos_vigentes))
 
     def emprestar_exemplar_referencia(self):
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         if hoje.weekday() == 4:
             return True
@@ -363,7 +363,7 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         emprestimos = []
         usuarios = {}
         filtro = {}
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
         
         if not data['faz_emprestimo']:
             filtro['usuario_id'] = self.context['request'].user['_id']

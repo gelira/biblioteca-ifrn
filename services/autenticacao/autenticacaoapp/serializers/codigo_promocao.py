@@ -15,7 +15,7 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
             codigo = str(uuid.uuid4())[:6].upper()
             if not CodigoPromocao.objects.filter(
                 codigo=codigo,
-                validade__gte=timezone.now(),
+                validade__gte=timezone.localtime(),
                 bolsista=None
             ).exists():
                 return codigo
@@ -26,7 +26,7 @@ class CodigoPromocaoCreateSerializer(serializers.ModelSerializer):
     def create(self, data):
         codigo = self.create_codigo()
         usuario = self.get_usuario()
-        validade = timezone.now() + timezone.timedelta(minutes=5)
+        validade = timezone.localtime() + timezone.timedelta(minutes=5)
 
         return CodigoPromocao.objects.create(
             usuario=usuario,
@@ -54,7 +54,7 @@ class UtilizarCodigoPromocaoSerializer(serializers.Serializer):
     def validate(self, data):
         codigo = CodigoPromocao.objects.filter(
             codigo=data['codigo'],
-            validade__gte=timezone.now()
+            validade__gte=timezone.localtime()
         ).first()
         
         if codigo is None:
