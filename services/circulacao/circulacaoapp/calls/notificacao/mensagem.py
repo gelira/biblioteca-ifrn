@@ -13,6 +13,6 @@ def task_comprovante_emprestimo(contexto_email, emails):
 def task_comprovante_devolucao(contexto_email, emails):
     app.send_task(
         'notificacaoapp.tasks.comprovante_devolucao', 
-        [comprovante, emails], 
+        [contexto_email, emails], 
         queue=NOTIFICACAO_QUEUE
     )
