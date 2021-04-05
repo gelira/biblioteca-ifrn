@@ -40,7 +40,7 @@ class EmprestimoViewSet(ModelViewSet):
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
-        if self.action in ['retrieve', 'emprestimo_avaliado']:
+        if self.action in ['retrieve']:
             return [AutenticadoPermissao()]
         return super().get_permissions()
 
@@ -63,11 +63,4 @@ class EmprestimoViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200)
-
-    @action(methods=['patch'], detail=True, url_path='avaliado')
-    def emprestimo_avaliado(self, request, pk=None):
-        emprestimo = self.get_object()
-        emprestimo.avaliado = True
-        emprestimo.save()
         return Response(status=200)

@@ -1,9 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
 from django.db import transaction
 from django.utils import timezone
-from circulacao.celery import app
 from circulacaoapp.models import Reserva, Data
 from circulacaoapp.utils import calcular_data_limite
 

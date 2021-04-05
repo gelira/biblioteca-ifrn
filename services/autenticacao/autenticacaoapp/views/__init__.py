@@ -5,9 +5,7 @@ from .autenticacao import (
 )
 from .usuario import (
     InformacoesUsuarioView,
-    ConsultaUsuarioView,
-    UsuariosSuspensosView,
-    UsuariosAbonoView
+    ConsultaUsuarioView
 )
 from .perfil import PerfilViewSet
 from .promocao import PromocaoViewSet

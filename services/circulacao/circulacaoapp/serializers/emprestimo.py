@@ -1,10 +1,10 @@
 import os
-import requests
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
+from .. import calls
 from ..utils import calcular_data_limite
 from ..models import (
     Emprestimo, 
@@ -14,18 +14,10 @@ from ..models import (
     Data
 )
 from ..tasks import (
-    marcar_exemplares_emprestados,
-    marcar_exemplares_devolvidos,
-    usuarios_suspensos,
     enviar_comprovantes_devolucao
 )
-from circulacao.celery import app
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
-AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
-CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
-NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
-USUARIO_SISTEMA_ID = os.getenv('USUARIO_SISTEMA_ID')
 
 class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,10 +100,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 })
 
         self.enviar_comprovante(usuario, exemplares_email)
-        marcar_exemplares_emprestados.apply_async(
-            [data['codigos']], 
-            queue=PROJECT_NAME
-        )
+        calls.catalogo.task_exemplares_emprestados(data['codigos'])
+
         return emprestimos
 
     def validate_codigos(self, value):
@@ -119,23 +109,16 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_usuario(self, matricula, senha):
         try:
-            r1 = requests.post(AUTENTICACAO_SERVICE_URL + '/token', json={
-                'username': matricula, 
-                'password': senha
-            })
-
+            r1 = calls.autenticacao.api_autenticar_usuario(matricula, senha)
             if not r1.ok:
                 if r1.status_code == 401:
                     raise serializers.ValidationError('Usuário ou senha inválidos')
                 raise serializers.ValidationError('Erro ao autenticar usuário')
 
-            token = r1.json()['token']
-            r2 = requests.get(AUTENTICACAO_SERVICE_URL + '/informacoes', headers={
-                'Authorization': 'JWT {}'.format(token)
-            })
-            
+            r2 = calls.autenticacao.api_informacoes_usuario(r1.json()['token'])            
             if not r2.ok:
                 raise serializers.ValidationError('Erro ao buscar informações do usuário')
+            
             return r2.json()
 
         except serializers.ValidationError as e:
@@ -146,14 +129,14 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
-            hoje = timezone.now().date()
+            hoje = timezone.localdate()
 
             emprestar_referencia = None
             exemplares = []
             reservas = {}
 
             for codigo in codigos:
-                r = requests.get(CATALOGO_SERVICE_URL + '/exemplares/consulta/' + codigo)
+                r = calls.catalogo.api_consulta_exemplar(codigo)
                 if not r.ok:
                     raise serializers.ValidationError('Exemplar {} não encontrado'.format(codigo))
                 
@@ -209,7 +192,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_usuario_suspenso(self, usuario):
         suspensao = usuario['suspensao']
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         if suspensao is not None:
             suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
@@ -235,7 +218,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         return list(map(lambda x: str(x), emprestimos_vigentes))
 
     def emprestar_exemplar_referencia(self):
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
 
         if hoje.weekday() == 4:
             return True
@@ -264,11 +247,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             'exemplares': exemplares
         }
 
-        app.send_task(
-            'notificacaoapp.tasks.comprovante_emprestimo', 
-            [contexto_email, emails], 
-            queue=NOTIFICACAO_QUEUE
-        )
+        calls.notificacao.task_comprovante_emprestimo(contexto_email, emails)
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
     emprestimos = serializers.ListField(
@@ -359,8 +338,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
         usuario_id = atendente['_id']
         if suspensoes:
-            usuarios_suspensos.apply_async([suspensoes], queue=PROJECT_NAME)
-        marcar_exemplares_devolvidos.apply_async([codigos], queue=PROJECT_NAME)
+            calls.autenticacao.task_usuarios_suspensos(suspensoes)
+        calls.catalogo.task_exemplares_devolvidos(codigos)
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         for reserva in reservas:
@@ -384,7 +363,7 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         emprestimos = []
         usuarios = {}
         filtro = {}
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()
         
         if not data['faz_emprestimo']:
             filtro['usuario_id'] = self.context['request'].user['_id']
@@ -474,11 +453,7 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         return usuario
 
     def buscar_usuario(self, usuario_id):
-        r = requests.get(
-            AUTENTICACAO_SERVICE_URL + '/consulta', 
-            params={ 'id': usuario_id }, 
-            headers={ 'X-Usuario-Id': USUARIO_SISTEMA_ID }
-        )
+        r = calls.autenticacao.api_consulta_usuario(usuario_id)
         if not r.ok:
             raise serializers.ValidationError('Erro ao buscar informações do usuário')
 

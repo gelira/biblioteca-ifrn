@@ -1,4 +1,3 @@
-import os
 from django.db import transaction
 from rest_framework import serializers
 
@@ -6,9 +5,7 @@ from ..models import (
     Abono,
     Suspensao
 )
-from ..tasks import usuarios_abono
-
-PROJECT_NAME = os.getenv('PROJECT_NAME')
+from .. import calls
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
     suspensoes = serializers.ListField(
@@ -23,10 +20,10 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
         usuarios = {}
 
         for s_id in suspensoes_id:
-            suspensao = Suspensao.objects.filter(**{
-                '_id': s_id,
-                'abono_id': None
-            }).first()
+            suspensao = Suspensao.objects.filter(
+                _id=s_id,
+                abono_id=None
+            ).first()
             
             if suspensao is not None:
                 usuario_id = str(suspensao.usuario_id)
@@ -55,7 +52,7 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
             )
             Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        usuarios_abono.apply_async([data['usuarios']], queue=PROJECT_NAME)
+        calls.autenticacao.task_usuarios_abono(data['usuarios'])
         return abono
     
     class Meta:

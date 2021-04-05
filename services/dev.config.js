@@ -45,19 +45,33 @@ module.exports = {
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A circulacao worker -l info -n circulacaoworker -Q circulacao -f worker.log'
     },
-    {
-      name: 'avaliacao-worker-dev',
-      interpreter: '',
-      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
-      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
-        'celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao -f worker.log'
-    },
+    // {
+    //   name: 'avaliacao-worker-dev',
+    //   interpreter: '',
+    //   cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/avaliacao',
+    //   script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+    //     'celery -A avaliacao worker -l info -n avaliacaoworker -Q avaliacao -f worker.log'
+    // },
     {
       name: 'notificacao-worker-dev',
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/notificacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
         'celery -A notificacao worker -l info -n notificacaoworker -Q notificacao -f worker.log'
+    },
+    {
+      name: 'catalogo-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/catalogo',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A catalogo worker -l info -n catalogoworker -Q catalogo -f worker.log'
+    },
+    {
+      name: 'autenticacao-worker-dev',
+      interpreter: '',
+      cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/autenticacao',
+      script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
+        'celery -A autenticacao worker -l info -n autenticacaoworker -Q autenticacao -f worker.log'
     },
 
     {

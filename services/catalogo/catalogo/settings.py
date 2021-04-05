@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from kombu import Queue, Exchange
+
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -140,3 +143,15 @@ REST_FRAMEWORK = {
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'catalogo-media')
 
 MEDIA_URL = '/media/'
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
+CELERY_QUEUES = [
+    Queue(
+        PROJECT_NAME,
+        Exchange(PROJECT_NAME),
+        routing_key=PROJECT_NAME
+    )
+]
+
+CELERY_DEFAULT_QUEUE = PROJECT_NAME

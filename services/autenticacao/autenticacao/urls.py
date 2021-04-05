@@ -30,6 +30,4 @@ urlpatterns = [
     path('verificar', views.VerificarTokenView.as_view()),
     path('informacoes', views.InformacoesUsuarioView.as_view()),
     path('consulta', views.ConsultaUsuarioView.as_view()),
-    path('suspensoes', views.UsuariosSuspensosView.as_view()),
-    path('abonos', views.UsuariosAbonoView.as_view()),
 ] + router.urls
