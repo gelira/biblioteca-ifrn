@@ -6,24 +6,31 @@ from django.template.loader import render_to_string
 
 EMAIL_SENDER = os.getenv('EMAIL_SENDER')
 
-def comprovante_emprestimo(contexto, emails):
-    msg_plain = render_to_string('comprovante_emprestimo.txt', contexto)
-    msg_html = render_to_string('comprovante_emprestimo.html', contexto)
+def compor_e_enviar_email(contexto, emails, assunto, template_html, template_txt):
+    msg_html = render_to_string(template_html, contexto)
+    msg_plain = render_to_string(template_txt, contexto)
     send_mail(
-        'Comprovante de Empréstimo',
+        assunto,
         msg_plain,
         EMAIL_SENDER,
         emails,
         html_message=msg_html
     )
 
+def comprovante_emprestimo(contexto, emails):
+    compor_e_enviar_email(
+        contexto, 
+        emails, 
+        'Comprovante de Empréstimo', 
+        'comprovante_emprestimo.html', 
+        'comprovante_emprestimo.txt'
+    )
+
 def comprovante_devolucao(contexto, emails):
-    msg_plain = render_to_string('comprovante_devolucao.txt', contexto)
-    msg_html = render_to_string('comprovante_devolucao.html', contexto)
-    send_mail(
-        'Comprovante de Devolução',
-        msg_plain,
-        EMAIL_SENDER,
-        emails,
-        html_message=msg_html
+    compor_e_enviar_email(
+        contexto, 
+        emails, 
+        'Comprovante de Devolução', 
+        'comprovante_devolucao.html', 
+        'comprovante_devolucao.txt'
     )
