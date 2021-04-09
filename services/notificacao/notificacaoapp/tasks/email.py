@@ -34,3 +34,12 @@ def comprovante_devolucao(contexto, emails):
         'comprovante_devolucao.html', 
         'comprovante_devolucao.txt'
     )
+
+def reserva_disponivel(contexto, emails):
+    compor_e_enviar_email(
+        contexto, 
+        emails, 
+        'Reserva Disponível', 
+        'reserva_disponivel.html', 
+        'reserva_disponivel.txt'
+    )

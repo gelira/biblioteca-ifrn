@@ -7,3 +7,6 @@ def _comprovante_emprestimo(contexto, emails):
 
 def _comprovante_devolucao(contexto, emails):
     email.comprovante_devolucao(contexto, emails)
+
+def _reserva_disponivel(contexto, emails):
+    email.reserva_disponivel(contexto, emails)
