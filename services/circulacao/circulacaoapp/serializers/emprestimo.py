@@ -282,6 +282,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         emprestimos = data['emprestimos']
         agora = timezone.localtime()
         hoje = agora.date()
+        data = agora.strftime('%d/%m/%Y')
+        hora = agora.strftime('%H:%M:%S')
         disponibilidade_retirada = None
         
         suspensoes = {}
@@ -328,8 +330,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     'usuario_id': str(emprestimo.usuario_id),
                     'livro_id': str(emprestimo.livro_id),
                     'atraso': diff.days,
-                    'data': agora.strftime('%d/%m/%Y'),
-                    'hora': agora.strftime('%H:%M:%S'),
+                    'data': data,
+                    'hora': hora,
                     'exemplar_codigo': emprestimo.exemplar_codigo,
                     'referencia': emprestimo.exemplar_referencia,
                     'nome_atendente': atendente['nome'],
