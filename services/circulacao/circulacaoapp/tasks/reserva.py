@@ -6,6 +6,7 @@ from django.utils import timezone
 from circulacaoapp.models import Reserva, Data
 from circulacaoapp.utils import calcular_data_limite
 from circulacaoapp import calls
+from circulacao.celery import app
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 
@@ -23,11 +24,19 @@ def _verificar_reservas():
     ).exists():
         return
 
+    comprovantes = []
+    disponibilidade_retirada = None
+    data_limite = None
+    agora = timezone.localtime()
+
     reservas = Reserva.objects.filter(
         disponibilidade_retirada__lt=data,
         emprestimo_id=None,
         cancelada=False
     ).all()
+
+    data = agora.strftime('%d/%m/%Y')
+    hora = agora.strftime('%H:%M:%S')
 
     with transaction.atomic():
         for reserva in reservas:
@@ -42,9 +51,26 @@ def _verificar_reservas():
             ).first()
 
             if proxima_reserva is not None:
+                if disponibilidade_retirada is None:
+                    disponibilidade_retirada = calcular_data_limite(1)
+                    data_limite = disponibilidade_retirada.strftime('%d/%m/%Y')
+
                 proxima_reserva.disponibilidade_retirada = calcular_data_limite(1)
                 proxima_reserva.save()
 
+                comprovantes.append({
+                    'usuario_id': str(proxima_reserva.usuario_id),
+                    'livro_id': str(proxima_reserva.livro_id),
+                    'data': data,
+                    'hora': hora,
+                    'data_limite': data_limite
+                })
+
+    app.send_task(
+        'circulacaoapp.tasks.enviar_reservas_disponiveis',
+        [comprovantes],
+        queue=PROJECT_NAME
+    )
 
 def _enviar_reservas_disponiveis(comprovantes):
     usuarios = {}
