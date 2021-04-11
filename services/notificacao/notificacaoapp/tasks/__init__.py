@@ -3,7 +3,9 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from notificacaoapp.tasks.mensagens import (
     _comprovante_emprestimo,
-    _comprovante_devolucao
+    _comprovante_devolucao,
+    _reserva_disponivel,
+    _reserva_cancelada
 )
 
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
@@ -13,3 +15,11 @@ def comprovante_emprestimo(contexto, emails):
 @shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
 def comprovante_devolucao(contexto, emails):
     _comprovante_devolucao(contexto, emails)
+
+@shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
+def reserva_disponivel(contexto, emails):
+    _reserva_disponivel(contexto, emails)
+
+@shared_task(autoretry_for=(Exception,), max_retries=None, default_retry_delay=30)
+def reserva_cancelada(contexto, emails):
+    _reserva_cancelada(contexto, emails)

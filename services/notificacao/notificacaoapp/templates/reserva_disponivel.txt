@@ -1,0 +1,5 @@
+Reserva Disponível
+
+Olá, {{ nome_usuario }}!
+Sua reserva do livro {{ titulo_livro }} está disponível desde {{ data }}, às {{ hora }}.
+Você deve retirar sua reserva até {{ data_limite }}. Após esta data, sua reserva será cancelada.

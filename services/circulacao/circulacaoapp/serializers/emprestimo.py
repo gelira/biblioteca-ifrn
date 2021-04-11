@@ -14,7 +14,8 @@ from ..models import (
     Data
 )
 from ..tasks import (
-    enviar_comprovantes_devolucao
+    enviar_comprovantes_devolucao,
+    enviar_reservas_disponiveis
 )
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
@@ -282,7 +283,10 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         emprestimos = data['emprestimos']
         agora = timezone.localtime()
         hoje = agora.date()
+        data = agora.strftime('%d/%m/%Y')
+        hora = agora.strftime('%H:%M:%S')
         disponibilidade_retirada = None
+        data_limite = None
         
         suspensoes = {}
         codigos = []
@@ -319,17 +323,25 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 if reserva is not None:
                     if disponibilidade_retirada is None:
                         disponibilidade_retirada = calcular_data_limite(1)
-                    reserva.disponibilidade_retirada = disponibilidade_retirada
+                        data_limite = disponibilidade_retirada.strftime('%d/%m/%Y')
 
+                    reserva.disponibilidade_retirada = disponibilidade_retirada
                     reserva.save()
-                    reservas.append(reserva)
+                    
+                    reservas.append({
+                        'usuario_id': str(reserva.usuario_id),
+                        'livro_id': str(reserva.livro_id),
+                        'data': data,
+                        'hora': hora,
+                        'data_limite': data_limite
+                    })
 
                 comprovantes.append({
                     'usuario_id': str(emprestimo.usuario_id),
                     'livro_id': str(emprestimo.livro_id),
                     'atraso': diff.days,
-                    'data': agora.strftime('%d/%m/%Y'),
-                    'hora': agora.strftime('%H:%M:%S'),
+                    'data': data,
+                    'hora': hora,
                     'exemplar_codigo': emprestimo.exemplar_codigo,
                     'referencia': emprestimo.exemplar_referencia,
                     'nome_atendente': atendente['nome'],
@@ -339,11 +351,12 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         usuario_id = atendente['_id']
         if suspensoes:
             calls.autenticacao.task_usuarios_suspensos(suspensoes)
+
         calls.catalogo.task_exemplares_devolvidos(codigos)
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
-        for reserva in reservas:
-            pass
+        if reservas:
+            enviar_reservas_disponiveis.apply_async([reservas], queue=PROJECT_NAME)
 
         return {}
 
