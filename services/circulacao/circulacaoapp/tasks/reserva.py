@@ -24,7 +24,8 @@ def _verificar_reservas():
     ).exists():
         return
 
-    comprovantes = []
+    comprovantes_disponiveis = []
+    comprovantes_cancelados = []
     disponibilidade_retirada = None
     data_limite = None
     agora = timezone.localtime()
@@ -35,13 +36,20 @@ def _verificar_reservas():
         cancelada=False
     ).all()
 
-    data = agora.strftime('%d/%m/%Y')
+    data_cancelamento = data.strftime('%d/%m/%Y')
+    data_agora = agora.strftime('%d/%m/%Y')
     hora = agora.strftime('%H:%M:%S')
 
     with transaction.atomic():
         for reserva in reservas:
             reserva.cancelada = True
             reserva.save()
+
+            comprovantes_cancelados.append({
+                'usuario_id': str(reserva.usuario_id),
+                'livro_id': str(reserva.livro_id),
+                'data_limite': data_cancelamento
+            })
 
             proxima_reserva = Reserva.objects.filter(
                 disponibilidade_retirada=None,
@@ -58,17 +66,23 @@ def _verificar_reservas():
                 proxima_reserva.disponibilidade_retirada = calcular_data_limite(1)
                 proxima_reserva.save()
 
-                comprovantes.append({
+                comprovantes_disponiveis.append({
                     'usuario_id': str(proxima_reserva.usuario_id),
                     'livro_id': str(proxima_reserva.livro_id),
-                    'data': data,
+                    'data': data_agora,
                     'hora': hora,
                     'data_limite': data_limite
                 })
 
     app.send_task(
         'circulacaoapp.tasks.enviar_reservas_disponiveis',
-        [comprovantes],
+        [comprovantes_disponiveis],
+        queue=PROJECT_NAME
+    )
+
+    app.send_task(
+        'circulacaoapp.tasks.enviar_reservas_canceladas',
+        [comprovantes_cancelados],
         queue=PROJECT_NAME
     )
 
