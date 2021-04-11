@@ -10,3 +10,6 @@ def _comprovante_devolucao(contexto, emails):
 
 def _reserva_disponivel(contexto, emails):
     email.reserva_disponivel(contexto, emails)
+
+def _reserva_cancelada(contexto, emails):
+    email.reserva_cancelada(contexto, emails)

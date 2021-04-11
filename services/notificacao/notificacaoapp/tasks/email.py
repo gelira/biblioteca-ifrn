@@ -43,3 +43,12 @@ def reserva_disponivel(contexto, emails):
         'reserva_disponivel.html', 
         'reserva_disponivel.txt'
     )
+
+def reserva_cancelada(contexto, emails):
+    compor_e_enviar_email(
+        contexto, 
+        emails, 
+        'Reserva Cancelada', 
+        'reserva_cancelada.html', 
+        'reserva_cancelada.txt'
+    )
