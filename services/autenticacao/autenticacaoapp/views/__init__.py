@@ -3,9 +3,6 @@ from .autenticacao import (
     ObterTokenLocalView,
     VerificarTokenView
 )
-from .usuario import (
-    InformacoesUsuarioView,
-    ConsultaUsuarioView
-)
+from .usuario import UsuarioViewSet
 from .perfil import PerfilViewSet
 from .promocao import PromocaoViewSet

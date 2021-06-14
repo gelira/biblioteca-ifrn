@@ -1,62 +1,48 @@
-import uuid
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import action
 
-from ..authentication import RedisAutenticacao
-from ..jwt import AutenticacaoJWT
-from ..models import Usuario
-from ..serializers import (
-    UsuarioSerializer,
-    UsuarioConsultaSerializer
-)
-from ..permissions import (
-    AutenticadoPermissao,
-    FazerEmprestimoPermissao,
-    ConsultarUsuarioPermissao
-)
+from ..services import AutenticacaoService
 
-User = get_user_model()
-
-class InformacoesUsuarioView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = UsuarioSerializer(request.user.usuario)
-        return Response(data=serializer.data)
-
-class ConsultaUsuarioView(APIView):
-    authentication_classes = [
-        RedisAutenticacao,
-        AutenticacaoJWT
-    ]
-    permission_classes = [
-        AutenticadoPermissao
-    ]
-
-    def get(self, request, *args, **kwargs):
-        usuario = request.user
-
-        if FazerEmprestimoPermissao().has_permission(request, self):    
-            _id = request.GET.get('id')
-            matricula = request.GET.get('matricula')
+class UsuarioViewSet(ViewSet):
+    @action(methods=['get'], detail=False, url_path='informacoes')
+    def informacoes(self, request):
+        usuario_id = str(request.user.usuario._id)
+        
+        try:
+            data = AutenticacaoService.informacoes_usuario(usuario_id)
+            return Response(data=data)
+        
+        except Exception as e:
+            arg = e.args[0]
             
-            try:
-                uuid.UUID(_id)     
-            except:
-                _id = None
+            if isinstance(arg, dict):
+                return Response(
+                    data=arg.get('error'), 
+                    status=arg.get('status', 500)
+                )
+            
+            raise e
 
-            if _id is not None:
-                usuario = get_object_or_404(Usuario.objects.all(), _id=_id)
+    @action(methods=['get'], detail=False, url_path='consulta')
+    def consulta(self, request):
+        _id = request.GET.get('id')
+        matricula = request.GET.get('matricula')
+        
+        if not _id and not matricula:
+            _id = str(request.user.usuario._id)
 
-            elif matricula is not None:
-                user = get_object_or_404(User.objects.all(), username=matricula)
-                usuario = user.usuario
-
-        if isinstance(usuario, dict):
-            usuario = get_object_or_404(Usuario.objects.all(), _id=usuario['_id'])
-
-        serializer = UsuarioConsultaSerializer(
-            usuario,
-            consultar_usuario=ConsultarUsuarioPermissao().has_permission(request, self)
-        )
-        return Response(data=serializer.data)
+        try:
+            data = AutenticacaoService.consulta_usuario(_id, matricula)
+            return Response(data=data)
+        
+        except Exception as e:
+            arg = e.args[0]
+            
+            if isinstance(arg, dict):
+                return Response(
+                    data=arg.get('error'), 
+                    status=arg.get('status', 500)
+                )
+            
+            raise e
