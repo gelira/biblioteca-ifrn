@@ -1,8 +1,4 @@
-from .token import (
-    ObterTokenLocalSerializer, 
-    ObterTokenSUAPSerializer, 
-    VerificarTokenSerializer
-)
+from .token import LoginSerializer
 from .usuario import (
     UsuarioSerializer,
     UsuarioConsultaSerializer
