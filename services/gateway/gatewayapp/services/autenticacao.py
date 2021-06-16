@@ -12,3 +12,12 @@ class AutenticacaoService:
             queue=AUTENTICACAO_QUEUE
         )
         return task.get()
+
+    @classmethod
+    def informacoes_usuario(cls, usuario_id):
+        task = app.send_task(
+            'autenticacao.informacoes_usuario', 
+            args=[usuario_id], 
+            queue=AUTENTICACAO_QUEUE
+        )
+        return task.get()
