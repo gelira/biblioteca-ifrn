@@ -20,13 +20,13 @@ from rest_framework.routers import SimpleRouter
 from autenticacaoapp import views
 
 router = SimpleRouter(trailing_slash=False)
-router.register('', views.UsuarioViewSet, basename='usuario')
+router.register('', views.AutenticacaoViewSet, basename='autenticacao')
 router.register('perfis', views.PerfilViewSet)
 router.register('promocao', views.PromocaoViewSet)
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
-    path('token', views.ObterTokenView.as_view()),
-    path('token-local', views.ObterTokenLocalView.as_view()),
-    path('verificar', views.VerificarTokenView.as_view()),
+    # path('token', views.ObterTokenView.as_view()),
+    # path('token-local', views.ObterTokenLocalView.as_view()),
+    # path('verificar', views.VerificarTokenView.as_view()),
 ] + router.urls
