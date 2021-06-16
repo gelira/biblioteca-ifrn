@@ -28,7 +28,9 @@ class TokenService:
             
             user = Usuario.objects.filter(**{ field: user_id }).first()
             if user:
-                return user_id
+                return { 
+                    'user_id': user_id 
+                }
             
             raise Exception({
                 'error': {
