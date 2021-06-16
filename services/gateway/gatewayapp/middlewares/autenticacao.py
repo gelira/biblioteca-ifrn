@@ -26,4 +26,5 @@ class AutenticacaoMiddleware(BaseMiddleware):
         if token is None:
             return None
         
-        return AutenticacaoService.verificar_token(token)
+        data = AutenticacaoService.verificar_token(token)
+        return data['user_id']
