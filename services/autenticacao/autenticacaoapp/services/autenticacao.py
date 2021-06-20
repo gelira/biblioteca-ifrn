@@ -1,5 +1,5 @@
 import uuid
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 
 from ..models import Usuario, Perfil
 from ..serializers import UsuarioSerializer, UsuarioConsultaSerializer
@@ -48,6 +48,23 @@ class AutenticacaoService:
             })
         
         user = cls.get_or_save_usuario(suap)
+        token = TokenService.gerar_token(user)
+
+        return {
+            'token': token
+        }
+
+    @classmethod
+    def login_local(cls, username, password):
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise Exception({
+                'error': {
+                    'detail': 'Credenciais inválidas',
+                },
+                'status': 401
+            })
+
         token = TokenService.gerar_token(user)
 
         return {

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
@@ -57,6 +58,31 @@ class AutenticacaoViewSet(ViewSet):
 
         try:
             login_data = AutenticacaoService.login_suap(data['username'], data['password'])
+            return Response(data=login_data)
+        
+        except Exception as e:
+            arg = e.args[0]
+            
+            if isinstance(arg, dict):
+                return Response(
+                    data=arg.get('error'), 
+                    status=arg.get('status', 500)
+                )
+            
+            raise e
+
+    @action(methods=['post'], detail=False, url_path='token-local', authentication_classes=[], permission_classes=[])
+    def token_local(self, request):
+        if not settings.DEBUG:
+            return Response(status=403)
+
+        ser = LoginSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        data = ser.validated_data
+
+        try:
+            login_data = AutenticacaoService.login_local(data['username'], data['password'])
             return Response(data=login_data)
         
         except Exception as e:
