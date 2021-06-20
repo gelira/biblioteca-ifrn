@@ -17,6 +17,7 @@ from ..tasks import (
     enviar_comprovantes_devolucao,
     enviar_reservas_disponiveis
 )
+from ..services import AutenticacaoService
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 
@@ -110,23 +111,15 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_usuario(self, matricula, senha):
         try:
-            r1 = calls.autenticacao.api_autenticar_usuario(matricula, senha)
-            if not r1.ok:
-                if r1.status_code == 401:
-                    raise serializers.ValidationError('Usuário ou senha inválidos')
-                raise serializers.ValidationError('Erro ao autenticar usuário')
+            return AutenticacaoService.autenticar_usuario(matricula, senha)
 
-            r2 = calls.autenticacao.api_informacoes_usuario(r1.json()['token'])            
-            if not r2.ok:
-                raise serializers.ValidationError('Erro ao buscar informações do usuário')
+        except Exception as e:
+            arg = e.args[0]
             
-            return r2.json()
-
-        except serializers.ValidationError as e:
+            if isinstance(arg, dict):
+                raise serializers.ValidationError(arg.get('error'))
+            
             raise e
-
-        except:
-            raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
     def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
@@ -350,7 +343,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
         usuario_id = atendente['_id']
         if suspensoes:
-            calls.autenticacao.task_usuarios_suspensos(suspensoes)
+            AutenticacaoService.suspensoes(suspensoes)
 
         calls.catalogo.task_exemplares_devolvidos(codigos)
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)

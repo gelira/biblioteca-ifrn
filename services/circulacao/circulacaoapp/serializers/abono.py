@@ -1,11 +1,11 @@
 from django.db import transaction
 from rest_framework import serializers
 
+from ..services import AutenticacaoService
 from ..models import (
     Abono,
     Suspensao
 )
-from .. import calls
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
     suspensoes = serializers.ListField(
@@ -52,7 +52,7 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
             )
             Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        calls.autenticacao.task_usuarios_abono(data['usuarios'])
+        AutenticacaoService.abono_suspensoes(data['usuarios'])
         return abono
     
     class Meta:
