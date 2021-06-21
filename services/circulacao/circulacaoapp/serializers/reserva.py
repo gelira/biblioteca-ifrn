@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from .. import calls
+from ..services import CatalogoService 
 from ..models import (
     Reserva,
     Emprestimo
@@ -66,12 +66,9 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
     def validar_livro(self, livro_id):
         try:
-            r = calls.catalogo.api_get_livro(livro_id)
-            if not r.ok:
-                raise serializers.ValidationError('Livro não encontrado')
-
             hoje = timezone.localdate()
-            livro = r.json()
+            livro = CatalogoService.busca_livro(livro_id)
+            
             exemplares_disponiveis = livro['exemplares_disponiveis']
 
             if exemplares_disponiveis > 0:

@@ -17,7 +17,10 @@ from ..tasks import (
     enviar_comprovantes_devolucao,
     enviar_reservas_disponiveis
 )
-from ..services import AutenticacaoService
+from ..services import (
+    AutenticacaoService,
+    CatalogoService
+)
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 
@@ -102,7 +105,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 })
 
         self.enviar_comprovante(usuario, exemplares_email)
-        calls.catalogo.task_exemplares_emprestados(data['codigos'])
+        CatalogoService.exemplares_emprestados(data['codigos'])
 
         return emprestimos
 
@@ -130,11 +133,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             reservas = {}
 
             for codigo in codigos:
-                r = calls.catalogo.api_consulta_exemplar(codigo)
-                if not r.ok:
-                    raise serializers.ValidationError('Exemplar {} não encontrado'.format(codigo))
-                
-                exemplar = r.json()
+                exemplar = CatalogoService.consulta_codigo_exemplar(codigo)
                 if not exemplar['ativo']:
                     raise serializers.ValidationError('Exemplar {} inativo'.format(codigo))
 
@@ -345,7 +344,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         if suspensoes:
             AutenticacaoService.suspensoes(suspensoes)
 
-        calls.catalogo.task_exemplares_devolvidos(codigos)
+        CatalogoService.exemplares_devolvidos(codigos)
         enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
 
         if reservas:
@@ -459,8 +458,13 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         return usuario
 
     def buscar_usuario(self, usuario_id):
-        r = calls.autenticacao.api_consulta_usuario(usuario_id)
-        if not r.ok:
-            raise serializers.ValidationError('Erro ao buscar informações do usuário')
+        try:
+            return AutenticacaoService.informacoes_usuario(usuario_id)
 
-        return r.json()
+        except Exception as e:
+            arg = e.args[0]
+            
+            if isinstance(arg, dict):
+                raise serializers.ValidationError(arg.get('error'))
+            
+            raise e
