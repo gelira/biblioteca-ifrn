@@ -1,5 +1,6 @@
 from django.utils import timezone
-from circulacaoapp.models import Data
+
+from ..models import Data
 
 def calcular_data_limite(max_dias=None):
     hoje = timezone.localdate()
