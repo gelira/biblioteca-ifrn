@@ -39,4 +39,4 @@ class CatalogoService:
             kwargs=kwargs, 
             queue=CATALOGO_QUEUE
         )
-        return task.get()
+        return task.get(disable_sync_subtasks=False)

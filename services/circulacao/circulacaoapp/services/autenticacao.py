@@ -36,7 +36,7 @@ class AutenticacaoService:
             args=[usuario_id], 
             queue=AUTENTICACAO_QUEUE
         )
-        return task.get()
+        return task.get(disable_sync_subtasks=False)
 
     @classmethod
     def suspensoes(cls, suspensoes):
