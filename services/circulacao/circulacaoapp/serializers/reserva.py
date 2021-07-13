@@ -1,20 +1,16 @@
-import os
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from ..services import CatalogoService 
+from ..services import (
+    CatalogoService,
+    ReservaService
+) 
 from ..models import (
     Reserva,
     Emprestimo
 )
-from ..utils import calcular_data_limite
-from ..tasks import (
-    enviar_reservas_disponiveis
-)
-
-PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
@@ -137,7 +133,7 @@ class CancelarReservaSerializer(serializers.Serializer):
         return reserva
 
     def create(self, data):
-        proxima_reserva = None
+        livros = []
 
         with transaction.atomic():
             reserva = data['reserva']
@@ -145,26 +141,9 @@ class CancelarReservaSerializer(serializers.Serializer):
             reserva.save()
 
             if reserva.disponibilidade_retirada is not None:
-                proxima_reserva = Reserva.objects.filter(
-                    disponibilidade_retirada=None,
-                    livro_id=reserva.livro_id,
-                    emprestimo_id=None,
-                    cancelada=False
-                ).first()
+                livros.append(str(reserva.livro_id))
 
-                if proxima_reserva is not None:
-                    proxima_reserva.disponibilidade_retirada = calcular_data_limite(1)
-                    proxima_reserva.save()
-
-        if proxima_reserva:
-            agora = timezone.localtime()
-            comprovante = {
-                'usuario_id': str(proxima_reserva.usuario_id),
-                'livro_id': str(proxima_reserva.livro_id),
-                'data': agora.strftime('%d/%m/%Y'),
-                'hora': agora.strftime('%H:%M:%S'),
-                'data_limite': proxima_reserva.disponibilidade_retirada.strftime('%d/%m/%Y')
-            }
-            enviar_reservas_disponiveis.apply_async([[comprovante]], queue=PROJECT_NAME)
+        if livros: 
+            ReservaService.call_proximas_reservas(livros)
 
         return {}
