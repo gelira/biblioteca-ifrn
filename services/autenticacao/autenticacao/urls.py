@@ -13,21 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+# from django.contrib import admin
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from autenticacaoapp import views
 
 router = SimpleRouter(trailing_slash=False)
+router.register('', views.AutenticacaoViewSet, basename='autenticacao')
 router.register('perfis', views.PerfilViewSet)
 router.register('promocao', views.PromocaoViewSet)
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
-    path('token', views.ObterTokenView.as_view()),
-    path('token-local', views.ObterTokenLocalView.as_view()),
-    path('verificar', views.VerificarTokenView.as_view()),
-    path('informacoes', views.InformacoesUsuarioView.as_view()),
-    path('consulta', views.ConsultaUsuarioView.as_view()),
+    # path('token', views.ObterTokenView.as_view()),
+    # path('token-local', views.ObterTokenLocalView.as_view()),
+    # path('verificar', views.VerificarTokenView.as_view()),
 ] + router.urls

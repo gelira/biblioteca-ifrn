@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from datetime import timedelta
-from kombu import Queue, Exchange
 
 PROJECT_NAME = os.getenv('PROJECT_NAME')
 
@@ -157,12 +156,6 @@ SIMPLE_JWT = {
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
-CELERY_QUEUES = [
-    Queue(
-        PROJECT_NAME,
-        Exchange(PROJECT_NAME),
-        routing_key=PROJECT_NAME
-    )
-]
-
 CELERY_DEFAULT_QUEUE = PROJECT_NAME
+
+CELERY_RESULT_BACKEND = 'rpc://'

@@ -1,10 +1,8 @@
-import os
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from .. import calls
 from ..utils import calcular_data_limite
 from ..models import (
     Emprestimo, 
@@ -13,12 +11,13 @@ from ..models import (
     Reserva,
     Data
 )
-from ..tasks import (
-    enviar_comprovantes_devolucao,
-    enviar_reservas_disponiveis
+from ..services import (
+    AutenticacaoService,
+    CatalogoService,
+    EmprestimoService,
+    ReservaService,
+    DevolucaoService
 )
-
-PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 class EmprestimoRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -101,7 +100,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                 })
 
         self.enviar_comprovante(usuario, exemplares_email)
-        calls.catalogo.task_exemplares_emprestados(data['codigos'])
+        CatalogoService.exemplares_emprestados(data['codigos'])
 
         return emprestimos
 
@@ -110,23 +109,15 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
     def validar_usuario(self, matricula, senha):
         try:
-            r1 = calls.autenticacao.api_autenticar_usuario(matricula, senha)
-            if not r1.ok:
-                if r1.status_code == 401:
-                    raise serializers.ValidationError('Usuário ou senha inválidos')
-                raise serializers.ValidationError('Erro ao autenticar usuário')
+            return AutenticacaoService.autenticar_usuario(matricula, senha)
 
-            r2 = calls.autenticacao.api_informacoes_usuario(r1.json()['token'])            
-            if not r2.ok:
-                raise serializers.ValidationError('Erro ao buscar informações do usuário')
+        except Exception as e:
+            arg = e.args[0]
             
-            return r2.json()
-
-        except serializers.ValidationError as e:
+            if isinstance(arg, dict):
+                raise serializers.ValidationError(arg.get('error'))
+            
             raise e
-
-        except:
-            raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
     def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
@@ -137,11 +128,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             reservas = {}
 
             for codigo in codigos:
-                r = calls.catalogo.api_consulta_exemplar(codigo)
-                if not r.ok:
-                    raise serializers.ValidationError('Exemplar {} não encontrado'.format(codigo))
-                
-                exemplar = r.json()
+                exemplar = CatalogoService.consulta_codigo_exemplar(codigo)
                 if not exemplar['ativo']:
                     raise serializers.ValidationError('Exemplar {} inativo'.format(codigo))
 
@@ -248,7 +235,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
             'exemplares': exemplares
         }
 
-        calls.notificacao.task_comprovante_emprestimo(contexto_email, emails)
+        EmprestimoService.call_enviar_comprovante_emprestimo(contexto_email, emails)
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
     emprestimos = serializers.ListField(
@@ -285,12 +272,10 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         hoje = agora.date()
         data = agora.strftime('%d/%m/%Y')
         hora = agora.strftime('%H:%M:%S')
-        disponibilidade_retirada = None
-        data_limite = None
         
         suspensoes = {}
         codigos = []
-        reservas = []
+        livros = []
 
         comprovantes = []
         atendente = self.context['request'].user
@@ -314,31 +299,13 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 emprestimo.data_devolucao = hoje
                 emprestimo.save()
 
-                reserva = Reserva.objects.filter(
-                    disponibilidade_retirada=None,
-                    livro_id=emprestimo.livro_id,
-                    cancelada=False,
-                    emprestimo_id=None
-                ).first()
-                if reserva is not None:
-                    if disponibilidade_retirada is None:
-                        disponibilidade_retirada = calcular_data_limite(1)
-                        data_limite = disponibilidade_retirada.strftime('%d/%m/%Y')
-
-                    reserva.disponibilidade_retirada = disponibilidade_retirada
-                    reserva.save()
-                    
-                    reservas.append({
-                        'usuario_id': str(reserva.usuario_id),
-                        'livro_id': str(reserva.livro_id),
-                        'data': data,
-                        'hora': hora,
-                        'data_limite': data_limite
-                    })
+                livro_id = str(emprestimo.livro_id)
+                if livro_id not in livros:
+                    livros.append(livro_id)
 
                 comprovantes.append({
                     'usuario_id': str(emprestimo.usuario_id),
-                    'livro_id': str(emprestimo.livro_id),
+                    'livro_id': livro_id,
                     'atraso': diff.days,
                     'data': data,
                     'hora': hora,
@@ -348,15 +315,12 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     'matricula_atendente': atendente['matricula']
                 })
 
-        usuario_id = atendente['_id']
         if suspensoes:
-            calls.autenticacao.task_usuarios_suspensos(suspensoes)
+            AutenticacaoService.suspensoes(suspensoes)
 
-        calls.catalogo.task_exemplares_devolvidos(codigos)
-        enviar_comprovantes_devolucao.apply_async([comprovantes], queue=PROJECT_NAME)
-
-        if reservas:
-            enviar_reservas_disponiveis.apply_async([reservas], queue=PROJECT_NAME)
+        CatalogoService.exemplares_devolvidos(codigos)
+        DevolucaoService.call_enviar_comprovantes_devolucao(comprovantes)
+        ReservaService.call_proximas_reservas(livros)
 
         return {}
 
@@ -466,8 +430,13 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         return usuario
 
     def buscar_usuario(self, usuario_id):
-        r = calls.autenticacao.api_consulta_usuario(usuario_id)
-        if not r.ok:
-            raise serializers.ValidationError('Erro ao buscar informações do usuário')
+        try:
+            return AutenticacaoService.informacoes_usuario(usuario_id)
 
-        return r.json()
+        except Exception as e:
+            arg = e.args[0]
+            
+            if isinstance(arg, dict):
+                raise serializers.ValidationError(arg.get('error'))
+            
+            raise e

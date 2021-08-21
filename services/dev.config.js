@@ -79,7 +79,7 @@ module.exports = {
       interpreter: '',
       cwd: '/home/geraldo/Projetos/Biblioteca IFRN/services/circulacao',
       script: '/home/geraldo/Projetos/Biblioteca\\ IFRN/env/bin/python -m ' + 
-        'celery -A circulacao beat -l info -S django_celery_beat.schedulers:DatabaseScheduler -f beat.log'
+        'celery -A circulacao beat -l info -f beat.log'
     },
   ],
 };
