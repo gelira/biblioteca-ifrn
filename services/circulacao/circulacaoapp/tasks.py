@@ -18,6 +18,10 @@ class IgnoreResultTask(BaseTask):
 def emprestimo_avaliado(emprestimo_id):
     EmprestimoService.emprestimo_avaliado(emprestimo_id)
 
+@shared_task(name='circulacao.get_emprestimo', base=BaseTask)
+def get_emprestimo(emprestimo_id):
+    return EmprestimoService.get_emprestimo(emprestimo_id)
+
 @shared_task(name='circulacao.verificar_reserva', base=IgnoreResultTask)
 def verificar_reserva(reserva_id):
     ReservaService.verificar_reserva(reserva_id)
@@ -35,7 +39,7 @@ def enviar_comprovante_devolucao(contexto):
     DevolucaoService.enviar_comprovante_devolucao(contexto)
 
 @shared_task(name='circulacao.enviar_comprovante_emprestimo', base=IgnoreResultTask)
-def enviar_comprovante_devolucao(contexto, emails):
+def enviar_comprovante_emprestimo(contexto, emails):
     EmprestimoService.enviar_comprovante_emprestimo(contexto, emails)
 
 @shared_task(name='circulacao.proxima_reserva', base=IgnoreResultTask)

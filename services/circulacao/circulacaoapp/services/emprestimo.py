@@ -17,6 +17,17 @@ class EmprestimoService:
         )
 
     @classmethod
+    def get_emprestimo(cls, emprestimo_id):
+        e = Emprestimo.objects.filter(_id=emprestimo_id).first()
+
+        if not e:
+            return None
+
+        from ..serializers import EmprestimoRetrieveSerializer
+        ser = EmprestimoRetrieveSerializer(e)
+        return ser.data
+
+    @classmethod
     def enviar_comprovante_emprestimo(cls, contexto, emails):
         NotificacaoService.comprovante_emprestimo(contexto, emails)
 
