@@ -4,7 +4,7 @@ from ..models import (
     Avaliacao,
     Tag
 )
-from .. import calls 
+from ..services import CirculacaoService
 
 class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
@@ -29,11 +29,10 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, data):
-        usuario_id = data['usuario_id']
         emprestimo_id = str(data['emprestimo_id'])
 
         retorno = super().create(data)
-        calls.circulacao.task_emprestimo_avaliado(emprestimo_id)
+        CirculacaoService.emprestimo_avaliado(emprestimo_id)
 
         return retorno
 
@@ -42,11 +41,10 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Empréstimo já avaliado')
         
         try:
-            r = calls.circulacao.api_get_emprestimo(emprestimo_id, self.context['request'].user['_id'])
-            if not r.ok:
-                raise serializers.ValidationError('Erro ao buscar informações do empréstimo')
+            emprestimo = CirculacaoService.get_emprestimo(emprestimo_id)
+            if not emprestimo:
+                raise serializers.ValidationError('Empréstimo não encontrado')
 
-            emprestimo = r.json()
             if emprestimo['avaliado']:
                 raise serializers.ValidationError('Empréstimo já avaliado')
 
