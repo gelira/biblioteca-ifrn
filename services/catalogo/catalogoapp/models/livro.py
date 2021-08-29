@@ -55,10 +55,6 @@ class Livro(TimestampedModel):
     paginas = models.CharField(
         max_length=10
     )
-    foto_capa = models.ImageField(
-        upload_to=nome_arquivo,
-        blank=True
-    )
 
     class Meta:
         db_table = 'livros'
