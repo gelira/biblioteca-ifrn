@@ -139,10 +139,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'catalogo-media')
-
-MEDIA_URL = '/media/'
-
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
 CELERY_RESULT_BACKEND = 'rpc://'
