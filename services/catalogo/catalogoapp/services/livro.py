@@ -26,6 +26,11 @@ class LivroService:
                 'status': 404
             })
 
+        from ..serializers import (
+            LivroSerializer,
+            LivroRetrieveSerializer
+        )
+
         serializer_class = LivroSerializer if kwargs.get('min') \
             else LivroRetrieveSerializer
         
