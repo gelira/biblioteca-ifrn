@@ -3,6 +3,7 @@ from django.db import models
 
 from .timestamped import TimestampedModel
 
+# não apagar essa função
 def nome_arquivo(instance, filename):
     nome = str(instance._id)
     sub1 = nome[0]
