@@ -8,8 +8,7 @@ class LivroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
-            'id',
-            'foto_capa'
+            'id'
         ]
 
 class LivroListSerializer(serializers.ModelSerializer):
@@ -17,10 +16,7 @@ class LivroListSerializer(serializers.ModelSerializer):
     exemplares_disponiveis = serializers.SerializerMethodField()
 
     def get_foto_capa(self, obj):
-        try:
-            return obj.foto_capa.url
-        except:
-            return None
+        return obj.get_foto_url()
 
     def get_exemplares_disponiveis(self, obj):
         return obj.exemplares.filter(ativo=True, disponivel=True, referencia=False).count()
@@ -39,10 +35,7 @@ class LivroRetrieveSerializer(serializers.ModelSerializer):
     indexadores = serializers.SerializerMethodField()
 
     def get_foto_capa(self, obj):
-        try:
-            return obj.foto_capa.url
-        except:
-            return None
+        return obj.get_foto_url()
 
     def get_exemplares(self, obj):
         exemplares = obj.exemplares.filter(ativo=True).all()
