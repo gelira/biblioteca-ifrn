@@ -1,7 +1,6 @@
 from django.utils.timezone import localtime
 
 from ..models import Exemplar
-from ..serializers import ExemplarConsultaSerializer
 
 class ExemplarService:
     @classmethod
@@ -30,6 +29,8 @@ class ExemplarService:
                 },
                 'status': 404
             })
+
+        from ..serializers import ExemplarConsultaSerializer
 
         ser = ExemplarConsultaSerializer(e)
         return ser.data

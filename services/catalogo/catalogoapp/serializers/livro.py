@@ -1,15 +1,18 @@
+import io
+import base64
+from PIL import Image
 from django.db.models import Q
 from rest_framework import serializers
 
 from ..models import Livro, Exemplar
+from ..services import LivroService
 from .exemplar import ExemplarListSerializer
 
 class LivroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
-            'id',
-            'foto_capa'
+            'id'
         ]
 
 class LivroListSerializer(serializers.ModelSerializer):
@@ -17,10 +20,7 @@ class LivroListSerializer(serializers.ModelSerializer):
     exemplares_disponiveis = serializers.SerializerMethodField()
 
     def get_foto_capa(self, obj):
-        try:
-            return obj.foto_capa.url
-        except:
-            return None
+        return obj.get_foto_url()
 
     def get_exemplares_disponiveis(self, obj):
         return obj.exemplares.filter(ativo=True, disponivel=True, referencia=False).count()
@@ -39,10 +39,7 @@ class LivroRetrieveSerializer(serializers.ModelSerializer):
     indexadores = serializers.SerializerMethodField()
 
     def get_foto_capa(self, obj):
-        try:
-            return obj.foto_capa.url
-        except:
-            return None
+        return obj.get_foto_url()
 
     def get_exemplares(self, obj):
         exemplares = obj.exemplares.filter(ativo=True).all()
@@ -101,10 +98,28 @@ class LivroPesquisaSerializer(serializers.Serializer):
         serializer = LivroListSerializer(qs, many=True)
         return serializer.data
 
-class FotoCapaLivroSerializer(serializers.ModelSerializer):
-    def update(self, instance, data):
-        instance.foto_capa.delete(save=False)
-        return super().update(instance, data)
+class FotoCapaLivroSerializer(serializers.Serializer):
+    foto_capa = serializers.CharField()
+
+    def validate_foto_capa(self, value):
+        try:
+            foto_bytes = base64.b64decode(value)
+            foto_bytesio = io.BytesIO(foto_bytes)
+            Image.open(foto_bytesio)
+
+            return value
+
+        except:
+            raise serializers.ValidationError('Arquivo inválido')
+
+    def save(self):
+        livro = self.instance
+
+        livro_id = str(livro._id)
+        livro_pk = livro.pk
+        foto_base64 = self.validated_data['foto_capa']
+
+        LivroService.task_upload_foto_capa(livro_id, livro_pk, foto_base64)
 
     class Meta:
         model = Livro

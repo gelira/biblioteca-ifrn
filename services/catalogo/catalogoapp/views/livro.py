@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from ..models import Livro
@@ -63,17 +62,13 @@ class LivroViewSet(viewsets.ModelViewSet):
 
             raise e
 
-    @action(methods=['put', 'delete'], detail=True, url_path='foto-capa', parser_classes=[MultiPartParser])
+    @action(methods=['put'], detail=True, url_path='foto-capa')
     def foto_capa(self, request, pk=None):
         livro = self.get_object()
-        if request.method.lower() == 'delete':
-            livro.foto_capa.delete()
-            return Response(status=204)
-
         serializer = FotoCapaLivroSerializer(data=request.data, instance=livro)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(data=serializer.data, status=200)
+        return Response(status=200)
 
     @action(methods=['post'], detail=False, url_path='pesquisa')
     def pesquisa(self, request):
