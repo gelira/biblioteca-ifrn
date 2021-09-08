@@ -5,6 +5,7 @@ from ..models import Usuario, Perfil
 from ..serializers import UsuarioSerializer, UsuarioConsultaSerializer
 from .suap import SuapService, SuapUnauthorized, SuapTimeOut, SuapUnavailable
 from .token import TokenService
+from .notificacao import NotificacaoService
 
 User = get_user_model()
 
@@ -113,14 +114,16 @@ class AutenticacaoService:
                 'status': 503
             })
 
+        nome = dados['nome_usual']
         matricula = dados['matricula']
+        email_institucional = dados['email']
         
         user = User.objects.create_user(matricula, password=matricula)
         u = Usuario.objects.create(
             user=user,
-            nome=dados['nome_usual'],
+            nome=nome,
             nome_completo=dados['vinculo']['nome'],
-            email_institucional=dados['email'],
+            email_institucional=email_institucional,
             vinculo=dados['tipo_vinculo'].lower(),
             url_foto=dados['url_foto_150x200']
         )
@@ -129,6 +132,15 @@ class AutenticacaoService:
         if perfil is not None:
             u.perfil = perfil
             u.save()
+
+        NotificacaoService.salvar_contato(
+            str(u._id),
+            {
+                'nome': nome,
+                'matricula': matricula,
+                'email_institucional': email_institucional,
+            }
+        )
 
         return user
 
