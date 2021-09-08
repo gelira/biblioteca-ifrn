@@ -1,6 +1,6 @@
 from celery import shared_task, Task
 
-from .services import MensagemService
+from .services import MensagemService, ContatoService
 
 class BaseTask(Task):
     autoretry_for = [Exception]
@@ -25,3 +25,7 @@ def reserva_disponivel(contexto, emails):
 @shared_task(name='notificacao.reserva_cancelada', base=IgnoreResultTask)
 def reserva_cancelada(contexto, emails):
     MensagemService.reserva_cancelada(contexto, emails)
+
+@shared_task(name='notificacao.salvar_contato', base=IgnoreResultTask)
+def salvar_contato(usuario_id, data):
+    ContatoService.salvar_contato(usuario_id, data)
