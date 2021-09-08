@@ -2,7 +2,6 @@ import uuid
 from django.contrib.auth import get_user_model, authenticate
 
 from ..models import Usuario, Perfil
-from ..serializers import UsuarioSerializer, UsuarioConsultaSerializer
 from .suap import SuapService, SuapUnauthorized, SuapTimeOut, SuapUnavailable
 from .token import TokenService
 from .notificacao import NotificacaoService
@@ -165,6 +164,8 @@ class AutenticacaoService:
                 'status': 404
             })
 
+        from ..serializers import UsuarioSerializer
+
         ser = UsuarioSerializer(usuario)
         return ser.data
 
@@ -203,6 +204,8 @@ class AutenticacaoService:
                     },
                     'status': 404
                 })
+
+        from ..serializers import UsuarioConsultaSerializer
 
         ser = UsuarioConsultaSerializer(usuario)
         return ser.data
