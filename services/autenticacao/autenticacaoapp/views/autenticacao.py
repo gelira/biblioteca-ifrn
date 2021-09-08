@@ -3,12 +3,15 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 
-from ..serializers import LoginSerializer
+from ..serializers import LoginSerializer, UsuarioUpdateSerializer
 from ..services import AutenticacaoService
 
 class AutenticacaoViewSet(ViewSet):
-    @action(methods=['get'], detail=False, url_path='informacoes')
+    @action(methods=['get', 'put'], detail=False, url_path='informacoes')
     def informacoes(self, request):
+        if request.method.lower() == 'put':
+            return self.atualizar_informações(request)
+
         usuario_id = str(request.user.usuario._id)
         
         try:
@@ -101,3 +104,13 @@ class AutenticacaoViewSet(ViewSet):
         return Response({
             '_id': request.user.usuario._id
         })
+
+    def atualizar_informações(self, request):
+        ser = UsuarioUpdateSerializer(
+            instance=request.user.usuario,
+            data=request.data
+        )
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        
+        return Response(status=200)

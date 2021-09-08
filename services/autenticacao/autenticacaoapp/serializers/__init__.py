@@ -1,7 +1,8 @@
 from .token import LoginSerializer
 from .usuario import (
     UsuarioSerializer,
-    UsuarioConsultaSerializer
+    UsuarioConsultaSerializer,
+    UsuarioUpdateSerializer
 )
 from .perfil import PerfilSerializer
 from .codigo_promocao import (
