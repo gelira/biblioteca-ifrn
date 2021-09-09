@@ -99,7 +99,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                     'data_limite': e.data_limite.strftime('%d/%m/%Y')
                 })
 
-        self.enviar_comprovante(usuario, exemplares_email)
+        self.enviar_comprovante(usuario['_id'], exemplares_email)
         CatalogoService.exemplares_emprestados(data['codigos'])
 
         return emprestimos
@@ -218,24 +218,19 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         
         return True
 
-    def enviar_comprovante(self, usuario, exemplares):
-        atendente = self.context['request'].user
+    def enviar_comprovante(self, usuario_id, exemplares):
+        atendente_id = self.context['request'].user['_id']
         agora = timezone.localtime()
 
-        emails = [usuario['email_institucional']]
-        if usuario['email_pessoal']:
-            emails.append(usuario['email_pessoal'])
-
-        contexto_email = {
-            'nome_usuario': usuario['nome'],
+        contexto = {
+            'usuario_id': usuario_id,
+            'atendente_id': atendente_id,
             'data': agora.strftime('%d/%m/%Y'),
             'hora': agora.strftime('%H:%M:%S'),
-            'nome_atendente': atendente['nome'],
-            'matricula_atendente': atendente['matricula'],
             'exemplares': exemplares
         }
 
-        EmprestimoService.call_enviar_comprovante_emprestimo(contexto_email, emails)
+        EmprestimoService.call_enviar_comprovante_emprestimo(contexto)
 
 class DevolucaoEmprestimosSerializer(serializers.Serializer):
     emprestimos = serializers.ListField(
