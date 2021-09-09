@@ -273,7 +273,7 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
         livros = []
 
         comprovantes = []
-        atendente = self.context['request'].user
+        atendente_id = self.context['request'].user['_id']
 
         with transaction.atomic():
             for emprestimo in emprestimos:
@@ -300,14 +300,13 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
 
                 comprovantes.append({
                     'usuario_id': str(emprestimo.usuario_id),
+                    'atendente_id': atendente_id,
                     'livro_id': livro_id,
                     'atraso': diff.days,
                     'data': data,
                     'hora': hora,
                     'exemplar_codigo': emprestimo.exemplar_codigo,
                     'referencia': emprestimo.exemplar_referencia,
-                    'nome_atendente': atendente['nome'],
-                    'matricula_atendente': atendente['matricula']
                 })
 
         if suspensoes:
