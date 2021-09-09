@@ -28,14 +28,14 @@ class EmprestimoService:
         return ser.data
 
     @classmethod
-    def enviar_comprovante_emprestimo(cls, contexto, emails):
-        NotificacaoService.comprovante_emprestimo(contexto, emails)
+    def enviar_comprovante_emprestimo(cls, contexto):
+        NotificacaoService.comprovante_emprestimo(contexto)
 
     @classmethod
-    def call_enviar_comprovante_emprestimo(cls, contexto, emails):
+    def call_enviar_comprovante_emprestimo(cls, contexto):
         app.send_task(
             'circulacao.enviar_comprovante_emprestimo',
-            args=[contexto, emails],
+            args=[contexto],
             queue=CIRCULACAO_QUEUE,
             ignore_result=True
         )

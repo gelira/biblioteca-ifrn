@@ -16,7 +16,6 @@ from circulacao.celery import app
 from ..models import Reserva
 from ..utils import calcular_data_limite
 
-from .autenticacao import AutenticacaoService
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
 
@@ -108,41 +107,25 @@ class ReservaService:
 
     @classmethod
     def enviar_reserva_disponivel(cls, contexto):
-        usuario_id = contexto['usuario_id']
         livro_id = contexto['livro_id']
-
-        usuario = AutenticacaoService.informacoes_usuario(usuario_id)
         livro = CatalogoService.busca_livro(livro_id, min=True)
-
-        emails = [usuario['email_institucional']]
-        if usuario['email_pessoal']:
-            emails.append(usuario['email_pessoal'])
-
+        
         contexto.update({
-            'nome_usuario': usuario['nome'],
             'titulo_livro': livro['titulo']
         })
 
-        NotificacaoService.reserva_disponivel(contexto, emails)
+        NotificacaoService.reserva_disponivel(contexto)
 
     @classmethod
     def enviar_reserva_cancelada(cls, contexto):
-        usuario_id = contexto['usuario_id']
         livro_id = contexto['livro_id']
-
-        usuario = AutenticacaoService.informacoes_usuario(usuario_id)
         livro = CatalogoService.busca_livro(livro_id, min=True)
 
-        emails = [usuario['email_institucional']]
-        if usuario['email_pessoal']:
-            emails.append(usuario['email_pessoal'])
-
         contexto.update({
-            'nome_usuario': usuario['nome'],
             'titulo_livro': livro['titulo']
         })
 
-        NotificacaoService.reserva_cancelada(contexto, emails)
+        NotificacaoService.reserva_cancelada(contexto)
 
     @classmethod
     def call_enviar_reserva_disponivel(cls, contexto):
