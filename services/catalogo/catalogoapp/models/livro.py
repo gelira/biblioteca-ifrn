@@ -56,6 +56,15 @@ class Livro(TimestampedModel):
     paginas = models.CharField(
         max_length=10
     )
+    media_notas = models.FloatField(
+        default=0
+    )
+    soma_notas = models.IntegerField(
+        default=0
+    )
+    quantidade_avaliacoes = models.IntegerField(
+        default=0
+    )
 
     def get_versao_atual(self):
         if not hasattr(self, 'foto_capa'):
