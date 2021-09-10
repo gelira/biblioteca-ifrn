@@ -17,8 +17,8 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         return Tag.objects.filter(_id__in=value).all()
 
     def validate_nota(self, value):
-        if value < 1 or value > 10:
-            raise serializers.ValidationError('Nota deve estar entre 1 e 10')
+        if value < 1 or value > 5:
+            raise serializers.ValidationError('Nota deve estar entre 1 e 5')
         return value 
 
     def validate(self, data):
