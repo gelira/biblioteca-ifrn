@@ -35,3 +35,7 @@ def busca_livro(livro_id, **kwargs):
 @shared_task(name='catalogo.upload_foto_capa', base=MaxRetriesTask)
 def upload_foto_capa(livro_id, livro_pk, foto_base64):
     LivroService.upload_foto_capa(livro_id, livro_pk, foto_base64)
+
+@shared_task(name='catalogo.atualizar_nota', base=IgnoreResultTask)
+def atualizar_nota(livro_id, nota):
+    LivroService.atualizar_nota(livro_id, nota)

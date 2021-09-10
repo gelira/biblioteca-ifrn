@@ -12,8 +12,17 @@ class LivroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
-            'id'
+            'id',
+            'soma_notas'
         ]
+        extra_kwargs = {
+            'media_notas': {
+                'read_only': True
+            },
+            'quantidade_avaliacoes': {
+                'read_only': True
+            }
+        }
 
 class LivroListSerializer(serializers.ModelSerializer):
     foto_capa = serializers.SerializerMethodField()
@@ -28,7 +37,8 @@ class LivroListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
-            'id'
+            'id',
+            'soma_notas'
         ]
 
 class LivroRetrieveSerializer(serializers.ModelSerializer):
@@ -66,7 +76,8 @@ class LivroRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Livro
         exclude = [
-            'id'
+            'id',
+            'soma_notas'
         ]
 
 class LivroPesquisaSerializer(serializers.Serializer):

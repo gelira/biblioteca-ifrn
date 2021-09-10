@@ -1,3 +1,2 @@
-from .circulacao import (
-    CirculacaoService
-)
+from .circulacao import CirculacaoService
+from .catalogo import CatalogoService
