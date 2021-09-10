@@ -59,10 +59,10 @@ class Livro(TimestampedModel):
     media_notas = models.FloatField(
         default=0
     )
-    soma_notas = models.IntegerField(
+    soma_notas = models.FloatField(
         default=0
     )
-    quantidade_avaliacoes = models.IntegerField(
+    quantidade_avaliacoes = models.FloatField(
         default=0
     )
 
