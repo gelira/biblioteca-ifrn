@@ -13,6 +13,9 @@ class Tag(models.Model):
     created = models.DateTimeField(
         auto_now_add=True
     )
+    censurada = models.BooleanField(
+        default=False
+    )
 
     class Meta:
         db_table = 'tags'
