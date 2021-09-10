@@ -4,7 +4,10 @@ from ..models import (
     Avaliacao,
     Tag
 )
-from ..services import CirculacaoService
+from ..services import (
+    CirculacaoService,
+    CatalogoService
+)
 
 class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
@@ -30,9 +33,12 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
 
     def create(self, data):
         emprestimo_id = str(data['emprestimo_id'])
+        livro_id = str(data['livro_id'])
+        nota = data['nota']
 
         retorno = super().create(data)
         CirculacaoService.emprestimo_avaliado(emprestimo_id)
+        CatalogoService.atualizar_nota(livro_id, nota)
 
         return retorno
 
