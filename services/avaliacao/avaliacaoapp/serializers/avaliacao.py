@@ -67,7 +67,8 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Avaliacao
         exclude = [
-            'id'
+            'id',
+            'censurada'
         ]
         extra_kwargs = {
             'livro_id': {
