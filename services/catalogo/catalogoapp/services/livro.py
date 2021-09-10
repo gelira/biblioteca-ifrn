@@ -2,6 +2,8 @@ import os
 import io
 import base64
 from django.db import transaction
+from django.db.models import F
+from django.utils.timezone import localtime
 from catalogo.celery import app
 
 from ..models import (
@@ -71,4 +73,13 @@ class LivroService:
             args=[livro_id, livro_pk, foto_base64],
             ignore_task=True, 
             queue=CATALOGO_QUEUE
+        )
+
+    @classmethod
+    def atualizar_nota(cls, livro_id, nota):
+        Livro.objects.filter(_id=livro_id).update(
+            media_notas=(F('soma_notas') + nota)/(F('quantidade_avaliacoes') + 1),
+            quantidade_avaliacoes=F('quantidade_avaliacoes') + 1,
+            soma_notas=F('soma_notas') + nota,
+            updated=localtime()
         )
