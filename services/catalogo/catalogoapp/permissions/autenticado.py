@@ -4,4 +4,12 @@ class AutenticadoPermissao(BasePermission):
     message = 'Usuário não autenticado'
 
     def has_permission(self, request, view):
-        return request.user is not None
+        u = request.user
+        
+        if u is None:
+            return False
+
+        if u.is_anonymous:
+            return False
+        
+        return True
