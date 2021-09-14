@@ -1,0 +1,10 @@
+Aviso de Moderação
+
+Olá, {{ nome_usuario }}!
+O seu comentário de avaliação do livro {{ titulo }}, feito em {{ data }} às {{ hora }}, foi avaliado como impróprio.
+Recomendamos que você reveja o comentário para que o mesmo possa voltar a ser público.
+
+Comentário:
+"{{ comentario }}"
+
+Moderador: {{ nome_moderador }} ({{ matricula_moderador }})
