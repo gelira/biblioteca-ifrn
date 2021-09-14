@@ -45,9 +45,11 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     def validar_emprestimo(self, emprestimo_id):
         if Avaliacao.objects.filter(emprestimo_id=emprestimo_id).exists():
             raise serializers.ValidationError('Empréstimo já avaliado')
+
+        usuario_id = self.context['request'].user['_id']
         
         try:
-            emprestimo = CirculacaoService.get_emprestimo(emprestimo_id)
+            emprestimo = CirculacaoService.get_emprestimo(emprestimo_id, usuario_id)
             if not emprestimo:
                 raise serializers.ValidationError('Empréstimo não encontrado')
 
@@ -65,7 +67,8 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Avaliacao
         exclude = [
-            'id'
+            'id',
+            'censurada'
         ]
         extra_kwargs = {
             'livro_id': {

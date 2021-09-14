@@ -1,7 +1,8 @@
 import uuid
 from django.db import models
+from .timestamped import TimestampedModel
 
-class Tag(models.Model):
+class Tag(TimestampedModel):
     _id = models.UUIDField(
         unique=True,
         editable=False,
@@ -10,8 +11,8 @@ class Tag(models.Model):
     tag = models.CharField(
         max_length=50
     )
-    created = models.DateTimeField(
-        auto_now_add=True
+    censurada = models.BooleanField(
+        default=False
     )
 
     class Meta:

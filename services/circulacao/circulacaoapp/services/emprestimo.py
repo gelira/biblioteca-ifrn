@@ -17,9 +17,13 @@ class EmprestimoService:
         )
 
     @classmethod
-    def get_emprestimo(cls, emprestimo_id):
-        e = Emprestimo.objects.filter(_id=emprestimo_id).first()
+    def get_emprestimo(cls, emprestimo_id, usuario_id=None):
+        qs = Emprestimo.objects.filter(_id=emprestimo_id)
 
+        if usuario_id:
+            qs = qs.filter(usuario_id=usuario_id)
+
+        e = qs.first()
         if not e:
             return None
 

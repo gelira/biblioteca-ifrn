@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from rest_framework.permissions import BasePermission
 
 class AutenticadoPermissao(BasePermission):
@@ -5,11 +6,10 @@ class AutenticadoPermissao(BasePermission):
 
     def has_permission(self, request, view):
         u = request.user
-        
         if u is None:
             return False
 
-        if u.is_anonymous:
+        if isinstance(u, AnonymousUser):
             return False
-        
+
         return True

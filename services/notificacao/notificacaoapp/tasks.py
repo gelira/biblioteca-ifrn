@@ -26,6 +26,14 @@ def reserva_disponivel(contexto):
 def reserva_cancelada(contexto):
     MensagemService.reserva_cancelada(contexto)
 
+@shared_task(name='notificacao.avaliacao_moderada', base=IgnoreResultTask)
+def avaliacao_moderada(contexto):
+    MensagemService.avaliacao_moderada(contexto)
+
+@shared_task(name='notificacao.avaliacao_publicada', base=IgnoreResultTask)
+def avaliacao_publicada(contexto):
+    MensagemService.avaliacao_publicada(contexto)
+
 @shared_task(name='notificacao.salvar_contato', base=IgnoreResultTask)
 def salvar_contato(usuario_id, data):
     ContatoService.salvar_contato(usuario_id, data)

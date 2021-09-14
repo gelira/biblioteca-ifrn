@@ -21,6 +21,9 @@ class Avaliacao(TimestampedModel):
     comentario = models.TextField(
         blank=True
     )
+    censurada = models.BooleanField(
+        default=False
+    )
 
     class Meta:
         db_table = 'avaliacoes'

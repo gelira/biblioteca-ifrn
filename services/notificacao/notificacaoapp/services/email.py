@@ -46,6 +46,26 @@ class EmailService:
         )
 
     @classmethod
+    def avaliacao_moderada(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Aviso de Moderação', 
+            'avaliacao_moderada.html', 
+            'avaliacao_moderada.txt'
+        )
+
+    @classmethod
+    def avaliacao_publicada(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Avaliação Publicada', 
+            'avaliacao_publicada.html', 
+            'avaliacao_publicada.txt'
+        )
+
+    @classmethod
     def compor_e_enviar_email(cls, contexto, emails, assunto, template_html, template_txt):
         msg_html = render_to_string(template_html, contexto)
         msg_plain = render_to_string(template_txt, contexto)

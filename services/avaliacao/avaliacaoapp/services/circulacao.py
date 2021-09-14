@@ -5,10 +5,10 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class CirculacaoService:
     @classmethod
-    def get_emprestimo(cls, emprestimo_id):
+    def get_emprestimo(cls, emprestimo_id, usuario_id):
         task = app.send_task(
             'circulacao.get_emprestimo', 
-            args=[emprestimo_id], 
+            args=[emprestimo_id, usuario_id], 
             queue=CIRCULACAO_QUEUE
         )
         return task.get()

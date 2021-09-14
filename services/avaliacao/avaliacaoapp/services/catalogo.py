@@ -12,3 +12,13 @@ class CatalogoService:
             ignore_task=True, 
             queue=CATALOGO_QUEUE
         )
+
+    @classmethod
+    def busca_livro(cls, livro_id):
+        task = app.send_task(
+            'catalogo.busca_livro', 
+            args=[livro_id],
+            kwargs={ 'min': True }, 
+            queue=CATALOGO_QUEUE
+        )
+        return task.get(disable_sync_subtasks=False)
