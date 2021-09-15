@@ -364,9 +364,17 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
         emprestimos = data['emprestimos']
         usuarios = data['usuarios']
 
+        agora = timezone.localtime()
+        agora_data = agora.strftime('%d/%m/%Y')
+        agora_hora = agora.strftime('%H:%M:%S')
+
+        comprovantes = []
+
         with transaction.atomic():
             for emprestimo in emprestimos:
-                perfil = usuarios[str(emprestimo.usuario_id)]['perfil']
+                usuario_id = str(emprestimo.usuario_id)
+
+                perfil = usuarios[usuario_id]['perfil']
                 emprestimo.quantidade_renovacoes += 1
                 
                 if emprestimo.quantidade_renovacoes >= perfil['quantidade_renovacoes']:
@@ -381,6 +389,18 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
                     usuario_id=agente_id
                 )
                 emprestimo.save()
+
+                comprovantes.append({
+                    'usuario_id': usuario_id,
+                    'livro_id': str(emprestimo.livro_id),
+                    'data_limite': nova_data.strftime('%d/%m/%Y'),
+                    'data': agora_data,
+                    'hora': agora_hora,
+                    'exemplar_codigo': emprestimo.exemplar_codigo,
+                    'atendente_id': agente_id if agente_id != usuario_id else '' 
+                })
+
+        EmprestimoService.call_enviar_comprovantes_renovacao(comprovantes)
 
         return {}
 
