@@ -1,10 +1,12 @@
 import os
+from celery import group
 from django.utils.timezone import localtime
 
 from circulacao.celery import app
 
 from ..models import Emprestimo
 from .notificacao import NotificacaoService
+from .catalogo import CatalogoService
 
 CIRCULACAO_QUEUE = os.getenv('PROJECT_NAME')
 
@@ -36,6 +38,12 @@ class EmprestimoService:
         NotificacaoService.comprovante_emprestimo(contexto)
 
     @classmethod
+    def enviar_comprovante_renovacao(cls, contexto):
+        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        contexto['titulo'] = livro['titulo']
+        NotificacaoService.comprovante_renovacao(contexto)
+
+    @classmethod
     def call_enviar_comprovante_emprestimo(cls, contexto):
         app.send_task(
             'circulacao.enviar_comprovante_emprestimo',
@@ -43,3 +51,14 @@ class EmprestimoService:
             queue=CIRCULACAO_QUEUE,
             ignore_result=True
         )
+
+    @classmethod
+    def call_enviar_comprovantes_renovacao(cls, comprovantes):
+        group([
+            app.signature(
+                'circulacao.enviar_comprovante_renovacao',
+                args=[comprovante],
+                queue=CIRCULACAO_QUEUE,
+                ignore_result=True    
+            ) for comprovante in comprovantes
+        ])()
