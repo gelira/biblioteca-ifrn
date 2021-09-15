@@ -39,8 +39,9 @@ def enviar_comprovante_devolucao(contexto):
     DevolucaoService.enviar_comprovante_devolucao(contexto)
 
 @shared_task(name='circulacao.enviar_comprovante_emprestimo', base=IgnoreResultTask)
-def enviar_comprovante_emprestimo(contexto, emails):
-    EmprestimoService.enviar_comprovante_emprestimo(contexto, emails)
+def enviar_comprovante_emprestimo(contexto):
+    EmprestimoService.enviar_comprovante_emprestimo(contexto)
+
 
 @shared_task(name='circulacao.proxima_reserva', base=IgnoreResultTask)
 def proxima_reserva(livro_id):
