@@ -101,10 +101,29 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Seus empréstimos + reservas estão no limite')
 
     def create(self, data):
-        return Reserva.objects.create(
-            livro_id=data['livro_id'],
-            usuario_id=self.context['request'].user['_id']
-        )
+        usuario_id = self.context['request'].user['_id']
+        livro_id = data['livro_id']
+
+        agora = timezone.localtime()
+        agora_data = agora.strftime('%d/%m/%Y')
+        agora_hora = agora.strftime('%H:%M:%S')
+
+        with transaction.atomic():
+            reserva = Reserva.objects.create(
+                livro_id=livro_id,
+                usuario_id=usuario_id
+            )
+
+            contexto = {
+                'usuario_id': usuario_id,
+                'livro_id': livro_id,
+                'data': agora_data,
+                'hora': agora_hora,
+            }
+
+            ReservaService.call_enviar_comprovante_reserva(contexto)
+
+            return reserva
 
     class Meta:
         model = Reserva
