@@ -1,7 +1,6 @@
 import os
 from circulacao.celery import app
 
-CIRCULACAO_QUEUE = os.getenv('PROJECT_NAME')
 NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
 
 class NotificacaoService:
@@ -18,6 +17,15 @@ class NotificacaoService:
     def comprovante_devolucao(cls, contexto):
         app.send_task(
             'notificacao.comprovante_devolucao',
+            args=[contexto],
+            queue=NOTIFICACAO_QUEUE,
+            ignore_result=True
+        )
+
+    @classmethod
+    def comprovante_renovacao(cls, contexto):
+        app.send_task(
+            'notificacao.comprovante_renovacao',
             args=[contexto],
             queue=NOTIFICACAO_QUEUE,
             ignore_result=True

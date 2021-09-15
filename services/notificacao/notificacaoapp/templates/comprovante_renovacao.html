@@ -1,0 +1,16 @@
+<h2>Comprovante de Renovação</h2>
+
+<h4>Olá, {{ nome_usuario }}!</h4>
+<p>Aqui está o seu comprovante de renovação de empréstimo, feito em <strong>{{ data }}</strong> às <strong>{{ hora }}</strong>:</p>
+<br>
+<p>Título: <strong>{{ titulo }}</strong></p>
+<ul>
+  <li>Código: <strong>{{ exemplar_codigo }}</strong></li>
+  <li>Devolver até <strong>{{ data_limite }}</strong></li>
+</ul>
+<br>
+{% if atendente_id %}
+  <p>Atendente: <strong>{{ nome_atendente }} ({{ matricula_atendente }})</strong></p>
+{% else %}
+  <p>Renovado pelo próprio usuário</p>
+{% endif %}

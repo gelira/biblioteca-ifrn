@@ -66,6 +66,16 @@ class EmailService:
         )
 
     @classmethod
+    def comprovante_renovacao(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Comprovante de Renovação', 
+            'comprovante_renovacao.html', 
+            'comprovante_renovacao.txt'
+        )
+
+    @classmethod
     def compor_e_enviar_email(cls, contexto, emails, assunto, template_html, template_txt):
         msg_html = render_to_string(template_html, contexto)
         msg_plain = render_to_string(template_txt, contexto)

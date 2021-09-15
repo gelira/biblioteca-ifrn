@@ -1,0 +1,14 @@
+Comprovante de Renovação
+
+Olá, {{ nome_usuario }}!
+Aqui está o seu comprovante de renovação de empréstimo, feito em {{ data }} às {{ hora }}:
+
+Título: {{ titulo }}
+-> Código: {{ exemplar_codigo }}
+-> Devolver até {{ data_limite }}
+
+{% if atendente_id %}
+Atendente: {{ nome_atendente }} ({{ matricula_atendente }})
+{% else %}
+Renovado pelo próprio usuário
+{% endif %}

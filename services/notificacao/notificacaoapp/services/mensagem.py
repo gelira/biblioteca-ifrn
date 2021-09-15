@@ -94,3 +94,17 @@ class MensagemService:
         emails = cls.get_emails_contato(usuario)
 
         EmailService.avaliacao_publicada(contexto, emails)
+
+    @classmethod
+    def comprovante_renovacao(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        atendente_id = contexto.get('atendente_id')
+        if atendente_id:
+            atendente = cls.get_contato(atendente_id)
+            contexto = cls.load_info_atendente(atendente, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.comprovante_renovacao(contexto, emails)
