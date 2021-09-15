@@ -108,3 +108,22 @@ class MensagemService:
         emails = cls.get_emails_contato(usuario)
 
         EmailService.comprovante_renovacao(contexto, emails)
+
+
+    @classmethod
+    def comprovante_reserva(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.comprovante_reserva(contexto, emails)
+
+    @classmethod
+    def comprovante_reserva_cancelada(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.comprovante_reserva_cancelada(contexto, emails)

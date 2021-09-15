@@ -76,6 +76,26 @@ class EmailService:
         )
 
     @classmethod
+    def comprovante_reserva(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Comprovante de Reserva', 
+            'comprovante_reserva.html', 
+            'comprovante_reserva.txt'
+        )
+
+    @classmethod
+    def comprovante_reserva_cancelada(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Comprovante de Cancelamento de Reserva', 
+            'comprovante_reserva_cancelada.html', 
+            'comprovante_reserva_cancelada.txt'
+        )
+
+    @classmethod
     def compor_e_enviar_email(cls, contexto, emails, assunto, template_html, template_txt):
         msg_html = render_to_string(template_html, contexto)
         msg_plain = render_to_string(template_txt, contexto)

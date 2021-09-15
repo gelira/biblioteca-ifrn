@@ -22,9 +22,18 @@ def comprovante_devolucao(contexto):
 def reserva_disponivel(contexto):
     MensagemService.reserva_disponivel(contexto)
 
+# Para quando a reserva é cancelada pelo próprio sistema
 @shared_task(name='notificacao.reserva_cancelada', base=IgnoreResultTask)
 def reserva_cancelada(contexto):
     MensagemService.reserva_cancelada(contexto)
+
+@shared_task(name='notificacao.comprovante_reserva', base=IgnoreResultTask)
+def comprovante_reserva(contexto):
+    MensagemService.comprovante_reserva(contexto)
+
+@shared_task(name='notificacao.comprovante_reserva_cancelada', base=IgnoreResultTask)
+def comprovante_reserva_cancelada(contexto):
+    MensagemService.comprovante_reserva_cancelada(contexto)
 
 @shared_task(name='notificacao.avaliacao_moderada', base=IgnoreResultTask)
 def avaliacao_moderada(contexto):

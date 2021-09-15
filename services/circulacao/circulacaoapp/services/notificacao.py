@@ -48,3 +48,21 @@ class NotificacaoService:
             queue=NOTIFICACAO_QUEUE,
             ignore_result=True
         )
+
+    @classmethod
+    def comprovante_reserva(cls, contexto):
+        app.send_task(
+            'notificacao.comprovante_reserva',
+            args=[contexto],
+            queue=NOTIFICACAO_QUEUE,
+            ignore_result=True
+        )
+    
+    @classmethod
+    def comprovante_reserva_cancelada(cls, contexto):
+        app.send_task(
+            'notificacao.comprovante_reserva_cancelada',
+            args=[contexto],
+            queue=NOTIFICACAO_QUEUE,
+            ignore_result=True
+        )
