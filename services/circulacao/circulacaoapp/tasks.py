@@ -49,3 +49,11 @@ def enviar_comprovante_renovacao(contexto):
 @shared_task(name='circulacao.proxima_reserva', base=IgnoreResultTask)
 def proxima_reserva(livro_id):
     ReservaService.proxima_reserva(livro_id)
+
+@shared_task(name='circulacao.enviar_comprovante_reserva', base=IgnoreResultTask)
+def enviar_comprovante_reserva(contexto):
+    ReservaService.enviar_comprovante_reserva(contexto)
+
+@shared_task(name='circulacao.enviar_comprovante_reserva_cancelada', base=IgnoreResultTask)
+def enviar_comprovante_reserva_cancelada(contexto):
+    ReservaService.enviar_comprovante_reserva_cancelada(contexto)

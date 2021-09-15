@@ -166,3 +166,33 @@ class ReservaService:
                 ignore_result=True
             ) for livro_id in livros
         ])()
+
+    @classmethod
+    def enviar_comprovante_reserva(cls, contexto):
+        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        contexto['titulo_livro'] = livro['titulo']
+        NotificacaoService.comprovante_reserva(contexto)
+
+    @classmethod
+    def enviar_comprovante_reserva_cancelada(cls, contexto):
+        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        contexto['titulo_livro'] = livro['titulo']
+        NotificacaoService.comprovante_reserva_cancelada(contexto)
+
+    @classmethod
+    def call_enviar_comprovante_reserva(cls, contexto):
+        app.send_task(
+            'circulacao.enviar_comprovante_reserva',
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE,
+            ignore_result=True
+        )
+
+    @classmethod
+    def call_enviar_comprovante_reserva_cancelada(cls, contexto):
+        app.send_task(
+            'circulacao.enviar_comprovante_reserva_cancelada',
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE,
+            ignore_result=True
+        )
