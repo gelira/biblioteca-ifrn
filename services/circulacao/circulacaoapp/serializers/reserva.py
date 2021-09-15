@@ -152,15 +152,31 @@ class CancelarReservaSerializer(serializers.Serializer):
         return reserva
 
     def create(self, data):
+        reserva = data['reserva']
+        usuario_id = str(reserva.usuario_id)
+        livro_id = str(reserva.livro_id)
+        
+        agora = timezone.localtime()
+        agora_data = agora.strftime('%d/%m/%Y')
+        agora_hora = agora.strftime('%H:%M:%S')
+
         livros = []
 
         with transaction.atomic():
-            reserva = data['reserva']
             reserva.cancelada = True
             reserva.save()
 
             if reserva.disponibilidade_retirada is not None:
-                livros.append(str(reserva.livro_id))
+                livros.append(livro_id)
+
+        contexto = {
+            'usuario_id': usuario_id,
+            'livro_id': livro_id,
+            'data': agora_data,
+            'hora': agora_hora,
+        }
+
+        ReservaService.call_enviar_comprovante_reserva_cancelada(contexto)
 
         if livros: 
             ReservaService.call_proximas_reservas(livros)
