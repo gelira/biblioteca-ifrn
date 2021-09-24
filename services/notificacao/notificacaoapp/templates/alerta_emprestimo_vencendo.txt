@@ -1,0 +1,6 @@
+Empréstimo próximo do vencimento
+
+Olá, {{ nome_usuario }}!
+Gostariamos de avisar que seu empréstimo do livro {{ titulo }}, exemplar {{ exemplar_codigo }}, está próximo do vencimento. Preste atenção nas datas para não receber nenhuma suspensão.
+O prazo de devolução é {% if hoje %}HOJE{% else %} dia {{ data_limite }}{% endif %}.
+Agradecemos pela compreensão.

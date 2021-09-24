@@ -1,0 +1,6 @@
+Empréstimo Atrasado
+
+Olá, {{ nome_usuario }}!
+Seu empréstimo do livro {{ titulo }}, exemplar {{ exemplar_codigo }}, está atrasado.
+A devolução deveria ter acontecido até o dia {{ data_limite }}.
+Pedimos a sua cooperação para que essa pendência possa ser resolvida.
