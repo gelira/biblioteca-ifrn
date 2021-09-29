@@ -225,12 +225,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         if hoje.weekday() == 4:
             return True
 
-        while hoje.weekday() < 5:
-            if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
-                return False
-            hoje = hoje + timezone.timedelta(days=1)
-        
-        return True
+        amanha = hoje + timezone.timedelta(days=1)
+        return Data.objects.filter(dia=amanha.day, mes=amanha.month, ano=amanha.year).exists()
 
     def enviar_comprovante(self, usuario_id, exemplares):
         atendente_id = self.context['request'].user['_id']
