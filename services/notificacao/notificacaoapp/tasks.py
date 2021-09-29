@@ -50,3 +50,11 @@ def salvar_contato(usuario_id, data):
 @shared_task(name='notificacao.comprovante_renovacao', base=IgnoreResultTask)
 def comprovante_renovacao(contexto):
     MensagemService.comprovante_renovacao(contexto)
+
+@shared_task(name='notificacao.alerta_emprestimo_vencendo', base=IgnoreResultTask)
+def alerta_emprestimo_vencendo(contexto):
+    MensagemService.alerta_emprestimo_vencendo(contexto)
+
+@shared_task(name='notificacao.alerta_emprestimo_atrasado', base=IgnoreResultTask)
+def alerta_emprestimo_atrasado(contexto):
+    MensagemService.alerta_emprestimo_atrasado(contexto)
