@@ -66,3 +66,21 @@ class NotificacaoService:
             queue=NOTIFICACAO_QUEUE,
             ignore_result=True
         )
+
+    @classmethod
+    def alerta_emprestimo_vencendo(cls, contexto):
+        app.send_task(
+            'notificacao.alerta_emprestimo_vencendo',
+            args=[contexto],
+            queue=NOTIFICACAO_QUEUE,
+            ignore_result=True
+        )
+
+    @classmethod
+    def alerta_emprestimo_atrasado(cls, contexto):
+        app.send_task(
+            'notificacao.alerta_emprestimo_atrasado',
+            args=[contexto],
+            queue=NOTIFICACAO_QUEUE,
+            ignore_result=True
+        )
