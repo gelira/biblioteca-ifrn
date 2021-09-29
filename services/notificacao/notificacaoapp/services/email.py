@@ -96,6 +96,26 @@ class EmailService:
         )
 
     @classmethod
+    def alerta_emprestimo_vencendo(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Empréstimo próximo do vencimento', 
+            'alerta_emprestimo_vencendo.html', 
+            'alerta_emprestimo_vencendo.txt'
+        )
+
+    @classmethod
+    def alerta_emprestimo_atrasado(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Empréstimo Atrasado', 
+            'alerta_emprestimo_atrasado.html', 
+            'alerta_emprestimo_atrasado.txt'
+        )
+
+    @classmethod
     def compor_e_enviar_email(cls, contexto, emails, assunto, template_html, template_txt):
         msg_html = render_to_string(template_html, contexto)
         msg_plain = render_to_string(template_txt, contexto)

@@ -127,3 +127,21 @@ class MensagemService:
         emails = cls.get_emails_contato(usuario)
 
         EmailService.comprovante_reserva_cancelada(contexto, emails)
+
+    @classmethod
+    def alerta_emprestimo_vencendo(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.alerta_emprestimo_vencendo(contexto, emails)
+
+    @classmethod
+    def alerta_emprestimo_atrasado(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.alerta_emprestimo_atrasado(contexto, emails)

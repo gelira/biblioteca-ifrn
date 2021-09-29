@@ -64,6 +64,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         emprestimos = []
 
         exemplares_email = []
+        alertas = []
 
         with transaction.atomic():
             for exemplar in data['exemplares']:
@@ -92,15 +93,28 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 emprestimos.append(e)
 
+                titulo = exemplar['livro']['titulo']
+                codigo = exemplar['codigo']
+                dl = e.data_limite.strftime('%d/%m/%Y')
+
                 exemplares_email.append({
-                    'titulo': exemplar['livro']['titulo'],
-                    'codigo': exemplar['codigo'],
+                    'titulo': titulo,
+                    'codigo': codigo,
                     'referencia': exemplar['referencia'],
-                    'data_limite': e.data_limite.strftime('%d/%m/%Y')
+                    'data_limite': dl
+                })
+
+                alertas.append({
+                    'usuario_id': usuario['_id'],
+                    'emprestimo_id': str(e._id),
+                    'titulo': titulo,
+                    'exemplar_codigo': codigo,
+                    'data_limite': dl,
                 })
 
         self.enviar_comprovante(usuario['_id'], exemplares_email)
         CatalogoService.exemplares_emprestados(data['codigos'])
+        EmprestimoService.call_agendar_alertas_emprestimo(alertas)
 
         return emprestimos
 
@@ -211,12 +225,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         if hoje.weekday() == 4:
             return True
 
-        while hoje.weekday() < 5:
-            if not Data.objects.filter(dia=hoje.day, mes=hoje.month, ano=hoje.year).exists():
-                return False
-            hoje = hoje + timezone.timedelta(days=1)
-        
-        return True
+        amanha = hoje + timezone.timedelta(days=1)
+        return Data.objects.filter(dia=amanha.day, mes=amanha.month, ano=amanha.year).exists()
 
     def enviar_comprovante(self, usuario_id, exemplares):
         atendente_id = self.context['request'].user['_id']
