@@ -81,3 +81,50 @@ class EmprestimoService:
         else:
             NotificacaoService.alerta_emprestimo_vencendo(contexto)
 
+    @classmethod
+    def agendar_alertas_emprestimo(cls, contexto):
+        e_id = contexto['emprestimo_id']
+        e = Emprestimo.objects.filter(_id=e_id).first()
+        
+        if not e:
+            return
+
+        data = e.data_limite
+        dias = [-2, -1, 0, 1]
+
+        with transaction.atomic():
+            for dia in dias:
+                contexto['hoje'] = dia == 0
+                d = data + timezone.timedelta(days=dia)
+
+                clock = ClockedSchedule.objects.create(
+                    clocked_time=timezone.make_aware(
+                        timezone.datetime(
+                            year=d.year,
+                            month=d.month,
+                            day=d.day,
+                            hour=9,
+                            minute=30
+                        )
+                    )
+                )
+
+                PeriodicTask.objects.create(
+                    clocked=clock,
+                    name=f'Alerta Empréstimo {e_id} ({dia})',
+                    task='circulacao.checar_emprestimo',
+                    args=json.dumps([contexto]),
+                    queue=CIRCULACAO_QUEUE,
+                    one_off=True
+                )
+
+    @classmethod
+    def call_agendar_alertas_emprestimo(cls, contextos):
+        group([
+            app.signature(
+                'circulacao.agendar_alertas_emprestimo',
+                args=[contexto],
+                queue=CIRCULACAO_QUEUE,
+                ignore_result=True  
+            ) for contexto in contextos
+        ])()

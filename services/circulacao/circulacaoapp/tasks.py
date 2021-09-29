@@ -50,6 +50,10 @@ def enviar_comprovante_renovacao(contexto):
 def checar_emprestimo(contexto):
     EmprestimoService.checar_emprestimo(contexto)
 
+@shared_task(name='circulacao.agendar_alertas_emprestimo', base=IgnoreResultTask)
+def agendar_alertas_emprestimo(contexto):
+    EmprestimoService.agendar_alertas_emprestimo(contexto)
+
 @shared_task(name='circulacao.proxima_reserva', base=IgnoreResultTask)
 def proxima_reserva(livro_id):
     ReservaService.proxima_reserva(livro_id)
