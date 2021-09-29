@@ -1,6 +1,9 @@
 import os
+import json
 from celery import group
-from django.utils.timezone import localtime
+from django.utils import timezone
+from django.db import transaction
+from django_celery_beat.models import PeriodicTask, ClockedSchedule
 
 from circulacao.celery import app
 
@@ -15,7 +18,7 @@ class EmprestimoService:
     def emprestimo_avaliado(cls, emprestimo_id):
         Emprestimo.objects.filter(_id=emprestimo_id).update(
             avaliado=True,
-            updated=localtime()
+            updated=timezone.localtime()
         )
 
     @classmethod
@@ -62,3 +65,19 @@ class EmprestimoService:
                 ignore_result=True    
             ) for comprovante in comprovantes
         ])()
+
+    @classmethod
+    def checar_emprestimo(cls, contexto):
+        e = Emprestimo.objects.filter(_id=contexto['emprestimo_id']).first()
+        
+        if not e:
+            return
+
+        if e.data_devolucao is not None:
+            return
+
+        if e.data_limite < timezone.localdate():
+            NotificacaoService.alerta_emprestimo_atrasado(contexto)
+        else:
+            NotificacaoService.alerta_emprestimo_vencendo(contexto)
+
