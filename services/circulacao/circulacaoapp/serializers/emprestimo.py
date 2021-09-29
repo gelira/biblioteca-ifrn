@@ -64,6 +64,7 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         emprestimos = []
 
         exemplares_email = []
+        alertas = []
 
         with transaction.atomic():
             for exemplar in data['exemplares']:
@@ -92,15 +93,28 @@ class EmprestimoCreateSerializer(serializers.Serializer):
 
                 emprestimos.append(e)
 
+                titulo = exemplar['livro']['titulo']
+                codigo = exemplar['codigo']
+                dl = e.data_limite.strftime('%d/%m/%Y')
+
                 exemplares_email.append({
-                    'titulo': exemplar['livro']['titulo'],
-                    'codigo': exemplar['codigo'],
+                    'titulo': titulo,
+                    'codigo': codigo,
                     'referencia': exemplar['referencia'],
-                    'data_limite': e.data_limite.strftime('%d/%m/%Y')
+                    'data_limite': dl
+                })
+
+                alertas.append({
+                    'usuario_id': usuario['_id'],
+                    'emprestimo_id': str(e._id),
+                    'titulo': titulo,
+                    'exemplar_codigo': codigo,
+                    'data_limite': dl,
                 })
 
         self.enviar_comprovante(usuario['_id'], exemplares_email)
         CatalogoService.exemplares_emprestados(data['codigos'])
+        EmprestimoService.call_agendar_alertas_emprestimo(alertas)
 
         return emprestimos
 
