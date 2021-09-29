@@ -90,12 +90,16 @@ class EmprestimoService:
             return
 
         data = e.data_limite
+        hoje = timezone.localdate()
         dias = [-2, -1, 0, 1]
 
         with transaction.atomic():
             for dia in dias:
-                contexto['hoje'] = dia == 0
                 d = data + timezone.timedelta(days=dia)
+                if d <= hoje:
+                    continue
+
+                contexto['hoje'] = dia == 0
 
                 clock = ClockedSchedule.objects.create(
                     clocked_time=timezone.make_aware(
