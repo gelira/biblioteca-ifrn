@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'aquisicaoapp',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
