@@ -28,14 +28,14 @@ class SugestaoAquisicaoViewSet(ModelViewSet):
 
             c = Curtida.objects.filter(**aux).first()
             if c is None:
-                SugestaoAquisicao.objects.update(
+                SugestaoAquisicao.objects.filter(pk=sugestao.pk).update(
                     quantidade_curtidas=models.F('quantidade_curtidas') + 1
                 )
                 aux['aviso'] = bool(request.GET.get('aviso'))
                 Curtida.objects.create(**aux)
 
             else:
-                SugestaoAquisicao.objects.update(
+                SugestaoAquisicao.objects.filter(pk=sugestao.pk).update(
                     quantidade_curtidas=models.F('quantidade_curtidas') - 1
                 )
                 c.delete()
