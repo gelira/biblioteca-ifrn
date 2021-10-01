@@ -37,6 +37,13 @@ module.exports = {
       script: './manage.py',
       args: 'runserver 8004'
     },
+    {
+      name: 'aquisicao-dev',
+      interpreter,
+      cwd: '/home/geraldo/Projetos/biblioteca-ifrn/services/aquisicao',
+      script: './manage.py',
+      args: 'runserver 8005'
+    },
     
     {
       name: 'circulacao-worker-dev',
