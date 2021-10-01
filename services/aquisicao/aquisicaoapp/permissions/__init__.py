@@ -1,0 +1,1 @@
+from .autenticado import AutenticadoPermissao
