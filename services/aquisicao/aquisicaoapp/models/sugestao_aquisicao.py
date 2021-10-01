@@ -18,7 +18,7 @@ class SugestaoAquisicao(TimestampedModel):
     )
     usuario_id = models.UUIDField()
     livro_id = models.UUIDField(
-        blank=True
+        null=True
     )
     titulo = models.CharField(
         max_length=100
