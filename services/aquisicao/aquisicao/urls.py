@@ -21,6 +21,7 @@ from aquisicaoapp import views
 
 router = SimpleRouter(trailing_slash=False)
 router.register('sugestoes', views.SugestaoAquisicaoViewSet)
+router.register('listas', views.ListaSugestoesViewSet)
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
