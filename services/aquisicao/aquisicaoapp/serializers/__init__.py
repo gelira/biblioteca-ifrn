@@ -1,1 +1,2 @@
 from .sugestao_aquisicao import SugestaoAquisicaoSerializer
+from .lista_sugestoes import ListaSugestoesSerializer
