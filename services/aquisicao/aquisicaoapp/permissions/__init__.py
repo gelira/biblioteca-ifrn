@@ -1,1 +1,2 @@
 from .autenticado import AutenticadoPermissao
+from .lista_sugestoes import CriarListaSugestoesPermissao
