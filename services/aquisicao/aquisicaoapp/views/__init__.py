@@ -1,1 +1,2 @@
 from .sugestao_aquisicao import SugestaoAquisicaoViewSet
+from .lista_sugestoes import ListaSugestoesViewSet
