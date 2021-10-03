@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from ..models import SugestaoAquisicao, Curtida
-from ..serializers import SugestaoAquisicaoSerializer
+from ..serializers import (
+    SugestaoAquisicaoSerializer,
+    SugestaoAquisicaoUpdateSerializer,
+)
 from ..permissions import (
     AutenticadoPermissao,
     ModificarSugestaoAquisicaoPermissao,
@@ -14,11 +17,17 @@ class SugestaoAquisicaoViewSet(ModelViewSet):
     lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
     lookup_field = '_id'
     queryset = SugestaoAquisicao.objects.all()
-    serializer_class = SugestaoAquisicaoSerializer
     permission_classes = [
         AutenticadoPermissao,
         ModificarSugestaoAquisicaoPermissao,
     ]
+
+    def get_serializer_class(self):
+        per = ModificarSugestaoAquisicaoPermissao()
+        if per.user_has_permission(self.request) and self.action in ['update', 'partial_update']:
+            return SugestaoAquisicaoUpdateSerializer
+
+        return SugestaoAquisicaoSerializer
 
     @action(methods=['put'], detail=True, url_path='curtida')
     def curtida(self, request, _id=None):
