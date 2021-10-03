@@ -24,6 +24,34 @@ class SugestaoAquisicaoSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             '_id': {
-                'read_only': True
-            }
+                'read_only': True,
+            },
+        }
+
+class SugestaoAquisicaoUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SugestaoAquisicao
+        fields = [
+            '_id',
+            'titulo',
+            'autor_principal',
+            'autores_secundarios',
+            'local_publicacao',
+            'editora',
+            'ano_publicacao',
+            'volume',
+            'edicao',
+            'isbn',
+            'cdu',
+            'cutter',
+            'paginas',
+            'comentario',
+        ]
+        extra_kwargs = {
+            '_id': {
+                'read_only': True,
+            },
+            'comentario': {
+                'read_only': True,
+            },
         }
