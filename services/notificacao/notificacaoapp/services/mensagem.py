@@ -145,3 +145,12 @@ class MensagemService:
         emails = cls.get_emails_contato(usuario)
 
         EmailService.alerta_emprestimo_atrasado(contexto, emails)
+
+    @classmethod
+    def alerta_sugestao_listada(cls, contexto):
+        usuario = cls.get_contato(contexto['usuario_id'])
+        contexto = cls.load_info_usuario(usuario, contexto)
+
+        emails = cls.get_emails_contato(usuario)
+
+        EmailService.alerta_sugestao_listada(contexto, emails)
