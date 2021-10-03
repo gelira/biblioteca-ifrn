@@ -5,7 +5,10 @@ from rest_framework.decorators import action
 
 from ..models import SugestaoAquisicao, Curtida
 from ..serializers import SugestaoAquisicaoSerializer
-from ..permissions import AutenticadoPermissao
+from ..permissions import (
+    AutenticadoPermissao,
+    ModificarSugestaoAquisicaoPermissao,
+)
 
 class SugestaoAquisicaoViewSet(ModelViewSet):
     lookup_value_regex = '[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}'
@@ -13,7 +16,8 @@ class SugestaoAquisicaoViewSet(ModelViewSet):
     queryset = SugestaoAquisicao.objects.all()
     serializer_class = SugestaoAquisicaoSerializer
     permission_classes = [
-        AutenticadoPermissao
+        AutenticadoPermissao,
+        ModificarSugestaoAquisicaoPermissao,
     ]
 
     @action(methods=['put'], detail=True, url_path='curtida')

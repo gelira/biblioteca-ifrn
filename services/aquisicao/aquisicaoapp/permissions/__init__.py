@@ -1,2 +1,3 @@
 from .autenticado import AutenticadoPermissao
 from .lista_sugestoes import CriarListaSugestoesPermissao
+from .sugestao_aquisicao import ModificarSugestaoAquisicaoPermissao
