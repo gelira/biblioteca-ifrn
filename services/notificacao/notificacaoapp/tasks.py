@@ -58,3 +58,7 @@ def alerta_emprestimo_vencendo(contexto):
 @shared_task(name='notificacao.alerta_emprestimo_atrasado', base=IgnoreResultTask)
 def alerta_emprestimo_atrasado(contexto):
     MensagemService.alerta_emprestimo_atrasado(contexto)
+
+@shared_task(name='notificacao.alerta_sugestao_listada', base=IgnoreResultTask)
+def alerta_sugestao_listada(contexto):
+    MensagemService.alerta_sugestao_listada(contexto)
