@@ -1,5 +1,5 @@
 Sugestão Listada para Aquisição
 
 Olá, {{ nome_usuario }}!
-{% if aviso %}A{% else %}Sua{% endif %} sugestão do livro {{ titulo }}, foi incluída na lista {{ descricao_lista }}, em {{ data }} às {{ hora }}.
+{% if aviso_curtida %}A{% else %}Sua{% endif %} sugestão do livro {{ titulo }}, foi incluída na lista {{ descricao_lista }}, em {{ data }} às {{ hora }}.
 Assim que este material estiver disponível na biblioteca, nós te avisaremos.
