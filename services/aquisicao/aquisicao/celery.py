@@ -5,7 +5,7 @@ import dotenv
 from celery import Celery
 
 dotenv.read_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'notificacao.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aquisicao.settings')
 
 app = Celery('aquisicao')
 
