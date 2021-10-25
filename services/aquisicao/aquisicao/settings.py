@@ -139,3 +139,11 @@ REST_FRAMEWORK = {
         'aquisicaoapp.authentication.RedisAutenticacao',
     ],
 }
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
+CELERY_RESULT_BACKEND = 'rpc://'
+
+CELERY_DEFAULT_QUEUE = PROJECT_NAME
+
+CELERY_ACKS_LATE = True

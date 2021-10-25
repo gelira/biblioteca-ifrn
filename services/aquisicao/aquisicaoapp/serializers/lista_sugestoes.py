@@ -6,6 +6,7 @@ from ..models import (
     ListaSugestoes,
     SugestaoAquisicao,
 )
+from ..services import ListaSugestoesService
 
 class ListaSugestoesSerializer(serializers.ModelSerializer):
     sugestoes = serializers.ListField(
@@ -36,6 +37,7 @@ class ListaSugestoesSerializer(serializers.ModelSerializer):
                 lista_sugestoes_id=l.pk,
                 updated=localtime()
             )
+            ListaSugestoesService.call_enviar_alertas_lista(str(l._id))
             return l
 
     class Meta:

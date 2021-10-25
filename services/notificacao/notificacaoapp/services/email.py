@@ -116,6 +116,16 @@ class EmailService:
         )
 
     @classmethod
+    def alerta_sugestao_listada(cls, contexto, emails):
+        cls.compor_e_enviar_email(
+            contexto, 
+            emails, 
+            'Sugestão Listada', 
+            'sugestao_listada_alerta.html', 
+            'sugestao_listada_alerta.txt'
+        )
+
+    @classmethod
     def compor_e_enviar_email(cls, contexto, emails, assunto, template_html, template_txt):
         msg_html = render_to_string(template_html, contexto)
         msg_plain = render_to_string(template_txt, contexto)
