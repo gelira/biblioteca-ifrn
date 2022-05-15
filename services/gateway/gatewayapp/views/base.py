@@ -16,6 +16,7 @@ class BaseProxyView(ProxyView):
     def get_request_headers(self):
         headers = super().get_request_headers()
         headers.pop('Authorization', None)
+        headers.pop('X-Usuario-Id', None)
 
         usuario_id = self.request.META.get('_id')
 
