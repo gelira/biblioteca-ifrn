@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 
-from ..serializers import LoginSerializer, UsuarioUpdateSerializer
+from .. import serializers
 from ..services import AutenticacaoService
 
 class AutenticacaoViewSet(ViewSet):
@@ -13,21 +13,9 @@ class AutenticacaoViewSet(ViewSet):
             return self.atualizar_informações(request)
 
         usuario_id = str(request.user.usuario._id)
-        
-        try:
-            data = AutenticacaoService.informacoes_usuario(usuario_id)
-            return Response(data=data)
-        
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'), 
-                    status=arg.get('status', 500)
-                )
-            
-            raise e
+        usuario = AutenticacaoService.informacoes_usuario(usuario_id)
+
+        return Response(data=serializers.UsuarioSerializer(usuario).data)
 
     @action(methods=['get'], detail=False, url_path='consulta')
     def consulta(self, request):
@@ -37,67 +25,33 @@ class AutenticacaoViewSet(ViewSet):
         if not _id and not matricula:
             _id = str(request.user.usuario._id)
 
-        try:
-            data = AutenticacaoService.consulta_usuario(_id, matricula)
-            return Response(data=data)
-        
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'), 
-                    status=arg.get('status', 500)
-                )
-            
-            raise e
+        usuario = AutenticacaoService.consulta_usuario(_id, matricula)
+        return Response(data=serializers.UsuarioConsultaSerializer(usuario).data)
 
     @action(methods=['post'], detail=False, url_path='token', authentication_classes=[], permission_classes=[])
     def token(self, request):
-        ser = LoginSerializer(data=request.data)
+        ser = serializers.LoginSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
         data = ser.validated_data
 
-        try:
-            login_data = AutenticacaoService.login_suap(data['username'], data['password'])
-            return Response(data=login_data)
-        
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'), 
-                    status=arg.get('status', 500)
-                )
-            
-            raise e
+        login_data = AutenticacaoService.login_suap(data['username'], data['password'])
+
+        return Response(data=login_data)
 
     @action(methods=['post'], detail=False, url_path='token-local', authentication_classes=[], permission_classes=[])
     def token_local(self, request):
         if not settings.DEBUG:
             return Response(status=403)
 
-        ser = LoginSerializer(data=request.data)
+        ser = serializers.LoginSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
         data = ser.validated_data
 
-        try:
-            login_data = AutenticacaoService.login_local(data['username'], data['password'])
-            return Response(data=login_data)
+        login_data = AutenticacaoService.login_local(data['username'], data['password'])
         
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'), 
-                    status=arg.get('status', 500)
-                )
-            
-            raise e
+        return Response(data=login_data)
 
     @action(methods=['get'], detail=False, url_path='verificar')
     def verificar(self, request):
@@ -106,7 +60,7 @@ class AutenticacaoViewSet(ViewSet):
         })
 
     def atualizar_informações(self, request):
-        ser = UsuarioUpdateSerializer(
+        ser = serializers.UsuarioUpdateSerializer(
             instance=request.user.usuario,
             data=request.data
         )
