@@ -1,23 +1,55 @@
 import os
-from gateway.celery import app
+import requests
 
-AUTENTICACAO_QUEUE = os.getenv('AUTENTICACAO_QUEUE')
+from .. import exceptions
+
+AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
+
+AUTENTICACAO_TIMEOUT = int(os.getenv('AUTENTICACAO_TIMEOUT'))
+
+AUTENTICACAO_VERIFICAR_TOKEN = (
+    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_VERIFICAR_TOKEN'))
+
+AUTENTICACAO_INFORMACOES_USUARIO = (
+    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_INFORMACOES_USUARIO'))
 
 class AutenticacaoService:
     @classmethod
     def verificar_token(cls, token):
-        task = app.send_task(
-            'autenticacao.verificar_token', 
-            args=[token], 
-            queue=AUTENTICACAO_QUEUE
-        )
-        return task.get()
+        return cls.dispatch({
+            'method': 'GET',
+            'url': AUTENTICACAO_VERIFICAR_TOKEN,
+            'headers': {
+                'Authorization': f'JWT {token}'
+            }
+        })
 
     @classmethod
-    def informacoes_usuario(cls, usuario_id):
-        task = app.send_task(
-            'autenticacao.informacoes_usuario', 
-            args=[usuario_id], 
-            queue=AUTENTICACAO_QUEUE
-        )
-        return task.get()
+    def informacoes_usuario(cls, token):
+        return cls.dispatch({
+            'method': 'GET',
+            'url': AUTENTICACAO_INFORMACOES_USUARIO,
+            'headers': {
+                'Authorization': f'JWT {token}'
+            }
+        })
+
+    @classmethod
+    def dispatch(self, options):
+        method = options.pop('method')
+        url = options.pop('url')
+        options['timeout'] = AUTENTICACAO_TIMEOUT
+        
+        try:
+            response = requests.request(method, url, **options)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.exceptions.HTTPError:
+            raise exceptions.ServiceUnauthorized
+        
+        except requests.exceptions.ConnectTimeout:
+            raise exceptions.ServiceTimeOut
+        
+        except requests.exceptions.ConnectionError:
+            raise exceptions.ServiceUnavailable
