@@ -1,5 +1,3 @@
-from django.http.response import JsonResponse
-
 from ..services import AutenticacaoService
 from ..cliente_redis import ClienteRedis
 from .base import BaseMiddleware
@@ -14,19 +12,8 @@ class RedisMiddleware(BaseMiddleware):
 
         if chave is not None:
             if not self.con.exist(chave):
-                try:
-                    informacoes = AutenticacaoService.informacoes_usuario(chave)
-                    self.con.store(chave, informacoes)
-                
-                except Exception as e:
-                    arg = e.args[0]
-            
-                    if isinstance(arg, dict):
-                        return JsonResponse(
-                            arg.get('error'), 
-                            status=arg.get('status', 500)
-                        )
-                    
-                    raise e
+                token = request.headers.get('Authorization')
+                informacoes = AutenticacaoService.informacoes_usuario(token)
+                self.con.store(chave, informacoes)
 
         return self.get_response(request)
