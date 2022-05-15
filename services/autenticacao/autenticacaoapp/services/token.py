@@ -3,6 +3,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 from ..tokens import AcessoToken
 from ..models import Usuario
+from .. import exceptions
 
 class TokenService:
     @staticmethod
@@ -27,22 +28,12 @@ class TokenService:
             user_id = validated_token[claim]
             
             user = Usuario.objects.filter(**{ field: user_id }).first()
-            if user:
-                return { 
-                    'user_id': user_id 
-                }
+            if not user:
+                raise exceptions.InvalidToken
             
-            raise Exception({
-                'error': {
-                    'detail': 'Token inválido'
-                },
-                'status': 401
-            })
+            return { 
+                'user_id': user_id 
+            }
 
         except TokenError as e:
-            raise Exception({
-                'error': {
-                    'detail': str(e)
-                },
-                'status': 401
-            })
+            raise exceptions.InvalidToken(str(e))

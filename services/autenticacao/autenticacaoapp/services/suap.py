@@ -1,18 +1,11 @@
 import os
 import requests
 
+from .. import exceptions
+
 SUAP_URL_AUTENTICACAO = os.getenv('SUAP_URL_AUTENTICACAO')
 SUAP_URL_DADOS = os.getenv('SUAP_URL_DADOS')
 SUAP_TIMEOUT = int(os.getenv('SUAP_TIMEOUT'))
-
-class SuapTimeOut(Exception):
-    pass
-
-class SuapUnauthorized(Exception):
-    pass
-
-class SuapUnavailable(Exception):
-    pass
 
 class SuapService:
     def __init__(self, username, password):
@@ -34,7 +27,7 @@ class SuapService:
 
     def dados_usuario(self):
         if self.token is None:
-            raise ValueError('Não foi gerado token')
+            raise Exception('Não foi gerado token')
         
         return self.dispatch({
             'method': 'GET',
@@ -56,10 +49,10 @@ class SuapService:
             return response.json()
 
         except requests.exceptions.HTTPError:
-            raise SuapUnauthorized
+            raise exceptions.SuapUnauthorized
         
         except requests.exceptions.ConnectTimeout:
-            raise SuapTimeOut
+            raise exceptions.SuapTimeOut
         
         except requests.exceptions.ConnectionError:
-            raise SuapUnavailable
+            raise exceptions.SuapUnavailable
