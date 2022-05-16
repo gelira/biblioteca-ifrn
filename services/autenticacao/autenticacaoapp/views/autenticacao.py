@@ -4,7 +4,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 
 from .. import serializers
-from ..services import AutenticacaoService
+from ..services import AutenticacaoService, UsuarioService
 
 class AutenticacaoViewSet(ViewSet):
     @action(methods=['get', 'put'], detail=False, url_path='informacoes')
@@ -59,6 +59,24 @@ class AutenticacaoViewSet(ViewSet):
             '_id': request.user.usuario._id
         })
 
+    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[], permission_classes=[])
+    def suspensoes(self, request):
+        ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        UsuarioService.suspensoes(ser.validated_data)
+
+        return Response(status=204)
+
+    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[], permission_classes=[])
+    def abono_suspensoes(self, request):
+        ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        UsuarioService.abono_suspensoes(ser.validated_data)
+
+        return Response(status=204)
+
     def atualizar_informações(self, request):
         ser = serializers.UsuarioUpdateSerializer(
             instance=request.user.usuario,
@@ -67,4 +85,4 @@ class AutenticacaoViewSet(ViewSet):
         ser.is_valid(raise_exception=True)
         ser.save()
         
-        return Response(status=200)
+        return Response(status=204)

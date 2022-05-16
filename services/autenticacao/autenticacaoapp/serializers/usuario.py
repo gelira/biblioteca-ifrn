@@ -82,3 +82,13 @@ class UsuarioUpdateSerializer(serializers.ModelSerializer):
                 'required': True
             }
         }
+
+class SuspensaoUsuarioSerializer(serializers.Serializer):
+    usuario_id = serializers.UUIDField()
+    dias = serializers.IntegerField(min_value=1)
+
+class SuspensoesUsuariosSerializer(serializers.Serializer):
+    suspensoes = serializers.ListField(
+        child=SuspensaoUsuarioSerializer(),
+        allow_empty=False
+    )
