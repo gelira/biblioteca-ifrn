@@ -1,5 +1,6 @@
 from django.utils.timezone import localtime
 
+from .. import exceptions, serializers
 from ..models import Exemplar
 
 class ExemplarService:
@@ -23,14 +24,7 @@ class ExemplarService:
         e = Exemplar.objects.filter(codigo=codigo).first()
         
         if not e:
-            raise Exception({
-                'error': {
-                    'detail': 'Exemplar não encontrado'
-                },
-                'status': 404
-            })
+            raise exceptions.ExemplarNotFound
 
-        from ..serializers import ExemplarConsultaSerializer
-
-        ser = ExemplarConsultaSerializer(e)
+        ser = serializers.ExemplarConsultaSerializer(e)
         return ser.data

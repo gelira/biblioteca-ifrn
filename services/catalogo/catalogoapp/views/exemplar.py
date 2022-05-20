@@ -17,17 +17,5 @@ class ExemplarViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)', authentication_classes=[], permission_classes=[])
     def consulta(self, request, codigo):
-        try:
-            data = ExemplarService.consulta_codigo_exemplar(codigo)
-            return Response(data=data)
-
-        except Exception as e:
-            arg = e.args[0]
-
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'),
-                    status=arg.get('status', 500)
-                )
-
-            raise e
+        data = ExemplarService.consulta_codigo_exemplar(codigo)
+        return Response(data=data)
