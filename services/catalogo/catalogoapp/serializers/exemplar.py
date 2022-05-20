@@ -52,3 +52,9 @@ class ExemplarListSerializer(serializers.ModelSerializer):
             'referencia',
             'disponivel'
         ]
+
+class CodigosExemplaresSerializers(serializers.Serializer):
+    codigos = serializers.ListField(
+        child=serializers.CharField(max_length=8, min_length=8),
+        allow_empty=False
+    )
