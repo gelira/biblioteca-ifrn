@@ -47,20 +47,8 @@ class LivroViewSet(viewsets.ModelViewSet):
         return LivroSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            data = LivroService.busca_livro(kwargs['pk'], min=request.GET.get('min'))
-            return Response(data)
-        
-        except Exception as e:
-            arg = e.args[0]
-
-            if isinstance(arg, dict):
-                return Response(
-                    data=arg.get('error'),
-                    status=arg.get('status', 500)
-                )
-
-            raise e
+        data = LivroService.busca_livro(kwargs['pk'], sem_exemplares=request.GET.get('sem_exemplares'))
+        return Response(data)
 
     @action(methods=['put'], detail=True, url_path='foto-capa')
     def foto_capa(self, request, pk=None):
