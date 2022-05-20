@@ -1,14 +1,7 @@
-import string
-import random
-from django.db.utils import IntegrityError
 from rest_framework import serializers
 
+from ..services import ExemplarService
 from ..models import Exemplar, Livro
-
-def gerarCodigo():
-    charset = string.ascii_uppercase + string.digits
-    chars = [random.choice(charset) for i in range(8)]
-    return ''.join(chars)
 
 class ExemplarSerializer(serializers.ModelSerializer):
     livro_id = serializers.UUIDField()
@@ -21,15 +14,7 @@ class ExemplarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Livro não encontrado')
 
     def create(self, data):
-        while True:
-            try:
-                exemplar = Exemplar.objects.create(
-                    livro=data['livro'],
-                    codigo=gerarCodigo()
-                )
-                return exemplar
-            except IntegrityError:
-                continue
+        return ExemplarService.create_exemplar(data['livro'])
 
     class Meta:
         model = Exemplar
