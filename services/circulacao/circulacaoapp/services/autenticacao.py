@@ -4,27 +4,15 @@ import requests
 from .. import exceptions
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
-
 AUTENTICACAO_TIMEOUT = int(os.getenv('AUTENTICACAO_TIMEOUT'))
 
-AUTENTICACAO_TOKEN = (
-    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_TOKEN'))
-
-AUTENTICACAO_INFORMACOES_USUARIO = (
-    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_INFORMACOES_USUARIO'))
-
-AUTENTICACAO_CONSULTA_USUARIO = (
-    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_CONSULTA_USUARIO'))
-
-AUTENTICACAO_SUSPENSOES = (
-    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_SUSPENSOES'))
-
-AUTENTICACAO_ABONO_SUSPENSOES = (
-    AUTENTICACAO_SERVICE_URL + os.getenv('AUTENTICACAO_ABONO_SUSPENSOES'))
-
-AUTENTICACAO_QUEUE = os.getenv('AUTENTICACAO_QUEUE')
-
 class AutenticacaoService:
+    url_token = AUTENTICACAO_SERVICE_URL + '/token'
+    url_informacoes_usuario = AUTENTICACAO_SERVICE_URL + '/informacoes'
+    url_consulta_usuario = AUTENTICACAO_SERVICE_URL + '/consulta'
+    url_suspensoes = AUTENTICACAO_SERVICE_URL + '/suspensoes'
+    url_abono_suspensoes = AUTENTICACAO_SERVICE_URL + '/abono-suspensoes'
+
     @classmethod
     def autenticar_usuario(cls, matricula, senha):
         data_token = cls.login_suap(matricula, senha)
@@ -34,7 +22,7 @@ class AutenticacaoService:
     def login_suap(cls, username, password):
         return cls.dispatch({
             'method': 'POST',
-            'url': AUTENTICACAO_TOKEN,
+            'url': cls.url_token,
             'json': {
                 'username': username,
                 'password': password
@@ -52,7 +40,7 @@ class AutenticacaoService:
 
         if usuario_id:
             options.update({
-                'url': AUTENTICACAO_CONSULTA_USUARIO,
+                'url': cls.url_consulta_usuario,
                 'params': {
                     'id': usuario_id
                 }
@@ -60,7 +48,7 @@ class AutenticacaoService:
 
         else:
             options.update({
-                'url': AUTENTICACAO_INFORMACOES_USUARIO,
+                'url': cls.url_informacoes_usuario,
                 'headers': {
                     'Authorization': f'JWT {token}'
                 }
@@ -72,7 +60,7 @@ class AutenticacaoService:
     def suspensoes(cls, suspensoes):
         return cls.dispatch({
             'method': 'POST',
-            'url': AUTENTICACAO_SUSPENSOES,
+            'url': cls.url_suspensoes,
             'json': suspensoes
         })
     
@@ -80,7 +68,7 @@ class AutenticacaoService:
     def abono_suspensoes(cls, suspensoes):
         return cls.dispatch({
             'method': 'POST',
-            'url': AUTENTICACAO_ABONO_SUSPENSOES,
+            'url': cls.url_abono_suspensoes,
             'json': suspensoes
         })
 
