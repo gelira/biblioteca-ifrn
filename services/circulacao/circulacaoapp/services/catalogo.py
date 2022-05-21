@@ -16,14 +16,16 @@ class CatalogoService:
 
     @classmethod
     def consulta_codigo_exemplar(cls, codigo):
-        return cls.dispatch({
+        response = cls.dispatch({
             'url': f'{cls.url_consulta_exemplar}/{codigo}',
             'method': 'GET'
         })
 
+        return response.json()
+
     @classmethod
     def exemplares_emprestados(cls, codigos):
-        return cls.dispatch({
+        cls.dispatch({
             'url': cls.url_exemplares_emprestados,
             'method': 'PATCH',
             'json': {
@@ -33,7 +35,7 @@ class CatalogoService:
 
     @classmethod
     def exemplares_devolvidos(cls, codigos):
-        return cls.dispatch({
+        cls.dispatch({
             'url': cls.url_exemplares_devolvidos,
             'method': 'PATCH',
             'json': {
@@ -43,11 +45,13 @@ class CatalogoService:
 
     @classmethod
     def busca_livro(cls, livro_id, **params):
-        return cls.dispatch({
+        response = cls.dispatch({
             'url': f'{cls.url_buscar_livro}/{livro_id}',
             'method': 'GET',
             'params': params
         })
+
+        return response.json()
 
     @classmethod
     def dispatch(cls, options):
@@ -58,7 +62,7 @@ class CatalogoService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
             raise exceptions.ServiceBadRequest

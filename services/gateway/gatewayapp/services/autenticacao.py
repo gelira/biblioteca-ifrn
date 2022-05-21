@@ -12,7 +12,7 @@ class AutenticacaoService:
 
     @classmethod
     def verificar_token(cls, token):
-        return cls.dispatch({
+        response = cls.dispatch({
             'method': 'GET',
             'url': cls.url_verificar_token,
             'headers': {
@@ -20,15 +20,19 @@ class AutenticacaoService:
             }
         })
 
+        return response.json()
+
     @classmethod
     def informacoes_usuario(cls, token):
-        return cls.dispatch({
+        response = cls.dispatch({
             'method': 'GET',
             'url': cls.url_informacoes_usuario,
             'headers': {
                 'Authorization': f'JWT {token}'
             }
         })
+
+        return response.json()
 
     @classmethod
     def dispatch(self, options):
@@ -39,7 +43,7 @@ class AutenticacaoService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
             raise exceptions.ServiceUnauthorized

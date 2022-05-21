@@ -12,7 +12,7 @@ class CatalogoService:
 
     @classmethod
     def atualizar_nota(cls, livro_id, nota):
-        return cls.dispatch({
+        cls.dispatch({
             'url': cls.url_atualizar_nota,
             'method': 'PATCH',
             'json': {
@@ -23,13 +23,15 @@ class CatalogoService:
 
     @classmethod
     def busca_livro(cls, livro_id):
-        return cls.dispatch({
+        response = cls.dispatch({
             'url': cls.url_buscar_livro + livro_id,
             'method': 'GET',
             'params': {
                 'sem_exemplares': True
             }
         })
+
+        return response.json()
 
     @classmethod
     def dispatch(cls, options):
@@ -40,7 +42,7 @@ class CatalogoService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
             raise exceptions.ServiceBadRequest

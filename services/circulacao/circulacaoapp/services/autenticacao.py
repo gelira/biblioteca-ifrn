@@ -20,7 +20,7 @@ class AutenticacaoService:
 
     @classmethod
     def login_suap(cls, username, password):
-        return cls.dispatch({
+        response = cls.dispatch({
             'method': 'POST',
             'url': cls.url_token,
             'json': {
@@ -28,6 +28,8 @@ class AutenticacaoService:
                 'password': password
             }
         })
+
+        return response.json()
 
     @classmethod
     def informacoes_usuario(cls, usuario_id=None, token=None):
@@ -54,11 +56,13 @@ class AutenticacaoService:
                 }
             })
 
-        return cls.dispatch(options)
+        response = cls.dispatch(options)
+
+        return response.json()
 
     @classmethod
     def suspensoes(cls, suspensoes):
-        return cls.dispatch({
+        cls.dispatch({
             'method': 'POST',
             'url': cls.url_suspensoes,
             'json': suspensoes
@@ -66,7 +70,7 @@ class AutenticacaoService:
     
     @classmethod
     def abono_suspensoes(cls, suspensoes):
-        return cls.dispatch({
+        cls.dispatch({
             'method': 'POST',
             'url': cls.url_abono_suspensoes,
             'json': suspensoes
@@ -81,7 +85,7 @@ class AutenticacaoService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
             raise exceptions.ServiceUnauthorized

@@ -12,13 +12,15 @@ class CirculacaoService:
     @classmethod
     def get_emprestimo(cls, emprestimo_id, usuario_id):
         try:
-            return cls.dispatch({
+            response = cls.dispatch({
                 'url': f'{cls.url_emprestimos}/{emprestimo_id}',
                 'method': 'GET',
                 'headers': {
                     'X-Usuario-Id': usuario_id
                 }
             })
+
+            return response.json()
 
         except:
             return None
@@ -39,7 +41,7 @@ class CirculacaoService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
             raise exceptions.ServiceBadRequest
