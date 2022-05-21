@@ -143,6 +143,10 @@ class FotoCapaLivroSerializer(serializers.Serializer):
             }
         }
 
+class AtualizacaoNotaLivroSerializer(serializers.Serializer):
+    livro_id = serializers.UUIDField()
+    nota = serializers.IntegerField()
+
 # Este serializer encontra-se no módulo de livros para resolver
 # um problema de importação cíclica que estava acontecendo por
 # causa do LivroListSerializer

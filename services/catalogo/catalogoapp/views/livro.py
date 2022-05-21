@@ -4,18 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..models import Livro
-from ..serializers import (
-    LivroSerializer, 
-    LivroListSerializer,
-    LivroPesquisaSerializer,
-    FotoCapaLivroSerializer
-)
 from ..permissions import (
     AutenticadoPermissao,
     LivroCatalogarPermissao,
     LivroModificarPermissao
 )
 from ..services import LivroService
+from .. import serializers
 
 class LivroViewSet(viewsets.ModelViewSet):
     queryset = Livro.objects.all()
@@ -39,12 +34,12 @@ class LivroViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return LivroListSerializer
+            return serializers.LivroListSerializer
         
         if self.action == 'pesquisa':
-            return LivroPesquisaSerializer
+            return serializers.LivroPesquisaSerializer
         
-        return LivroSerializer
+        return serializers.LivroSerializer
 
     def retrieve(self, request, *args, **kwargs):
         data = LivroService.busca_livro(kwargs['pk'], sem_exemplares=request.GET.get('sem_exemplares'))
@@ -53,14 +48,28 @@ class LivroViewSet(viewsets.ModelViewSet):
     @action(methods=['put'], detail=True, url_path='foto-capa')
     def foto_capa(self, request, pk=None):
         livro = self.get_object()
-        serializer = FotoCapaLivroSerializer(data=request.data, instance=livro)
+        serializer = serializers.FotoCapaLivroSerializer(data=request.data, instance=livro)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200)
+
+        return Response(status=204)
 
     @action(methods=['post'], detail=False, url_path='pesquisa')
     def pesquisa(self, request):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
         return Response(data=serializer.validated_data, status=200)
+
+    @action(methods=['patch'], detail=False, url_path='atualizar-nota', authentication_classes=[], permission_classes=[])
+    def atualizar_nota(self, request):
+        ser = serializers.AtualizacaoNotaLivroSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        livro_id = ser.validated_data['livro_id']
+        nota = ser.validated_data['nota']
+
+        LivroService.atualizar_nota(livro_id, nota)
+
+        return Response(status=204)
