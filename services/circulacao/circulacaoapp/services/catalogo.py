@@ -9,15 +9,15 @@ CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 CATALOGO_TIMEOUT = int(os.getenv('CATALOGO_TIMEOUT'))
 
 class CatalogoService:
-    url_consulta_exemplar = CATALOGO_SERVICE_URL + '/exemplares/consulta/'
+    url_consulta_exemplar = CATALOGO_SERVICE_URL + '/exemplares/consulta'
     url_exemplares_emprestados = CATALOGO_SERVICE_URL + '/exemplares/emprestados'
     url_exemplares_devolvidos = CATALOGO_SERVICE_URL + '/exemplares/devolvidos'
-    url_buscar_livro = CATALOGO_SERVICE_URL + '/livros/'
+    url_buscar_livro = CATALOGO_SERVICE_URL + '/livros'
 
     @classmethod
     def consulta_codigo_exemplar(cls, codigo):
         return cls.dispatch({
-            'url': cls.url_consulta_exemplar + codigo,
+            'url': f'{cls.url_consulta_exemplar}/{codigo}',
             'method': 'GET'
         })
 
@@ -44,7 +44,7 @@ class CatalogoService:
     @classmethod
     def busca_livro(cls, livro_id, **params):
         return cls.dispatch({
-            'url': cls.url_buscar_livro + livro_id,
+            'url': f'{cls.url_buscar_livro}/{livro_id}',
             'method': 'GET',
             'params': params
         })
