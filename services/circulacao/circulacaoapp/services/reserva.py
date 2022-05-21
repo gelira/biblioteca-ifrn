@@ -108,7 +108,7 @@ class ReservaService:
     @classmethod
     def enviar_reserva_disponivel(cls, contexto):
         livro_id = contexto['livro_id']
-        livro = CatalogoService.busca_livro(livro_id, min=True)
+        livro = CatalogoService.busca_livro(livro_id, sem_exemplares=True)
         
         contexto.update({
             'titulo_livro': livro['titulo']
@@ -119,7 +119,7 @@ class ReservaService:
     @classmethod
     def enviar_reserva_cancelada(cls, contexto):
         livro_id = contexto['livro_id']
-        livro = CatalogoService.busca_livro(livro_id, min=True)
+        livro = CatalogoService.busca_livro(livro_id, sem_exemplares=True)
 
         contexto.update({
             'titulo_livro': livro['titulo']
@@ -169,13 +169,13 @@ class ReservaService:
 
     @classmethod
     def enviar_comprovante_reserva(cls, contexto):
-        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        livro = CatalogoService.busca_livro(contexto['livro_id'], sem_exemplares=True)
         contexto['titulo_livro'] = livro['titulo']
         NotificacaoService.comprovante_reserva(contexto)
 
     @classmethod
     def enviar_comprovante_reserva_cancelada(cls, contexto):
-        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        livro = CatalogoService.busca_livro(contexto['livro_id'], sem_exemplares=True)
         contexto['titulo_livro'] = livro['titulo']
         NotificacaoService.comprovante_reserva_cancelada(contexto)
 

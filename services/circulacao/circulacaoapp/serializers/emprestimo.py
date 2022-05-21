@@ -113,8 +113,9 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                     'data_limite': dl,
                 })
 
+            CatalogoService.exemplares_emprestados(data['codigos'])
+
         self.enviar_comprovante(usuario['_id'], exemplares_email)
-        CatalogoService.exemplares_emprestados(data['codigos'])
         EmprestimoService.call_agendar_alertas_emprestimo(alertas)
 
         return emprestimos
@@ -319,7 +320,8 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                 AutenticacaoService.suspensoes(list(map(
                     lambda x: ({ 'usuario_id': x, 'dias': suspensoes[x] }), suspensoes)))
 
-        CatalogoService.exemplares_devolvidos(codigos)
+            CatalogoService.exemplares_devolvidos(codigos)
+            
         DevolucaoService.call_enviar_comprovantes_devolucao(comprovantes)
         ReservaService.call_proximas_reservas(livros)
 

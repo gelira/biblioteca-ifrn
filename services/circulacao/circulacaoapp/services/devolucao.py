@@ -12,7 +12,7 @@ class DevolucaoService:
     @classmethod
     def enviar_comprovante_devolucao(cls, contexto):
         livro_id = contexto['livro_id']
-        livro = CatalogoService.busca_livro(livro_id, min=True)
+        livro = CatalogoService.busca_livro(livro_id, sem_exemplares=True)
 
         contexto.update({
             'titulo': livro['titulo']
