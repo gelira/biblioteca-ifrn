@@ -1,12 +1,14 @@
 from rest_framework import serializers
 
+from .. import exceptions
 from ..models import (
     Avaliacao,
     Tag
 )
 from ..services import (
     CirculacaoService,
-    CatalogoService
+    CatalogoService,
+    AvaliacaoService
 )
 
 class AvaliacaoCreateSerializer(serializers.ModelSerializer):
@@ -43,23 +45,14 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         return retorno
 
     def validar_emprestimo(self, emprestimo_id):
-        if Avaliacao.objects.filter(emprestimo_id=emprestimo_id).exists():
-            raise serializers.ValidationError('Empréstimo já avaliado')
-
         usuario_id = self.context['request'].user['_id']
         
         try:
-            emprestimo = CirculacaoService.get_emprestimo(emprestimo_id, usuario_id)
-            if not emprestimo:
-                raise serializers.ValidationError('Empréstimo não encontrado')
-
-            if emprestimo['avaliado']:
-                raise serializers.ValidationError('Empréstimo já avaliado')
-
+            emprestimo = AvaliacaoService.validar_emprestimo(emprestimo_id, usuario_id)
             return emprestimo['livro_id']
 
-        except serializers.ValidationError as e:
-            raise e
+        except exceptions.InvalidEmprestimo as e:
+            raise serializers.ValidationError(str(e))
 
         except:
             raise serializers.ValidationError('Erro de comunicação entre os serviços')
