@@ -35,3 +35,6 @@ class UserNotFound(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = 'Usuário não encontrado'
     default_code = 'user_not_found'
+
+class InvalidCodigoPromocao(Exception):
+    pass
