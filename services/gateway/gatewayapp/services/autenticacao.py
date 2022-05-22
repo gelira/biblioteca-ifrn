@@ -1,23 +1,55 @@
 import os
-from gateway.celery import app
+import requests
 
-AUTENTICACAO_QUEUE = os.getenv('AUTENTICACAO_QUEUE')
+from .. import exceptions
+
+AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
+AUTENTICACAO_TIMEOUT = int(os.getenv('AUTENTICACAO_TIMEOUT'))
 
 class AutenticacaoService:
-    @classmethod
-    def verificar_token(cls, token):
-        task = app.send_task(
-            'autenticacao.verificar_token', 
-            args=[token], 
-            queue=AUTENTICACAO_QUEUE
-        )
-        return task.get()
+    url_verificar_token = AUTENTICACAO_SERVICE_URL + '/verificar'
+    url_informacoes_usuario = AUTENTICACAO_SERVICE_URL + '/informacoes'
 
     @classmethod
-    def informacoes_usuario(cls, usuario_id):
-        task = app.send_task(
-            'autenticacao.informacoes_usuario', 
-            args=[usuario_id], 
-            queue=AUTENTICACAO_QUEUE
-        )
-        return task.get()
+    def verificar_token(cls, token):
+        response = cls.dispatch({
+            'method': 'GET',
+            'url': cls.url_verificar_token,
+            'headers': {
+                'Authorization': f'JWT {token}'
+            }
+        })
+
+        return response.json()
+
+    @classmethod
+    def informacoes_usuario(cls, token):
+        response = cls.dispatch({
+            'method': 'GET',
+            'url': cls.url_informacoes_usuario,
+            'headers': {
+                'Authorization': f'JWT {token}'
+            }
+        })
+
+        return response.json()
+
+    @classmethod
+    def dispatch(self, options):
+        method = options.pop('method')
+        url = options.pop('url')
+        options['timeout'] = AUTENTICACAO_TIMEOUT
+        
+        try:
+            response = requests.request(method, url, **options)
+            response.raise_for_status()
+            return response
+
+        except requests.exceptions.HTTPError:
+            raise exceptions.ServiceUnauthorized
+        
+        except requests.exceptions.ConnectTimeout:
+            raise exceptions.ServiceTimeOut
+        
+        except requests.exceptions.ConnectionError:
+            raise exceptions.ServiceUnavailable

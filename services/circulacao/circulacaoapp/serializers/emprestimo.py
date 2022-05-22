@@ -2,6 +2,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
 from ..utils import calcular_data_limite
 from ..models import (
@@ -112,8 +113,9 @@ class EmprestimoCreateSerializer(serializers.Serializer):
                     'data_limite': dl,
                 })
 
+            CatalogoService.exemplares_emprestados(data['codigos'])
+
         self.enviar_comprovante(usuario['_id'], exemplares_email)
-        CatalogoService.exemplares_emprestados(data['codigos'])
         EmprestimoService.call_agendar_alertas_emprestimo(alertas)
 
         return emprestimos
@@ -125,13 +127,8 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         try:
             return AutenticacaoService.autenticar_usuario(matricula, senha)
 
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                raise serializers.ValidationError(arg.get('error'))
-            
-            raise e
+        except APIException:
+            raise serializers.ValidationError('Não foi possível validar as credenciais do usuário')
 
     def validar_codigos(self, codigos, livros_emprestados, usuario_id):
         try:
@@ -319,10 +316,12 @@ class DevolucaoEmprestimosSerializer(serializers.Serializer):
                     'referencia': emprestimo.exemplar_referencia,
                 })
 
-        if suspensoes:
-            AutenticacaoService.suspensoes(suspensoes)
+            if suspensoes:
+                AutenticacaoService.suspensoes(list(map(
+                    lambda x: ({ 'usuario_id': x, 'dias': suspensoes[x] }), suspensoes)))
 
-        CatalogoService.exemplares_devolvidos(codigos)
+            CatalogoService.exemplares_devolvidos(codigos)
+            
         DevolucaoService.call_enviar_comprovantes_devolucao(comprovantes)
         ReservaService.call_proximas_reservas(livros)
 
@@ -455,12 +454,7 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
 
     def buscar_usuario(self, usuario_id):
         try:
-            return AutenticacaoService.informacoes_usuario(usuario_id)
+            return AutenticacaoService.informacoes_usuario(usuario_id=usuario_id)
 
-        except Exception as e:
-            arg = e.args[0]
-            
-            if isinstance(arg, dict):
-                raise serializers.ValidationError(arg.get('error'))
-            
-            raise e
+        except APIException:
+            raise serializers.ValidationError('Não foi possível obter informações do usuário')

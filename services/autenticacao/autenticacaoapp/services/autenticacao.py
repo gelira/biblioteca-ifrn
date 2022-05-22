@@ -1,8 +1,9 @@
 import uuid
 from django.contrib.auth import get_user_model, authenticate
 
+from .. import exceptions
 from ..models import Usuario, Perfil
-from .suap import SuapService, SuapUnauthorized, SuapTimeOut, SuapUnavailable
+from .suap import SuapService
 from .token import TokenService
 from .notificacao import NotificacaoService
 
@@ -12,40 +13,7 @@ class AutenticacaoService:
     @classmethod
     def login_suap(cls, username, password):
         suap = SuapService(username, password)
-
-        try:
-            suap.autenticar()
-
-        except SuapUnauthorized:
-            raise Exception({
-                'error': {
-                    'detail': 'Credenciais inválidas',
-                },
-                'status': 401
-            })
-
-        except SuapTimeOut:
-            raise Exception({
-                'error': {
-                    'detail': 'Serviço demorou demais para responder'
-                },
-                'status': 408
-            })
-
-        except SuapUnavailable:
-            raise Exception({
-                'error': {
-                    'detail': 'Serviço indisponível'
-                },
-                'status': 503
-            })
-
-        except Exception as e:
-            raise Exception({
-                'error': {
-                    'detail': str(e)
-                }
-            })
+        suap.autenticar()
         
         user = cls.get_or_save_usuario(suap)
         token = TokenService.gerar_token(user)
@@ -58,12 +26,7 @@ class AutenticacaoService:
     def login_local(cls, username, password):
         user = authenticate(username=username, password=password)
         if not user:
-            raise Exception({
-                'error': {
-                    'detail': 'Credenciais inválidas',
-                },
-                'status': 401
-            })
+            raise exceptions.InvalidCredentials
 
         token = TokenService.gerar_token(user)
 
@@ -83,35 +46,8 @@ class AutenticacaoService:
         return user
         
     @classmethod
-    def save_usuario(cls, suap):
-        dados = None
-        
-        try:
-            dados = suap.dados_usuario()
-        
-        except SuapUnauthorized:
-            raise Exception({
-                'error': {
-                    'detail': 'Credenciais inválidas'
-                },
-                'status': 401
-            })
-
-        except SuapTimeOut:
-            raise Exception({
-                'error': {
-                    'detail': 'Serviço demorou demais para responder'
-                },
-                'status': 408
-            })
-
-        except SuapUnavailable:
-            raise Exception({
-                'error': {
-                    'detail': 'Serviço indisponível'
-                },
-                'status': 503
-            })
+    def save_usuario(cls, suap):    
+        dados = suap.dados_usuario()
 
         nome = dados['nome_usual']
         matricula = dados['matricula']
@@ -148,64 +84,30 @@ class AutenticacaoService:
         try:
             uuid.UUID(usuario_id)
         except:
-            raise Exception({
-                'error': {
-                    'detail': 'UUID inválido'
-                },
-                'status': 400
-            })
+            raise exceptions.InvalidUUID
 
         usuario = Usuario.objects.filter(_id=usuario_id).first()
         if not usuario:
-            raise Exception({
-                'error': {
-                    'detail': 'Usuário não encontrado'
-                },
-                'status': 404
-            })
+            raise exceptions.UserNotFound
 
-        from ..serializers import UsuarioSerializer
-
-        ser = UsuarioSerializer(usuario)
-        return ser.data
+        return usuario
 
     @classmethod
     def consulta_usuario(cls, usuario_id, matricula=None):
-        usuario = None
-        
         if matricula:
             user = User.objects.filter(username=matricula).first()
             if not user:
-                raise Exception({
-                    'error': {
-                        'detail': 'Usuário não encontrado'
-                    },
-                    'status': 404
-                })
+                raise exceptions.UserNotFound
             
-            usuario = user.usuario
+            return user.usuario
 
-        else:
-            try:
-                uuid.UUID(usuario_id)
-            except:
-                raise Exception({
-                    'error': {
-                        'detail': 'UUID inválido'
-                    },
-                    'status': 400
-                })
+        try:
+            uuid.UUID(usuario_id)
+        except:
+            raise exceptions.InvalidUUID
 
-            usuario = Usuario.objects.filter(_id=usuario_id).first()
-            if not usuario:
-                raise Exception({
-                    'error': {
-                        'detail': 'Usuário não encontrado'
-                    },
-                    'status': 404
-                })
+        usuario = Usuario.objects.filter(_id=usuario_id).first()
+        if not usuario:
+            raise exceptions.UserNotFound
 
-        from ..serializers import UsuarioConsultaSerializer
-
-        ser = UsuarioConsultaSerializer(usuario)
-        return ser.data
+        return usuario

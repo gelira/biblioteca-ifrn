@@ -44,16 +44,19 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, data):
-        abono = None
+        usuarios = data['usuarios']
+
         with transaction.atomic():
             abono = Abono.objects.create(
                 usuario_id=data['usuario_id'],
                 justificativa=data['justificativa']
             )
-            Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
 
-        AutenticacaoService.abono_suspensoes(data['usuarios'])
-        return abono
+            Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
+            AutenticacaoService.abono_suspensoes(list(map(
+                lambda x: ({ 'usuario_id': x, 'dias': usuarios[x] }), usuarios)))
+        
+            return abono
     
     class Meta:
         model = Abono

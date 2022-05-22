@@ -1,18 +1,11 @@
 import os
 import requests
 
+from .. import exceptions
+
 SUAP_URL_AUTENTICACAO = os.getenv('SUAP_URL_AUTENTICACAO')
 SUAP_URL_DADOS = os.getenv('SUAP_URL_DADOS')
 SUAP_TIMEOUT = int(os.getenv('SUAP_TIMEOUT'))
-
-class SuapTimeOut(Exception):
-    pass
-
-class SuapUnauthorized(Exception):
-    pass
-
-class SuapUnavailable(Exception):
-    pass
 
 class SuapService:
     def __init__(self, username, password):
@@ -21,7 +14,7 @@ class SuapService:
         self.token = None
 
     def autenticar(self):
-        retorno = self.dispatch({
+        response = self.dispatch({
             'method': 'POST',
             'url': SUAP_URL_AUTENTICACAO,
             'json': {
@@ -29,14 +22,17 @@ class SuapService:
                 'password': self.password
             }
         })
-        self.token = retorno['token']
-        return retorno
+
+        data = response.json()
+
+        self.token = data['token']
+        return data
 
     def dados_usuario(self):
         if self.token is None:
-            raise ValueError('Não foi gerado token')
+            raise Exception('Não foi gerado token')
         
-        return self.dispatch({
+        response = self.dispatch({
             'method': 'GET',
             'url': SUAP_URL_DADOS,
             'headers': {
@@ -44,6 +40,8 @@ class SuapService:
                 'Accept': 'application/json'
             }
         })
+
+        return response.json()
 
     def dispatch(self, options):
         method = options.pop('method')
@@ -53,13 +51,13 @@ class SuapService:
         try:
             response = requests.request(method, url, **options)
             response.raise_for_status()
-            return response.json()
+            return response
 
         except requests.exceptions.HTTPError:
-            raise SuapUnauthorized
+            raise exceptions.SuapUnauthorized
         
         except requests.exceptions.ConnectTimeout:
-            raise SuapTimeOut
+            raise exceptions.SuapTimeOut
         
         except requests.exceptions.ConnectionError:
-            raise SuapUnavailable
+            raise exceptions.SuapUnavailable

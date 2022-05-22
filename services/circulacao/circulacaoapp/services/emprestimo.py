@@ -42,7 +42,7 @@ class EmprestimoService:
 
     @classmethod
     def enviar_comprovante_renovacao(cls, contexto):
-        livro = CatalogoService.busca_livro(contexto['livro_id'], min=True)
+        livro = CatalogoService.busca_livro(contexto['livro_id'], sem_exemplares=True)
         contexto['titulo'] = livro['titulo']
         NotificacaoService.comprovante_renovacao(contexto)
 

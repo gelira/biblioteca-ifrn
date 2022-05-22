@@ -3,6 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from ..services import EmprestimoService
 from ..models import Emprestimo
 from ..serializers import (
     EmprestimoRetrieveSerializer,
@@ -33,10 +34,13 @@ class EmprestimoViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'devolucoes':
             return DevolucaoEmprestimosSerializer
+        
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
+        
         if self.action == 'retrieve':
             return EmprestimoRetrieveSerializer
+        
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
@@ -48,6 +52,7 @@ class EmprestimoViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
         return Response(status=200)
 
     @action(methods=['post'], detail=False, url_path='devolucoes')
@@ -55,12 +60,20 @@ class EmprestimoViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
         return Response(status=200)
 
     @action(methods=['post'], detail=False, url_path='renovacoes', permission_classes=[AutenticadoPermissao])
     def renovacoes(self, request):
         request.data['faz_emprestimo'] = FazerEmprestimoPermissao().has_permission(request, self)
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
         return Response(status=200)
+
+    @action(methods=['patch'], detail=True, url_path='avaliado', authentication_classes=[], permission_classes=[])
+    def emprestimo_avaliado(self, request, pk):
+        EmprestimoService.emprestimo_avaliado(pk)
+        return Response(status=204)

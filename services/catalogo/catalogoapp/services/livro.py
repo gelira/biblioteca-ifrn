@@ -6,6 +6,7 @@ from django.db.models import F
 from django.utils.timezone import localtime
 from catalogo.celery import app
 
+from .. import exceptions, serializers
 from ..models import (
     Livro,
     FotoCapa,
@@ -21,20 +22,12 @@ class LivroService:
         livro = Livro.objects.filter(_id=livro_id).first()
 
         if not livro:
-            raise Exception({
-                'error': {
-                    'detail': 'Livro não encontrado'
-                },
-                'status': 404
-            })
+            raise exceptions.LivroNotFound
 
-        from ..serializers import (
-            LivroSerializer,
-            LivroRetrieveSerializer
-        )
-
-        serializer_class = LivroSerializer if kwargs.get('min') \
-            else LivroRetrieveSerializer
+        if kwargs.get('sem_exemplares'):
+            serializer_class = serializers.LivroSerializer
+        else: 
+            serializer_class = serializers.LivroRetrieveSerializer
         
         ser = serializer_class(livro)
         return ser.data

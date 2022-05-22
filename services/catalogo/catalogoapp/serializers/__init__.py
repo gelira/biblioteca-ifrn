@@ -4,10 +4,12 @@ from .livro import (
     LivroRetrieveSerializer,
     LivroPesquisaSerializer,
     FotoCapaLivroSerializer,
-    ExemplarConsultaSerializer
+    ExemplarConsultaSerializer,
+    AtualizacaoNotaLivroSerializer
 )
 from .indexador import IndexadorSerializer
 from .exemplar import (
-    ExemplarSerializer
+    ExemplarSerializer,
+    CodigosExemplaresSerializers
 )
 from .localizacao_fisica import LocalizacaoFisicaSerializer
