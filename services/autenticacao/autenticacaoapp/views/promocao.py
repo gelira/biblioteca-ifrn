@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
 
 from ..models import CodigoPromocao
 from ..serializers import (
@@ -39,4 +40,4 @@ class PromocaoViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
