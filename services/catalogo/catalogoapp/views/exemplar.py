@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework import status
 
 from .. import serializers
 from ..models import Exemplar
@@ -25,14 +26,14 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         codigos = self.codigos(request)
         ExemplarService.exemplares_emprestados(codigos)
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['patch'], detail=False, url_path='devolvidos', authentication_classes=[], permission_classes=[])
     def devolvidos(self, request):
         codigos = self.codigos(request)
         ExemplarService.exemplares_devolvidos(codigos)
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def codigos(self, request):
         ser = serializers.CodigosExemplaresSerializers(data=request.data)

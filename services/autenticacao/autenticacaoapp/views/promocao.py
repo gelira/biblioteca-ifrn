@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
 
 from ..models import CodigoPromocao
 from ..serializers import (
@@ -21,6 +22,7 @@ class PromocaoViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'utilizar_codigo':
             return UtilizarCodigoPromocaoSerializer
+
         return CodigoPromocaoCreateSerializer
 
     def get_permissions(self):
@@ -29,6 +31,7 @@ class PromocaoViewSet(viewsets.ModelViewSet):
                 AutenticadoPermissao(),
                 PromoverBolsistaPermissao()
             ]
+
         return super().get_permissions()
 
     @action(methods=['patch'], detail=False, url_path='utilizar')
@@ -36,4 +39,5 @@ class PromocaoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

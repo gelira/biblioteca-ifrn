@@ -15,3 +15,6 @@ class ServiceUnavailable(APIException):
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     default_detail = 'Serviço indisponível'
     default_code = 'service_unavailable'
+
+class InvalidEmprestimo(Exception):
+    pass
