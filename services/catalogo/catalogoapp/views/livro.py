@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -52,7 +52,7 @@ class LivroViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post'], detail=False, url_path='pesquisa')
     def pesquisa(self, request):
@@ -60,7 +60,7 @@ class LivroViewSet(viewsets.ModelViewSet):
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        return Response(data=serializer.validated_data, status=200)
+        return Response(data=serializer.validated_data)
 
     @action(methods=['patch'], detail=False, url_path='atualizar-nota', authentication_classes=[], permission_classes=[])
     def atualizar_nota(self, request):
@@ -72,4 +72,4 @@ class LivroViewSet(viewsets.ModelViewSet):
 
         LivroService.atualizar_nota(livro_id, nota)
 
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)

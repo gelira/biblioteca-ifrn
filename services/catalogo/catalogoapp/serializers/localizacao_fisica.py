@@ -13,11 +13,10 @@ class LocalizacaoFisicaSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Livro não encontrado')
 
     def create(self, data):
-        l = LocalizacaoFisica.objects.create(
+        return LocalizacaoFisica.objects.create(
             livro=data['livro'],
             localizacao=data['localizacao']
         )
-        return l
 
     class Meta:
         model = LocalizacaoFisica

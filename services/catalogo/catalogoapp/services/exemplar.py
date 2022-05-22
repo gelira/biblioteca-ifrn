@@ -17,11 +17,10 @@ class ExemplarService:
     def create_exemplar(cls, livro):
         while True:
             try:
-                exemplar = Exemplar.objects.create(
+                return Exemplar.objects.create(
                     livro=livro,
                     codigo=cls.gerar_codigo()
                 )
-                return exemplar
 
             except IntegrityError:
                 continue
