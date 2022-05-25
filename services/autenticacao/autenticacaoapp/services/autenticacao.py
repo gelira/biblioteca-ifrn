@@ -28,6 +28,9 @@ class AutenticacaoService:
         if not user:
             raise exceptions.InvalidCredentials
 
+        if user.usuario.vinculo == 'service':
+            raise exceptions.InvalidCredentials
+
         token = TokenService.gerar_token(user)
 
         return {
