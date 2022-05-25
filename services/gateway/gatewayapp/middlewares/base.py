@@ -3,7 +3,6 @@ from rest_framework.exceptions import APIException
 
 ALLOW_URLS = [
     '/autenticacao',
-    '/catalogo/media',
 ]
 
 class BaseMiddleware:
