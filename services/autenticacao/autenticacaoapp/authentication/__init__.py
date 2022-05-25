@@ -1,1 +1,1 @@
-from .autenticacao_redis import RedisAutenticacao
+from .jwt import AutenticacaoJWT

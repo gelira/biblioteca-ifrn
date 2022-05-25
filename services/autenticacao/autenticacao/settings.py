@@ -137,7 +137,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'autenticacaoapp.jwt.AutenticacaoJWT',
+        'autenticacaoapp.authentication.AutenticacaoJWT',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
