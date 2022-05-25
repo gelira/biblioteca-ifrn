@@ -138,6 +138,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'autenticacaoapp.authentication.AutenticacaoJWT',
+        'autenticacaoapp.authentication.HeaderUsuarioIdAutenticacao',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
