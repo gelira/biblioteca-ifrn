@@ -9,7 +9,11 @@ class AutenticacaoProxyView(BaseProxyView):
 
     def get_request_headers(self):
         headers = super(BaseProxyView, self).get_request_headers()
+        headers.pop('X-Usuario-Id', None)
+        
         authorization = headers.get('Authorization')
+
         if authorization is not None:
-            headers['Authorization'] = 'JWT {}'.format(authorization)
+            headers['Authorization'] = f'JWT {authorization}'
+        
         return headers
