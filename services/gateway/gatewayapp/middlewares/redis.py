@@ -11,9 +11,14 @@ class RedisMiddleware(BaseMiddleware):
         chave = request.META.get('_id')
 
         if chave is not None:
-            if not self.con.exist(chave):
-                token = request.headers.get('Authorization')
-                informacoes = AutenticacaoService.informacoes_usuario(token)
-                self.con.store(chave, informacoes)
+            try:
+                if not self.con.exist(chave):
+                    token = request.headers.get('Authorization')
+                    informacoes = AutenticacaoService.informacoes_usuario(token)
+            
+                    self.con.store(chave, informacoes)
+            
+            except:
+                pass
 
         return self.get_response(request)
