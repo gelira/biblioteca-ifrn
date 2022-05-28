@@ -9,7 +9,10 @@ class RedisAutenticacao(BaseAuthentication):
 
         usuario_id = request.META.get('HTTP_X_USUARIO_ID')
         if usuario_id is not None:
-            usuario = cliente_redis.get(usuario_id)
+            try:
+                usuario = cliente_redis.get(usuario_id)
+            except:
+                pass
             
         if usuario is None:
             return None
