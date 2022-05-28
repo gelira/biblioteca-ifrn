@@ -12,7 +12,7 @@ class RedisAutenticacao(BaseAuthentication):
             try:
                 usuario = cliente_redis.get(usuario_id)
             except:
-                pass
+                request.META['redis_error'] = True
             
         if usuario is None:
             return None
