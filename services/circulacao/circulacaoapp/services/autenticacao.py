@@ -61,6 +61,18 @@ class AutenticacaoService:
         return response.json()
 
     @classmethod
+    def consulta_usuario(cls, usuario_id):
+        response = cls.dispatch({
+            'method': 'GET',
+            'url': cls.url_consulta_usuario,
+            'params': {
+                'id': usuario_id
+            }
+        })
+
+        return response.json()
+
+    @classmethod
     def suspensoes(cls, suspensoes):
         cls.dispatch({
             'method': 'POST',
