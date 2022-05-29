@@ -3,7 +3,7 @@ import requests
 
 from .. import exceptions
 
-CATALOGO_QUEUE = os.getenv('CATALOGO_QUEUE')
+CIRCULACAO_USUARIO_ID = os.getenv('CIRCULACAO_USUARIO_ID')
 
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 CATALOGO_TIMEOUT = int(os.getenv('CATALOGO_TIMEOUT'))
@@ -28,6 +28,9 @@ class CatalogoService:
         cls.dispatch({
             'url': cls.url_exemplares_emprestados,
             'method': 'PATCH',
+            'headers': {
+                'X-Usuario-Id': CIRCULACAO_USUARIO_ID,
+            },
             'json': {
                 'codigos': codigos
             }
@@ -38,6 +41,9 @@ class CatalogoService:
         cls.dispatch({
             'url': cls.url_exemplares_devolvidos,
             'method': 'PATCH',
+            'headers': {
+                'X-Usuario-Id': CIRCULACAO_USUARIO_ID,
+            },
             'json': {
                 'codigos': codigos
             }
