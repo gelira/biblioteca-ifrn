@@ -136,7 +136,8 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'catalogoapp.authentication.RedisAutenticacao'
+        'catalogoapp.authentication.RedisAutenticacao',
+        'catalogoapp.authentication.HeaderUsuarioIdAutenticacao',
     ],
 }
 

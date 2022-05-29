@@ -137,7 +137,8 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'circulacaoapp.authentication.RedisAutenticacao'
+        'circulacaoapp.authentication.RedisAutenticacao',
+        'circulacaoapp.authentication.HeaderUsuarioIdAutenticacao',
     ],
 }
 
