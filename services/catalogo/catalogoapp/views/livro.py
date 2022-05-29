@@ -7,7 +7,8 @@ from ..models import Livro
 from ..permissions import (
     AutenticadoPermissao,
     LivroCatalogarPermissao,
-    LivroModificarPermissao
+    LivroModificarPermissao,
+    AvaliacaoServicePermissao
 )
 from ..services import LivroService
 from .. import serializers
@@ -20,16 +21,24 @@ class LivroViewSet(viewsets.ModelViewSet):
         return get_object_or_404(self.queryset, _id=self.kwargs['pk'])
 
     def get_permissions(self):
+        if self.action == 'atualizar_nota':
+            return [
+                AutenticadoPermissao(),
+                AvaliacaoServicePermissao()
+            ]
+
         if self.action in ['update', 'partial_update']:
             return [
                 AutenticadoPermissao(), 
                 LivroModificarPermissao()
             ]
+
         if self.action in ['create', 'destroy', 'foto_capa']:
             return [
                 AutenticadoPermissao(), 
                 LivroCatalogarPermissao()
             ]
+
         return []
 
     def get_serializer_class(self):
@@ -62,7 +71,7 @@ class LivroViewSet(viewsets.ModelViewSet):
         
         return Response(data=serializer.validated_data)
 
-    @action(methods=['patch'], detail=False, url_path='atualizar-nota', authentication_classes=[], permission_classes=[])
+    @action(methods=['patch'], detail=False, url_path='atualizar-nota')
     def atualizar_nota(self, request):
         ser = serializers.AtualizacaoNotaLivroSerializer(data=request.data)
         ser.is_valid(raise_exception=True)

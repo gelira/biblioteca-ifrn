@@ -32,31 +32,43 @@ class AutenticacaoService:
         return response.json()
 
     @classmethod
-    def informacoes_usuario(cls, usuario_id=None, token=None):
+    def informacoes_usuario(cls, usuario_id=None, token=None, save_cache=False):
         if not usuario_id and not token:
             raise Exception('Uma das opções deve ser definida: usuario_id ou token')
         
         options = { 
-            'method': 'GET' 
+            'method': 'GET', 
+            'url': cls.url_informacoes_usuario,
         }
 
         if usuario_id:
-            options.update({
-                'url': cls.url_consulta_usuario,
-                'params': {
-                    'id': usuario_id
-                }
-            })
-
+            options['headers'] = { 
+                'X-Usuario-Id': usuario_id, 
+            }
+ 
         else:
-            options.update({
-                'url': cls.url_informacoes_usuario,
-                'headers': {
-                    'Authorization': f'JWT {token}'
-                }
-            })
+            options['headers'] = {
+                'Authorization': f'JWT {token}',
+            }
+
+        if save_cache:
+            options['params'] = {
+                'save_cache': True
+            }
 
         response = cls.dispatch(options)
+
+        return response.json()
+
+    @classmethod
+    def consulta_usuario(cls, usuario_id):
+        response = cls.dispatch({
+            'method': 'GET',
+            'url': cls.url_consulta_usuario,
+            'params': {
+                'id': usuario_id
+            }
+        })
 
         return response.json()
 

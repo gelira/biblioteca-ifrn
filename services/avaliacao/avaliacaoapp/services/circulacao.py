@@ -3,6 +3,8 @@ import requests
 
 from .. import exceptions
 
+AVALIACAO_USUARIO_ID = os.getenv('AVALIACAO_USUARIO_ID')
+
 CIRCULACAO_SERVICE_URL = os.getenv('CIRCULACAO_SERVICE_URL')
 CIRCULACAO_TIMEOUT = int(os.getenv('CIRCULACAO_TIMEOUT'))
 
@@ -29,7 +31,10 @@ class CirculacaoService:
     def emprestimo_avaliado(cls, emprestimo_id):
         cls.dispatch({
             'url': f'{cls.url_emprestimos}/{emprestimo_id}/avaliado',
-            'method': 'PATCH'
+            'method': 'PATCH',
+            'headers': {
+                'X-Usuario-Id': AVALIACAO_USUARIO_ID,
+            },
         })
 
     @classmethod

@@ -2,9 +2,7 @@ from django.http.response import JsonResponse
 from rest_framework.exceptions import APIException
 
 ALLOW_URLS = [
-    '/autenticacao/token',
-    '/autenticacao/verificar',
-    '/catalogo/media',
+    '/autenticacao',
 ]
 
 class BaseMiddleware:

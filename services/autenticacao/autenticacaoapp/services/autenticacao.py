@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 
 from .. import exceptions
 from ..models import Usuario, Perfil
+from ..cliente_redis import ClienteRedis
 from .suap import SuapService
 from .token import TokenService
 from .notificacao import NotificacaoService
@@ -26,6 +27,9 @@ class AutenticacaoService:
     def login_local(cls, username, password):
         user = authenticate(username=username, password=password)
         if not user:
+            raise exceptions.InvalidCredentials
+
+        if user.usuario.vinculo == 'service':
             raise exceptions.InvalidCredentials
 
         token = TokenService.gerar_token(user)
@@ -91,6 +95,15 @@ class AutenticacaoService:
             raise exceptions.UserNotFound
 
         return usuario
+
+    @classmethod
+    def save_cache(cls, usuario_id, data):
+        cliente = ClienteRedis()
+
+        try:
+            cliente.store(usuario_id, data)
+        except:
+            pass
 
     @classmethod
     def consulta_usuario(cls, usuario_id, matricula=None):

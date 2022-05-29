@@ -3,6 +3,8 @@ import requests
 
 from .. import exceptions
 
+AVALIACAO_USUARIO_ID = os.getenv('AVALIACAO_USUARIO_ID')
+
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 CATALOGO_TIMEOUT = int(os.getenv('CATALOGO_TIMEOUT'))
 
@@ -15,6 +17,9 @@ class CatalogoService:
         cls.dispatch({
             'url': cls.url_atualizar_nota,
             'method': 'PATCH',
+            'headers': {
+                'X-Usuario-Id': AVALIACAO_USUARIO_ID,
+            },
             'json': {
                 'livro_id': livro_id,
                 'nota': nota

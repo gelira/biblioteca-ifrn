@@ -1,1 +1,2 @@
-from .autenticacao_redis import RedisAutenticacao
+from .jwt import AutenticacaoJWT
+from .header_usuario_id import HeaderUsuarioIdAutenticacao

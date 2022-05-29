@@ -1,18 +1,19 @@
 from rest_framework.authentication import BaseAuthentication
 
-from ..cliente_redis import ClienteRedis
+from ..services import AutenticacaoService
 
-class RedisAutenticacao(BaseAuthentication):
+class HeaderUsuarioIdAutenticacao(BaseAuthentication):
     def authenticate(self, request):
-        cliente_redis = ClienteRedis()
         usuario = None
 
         usuario_id = request.META.get('HTTP_X_USUARIO_ID')
         if usuario_id is not None:
+            save_cache = not request.META.get('redis_error')
+            
             try:
-                usuario = cliente_redis.get(usuario_id)
+                usuario = AutenticacaoService.informacoes_usuario(usuario_id, save_cache)
             except:
-                request.META['redis_error'] = True
+                pass
             
         if usuario is None:
             return None

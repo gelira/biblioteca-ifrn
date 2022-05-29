@@ -1,1 +1,2 @@
 from .autenticacao_redis import RedisAutenticacao
+from .header_usuario_id import HeaderUsuarioIdAutenticacao

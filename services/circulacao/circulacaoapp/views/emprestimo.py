@@ -13,7 +13,8 @@ from ..serializers import (
 )
 from ..permissions import (
     AutenticadoPermissao,
-    FazerEmprestimoPermissao
+    FazerEmprestimoPermissao,
+    AvaliacaoServicePermissao
 )
 
 class EmprestimoViewSet(ModelViewSet):
@@ -45,7 +46,16 @@ class EmprestimoViewSet(ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['retrieve']:
-            return [AutenticadoPermissao()]
+            return [
+                AutenticadoPermissao()
+            ]
+
+        if self.action == 'emprestimo_avaliado':
+            return [
+                AutenticadoPermissao(),
+                AvaliacaoServicePermissao()
+            ]
+
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):

@@ -136,14 +136,17 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'avaliacaoapp.authentication.RedisAutenticacao'
+        'avaliacaoapp.authentication.RedisAutenticacao',
+        'avaliacaoapp.authentication.HeaderUsuarioIdAutenticacao',
     ],
 }
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
-CELERY_RESULT_BACKEND = 'rpc://'
-
 CELERY_DEFAULT_QUEUE = PROJECT_NAME
 
 CELERY_ACKS_LATE = True
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BROKER_CONNECTION_MAX_RETRIES = None

@@ -18,3 +18,8 @@ class ServiceUnavailable(APIException):
 
 class InvalidEmprestimo(Exception):
     pass
+
+class ServiceUnauthorized(APIException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    default_detail = 'Acesso não autorizado'
+    default_code = 'unauthorized'

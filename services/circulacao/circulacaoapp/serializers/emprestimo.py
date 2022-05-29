@@ -454,7 +454,7 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
 
     def buscar_usuario(self, usuario_id):
         try:
-            return AutenticacaoService.informacoes_usuario(usuario_id=usuario_id)
+            return AutenticacaoService.consulta_usuario(usuario_id)
 
         except APIException:
             raise serializers.ValidationError('Não foi possível obter informações do usuário')

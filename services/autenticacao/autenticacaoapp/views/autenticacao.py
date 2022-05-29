@@ -16,9 +16,12 @@ class AutenticacaoViewSet(ViewSet):
         usuario_id = str(request.user.usuario._id)
         usuario = AutenticacaoService.informacoes_usuario(usuario_id)
 
-        ser = serializers.UsuarioSerializer(usuario)
+        data = serializers.UsuarioSerializer(usuario).data
 
-        return Response(data=ser.data)
+        if request.GET.get('save_cache'):
+            AutenticacaoService.save_cache(usuario_id, data)
+
+        return Response(data)
 
     @action(methods=['get'], detail=False, url_path='consulta')
     def consulta(self, request):

@@ -2,7 +2,7 @@ import random, string
 from django.db.utils import IntegrityError
 from django.utils.timezone import localtime
 
-from .. import exceptions, serializers
+from .. import exceptions
 from ..models import Exemplar
 
 class ExemplarService:
@@ -47,5 +47,7 @@ class ExemplarService:
         if not e:
             raise exceptions.ExemplarNotFound
 
-        ser = serializers.ExemplarConsultaSerializer(e)
-        return ser.data
+        return e
+
+        # ser = serializers.ExemplarConsultaSerializer(e)
+        # return ser.data

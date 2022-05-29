@@ -4,3 +4,7 @@ from .livro import (
     LivroModificarPermissao
 )
 from .emprestimo import FazerEmprestimoPermissao
+from .services import (
+    AvaliacaoServicePermissao,
+    CirculacaoServicePermissao
+)

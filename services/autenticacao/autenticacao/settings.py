@@ -137,7 +137,8 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'autenticacaoapp.jwt.AutenticacaoJWT',
+        'autenticacaoapp.authentication.AutenticacaoJWT',
+        'autenticacaoapp.authentication.HeaderUsuarioIdAutenticacao',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -159,6 +160,8 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
 CELERY_DEFAULT_QUEUE = PROJECT_NAME
 
-CELERY_RESULT_BACKEND = 'rpc://'
-
 CELERY_ACKS_LATE = True
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BROKER_CONNECTION_MAX_RETRIES = None
