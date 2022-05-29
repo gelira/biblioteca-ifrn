@@ -11,7 +11,7 @@ class AutenticacaoViewSet(ViewSet):
     @action(methods=['get', 'put'], detail=False, url_path='informacoes')
     def informacoes(self, request):
         if request.method.lower() == 'put':
-            return self.atualizar_informações(request)
+            return self.atualizar_informacoes(request)
 
         usuario_id = str(request.user.usuario._id)
         usuario = AutenticacaoService.informacoes_usuario(usuario_id)
@@ -86,7 +86,7 @@ class AutenticacaoViewSet(ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def atualizar_informações(self, request):
+    def atualizar_informacoes(self, request):
         ser = serializers.UsuarioUpdateSerializer(
             instance=request.user.usuario,
             data=request.data
