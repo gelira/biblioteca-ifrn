@@ -7,7 +7,8 @@ from .. import serializers
 from ..models import Exemplar
 from ..permissions import (
     AutenticadoPermissao,
-    LivroModificarPermissao
+    LivroModificarPermissao,
+    CirculacaoServicePermissao
 )
 from ..services import ExemplarService
 
@@ -21,14 +22,14 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         data = ExemplarService.consulta_codigo_exemplar(codigo)
         return Response(data)
 
-    @action(methods=['patch'], detail=False, url_path='emprestados', authentication_classes=[], permission_classes=[])
+    @action(methods=['patch'], detail=False, url_path='emprestados')
     def emprestados(self, request):
         codigos = self.codigos(request)
         ExemplarService.exemplares_emprestados(codigos)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['patch'], detail=False, url_path='devolvidos', authentication_classes=[], permission_classes=[])
+    @action(methods=['patch'], detail=False, url_path='devolvidos')
     def devolvidos(self, request):
         codigos = self.codigos(request)
         ExemplarService.exemplares_devolvidos(codigos)
@@ -40,3 +41,12 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         ser.is_valid(raise_exception=True)
 
         return ser.validated_data['codigos']
+
+    def get_permissions(self):
+        if self.action in ['emprestados', 'devolvidos']:
+            return [
+                AutenticadoPermissao(),
+                CirculacaoServicePermissao()
+            ]
+
+        return super().get_permissions()
