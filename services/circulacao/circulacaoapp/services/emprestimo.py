@@ -11,7 +11,7 @@ from ..models import Emprestimo
 from .notificacao import NotificacaoService
 from .catalogo import CatalogoService
 
-CIRCULACAO_QUEUE = os.getenv('PROJECT_NAME')
+CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class EmprestimoService:
     @classmethod

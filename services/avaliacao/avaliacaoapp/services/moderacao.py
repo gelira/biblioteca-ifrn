@@ -4,7 +4,7 @@ from avaliacao.celery import app
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
 
-AVALIACAO_QUEUE = os.getenv('PROJECT_NAME')
+AVALIACAO_QUEUE = os.getenv('AVALIACAO_QUEUE')
 
 class ModeracaoService:
     @classmethod

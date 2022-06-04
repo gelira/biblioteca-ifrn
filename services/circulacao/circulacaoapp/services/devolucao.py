@@ -6,7 +6,7 @@ from circulacao.celery import app
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
 
-CIRCULACAO_QUEUE = os.getenv('PROJECT_NAME')
+CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class DevolucaoService:
     @classmethod

@@ -14,7 +14,7 @@ from ..models import (
 )
 from ..cliente_aws import get_bucket
 
-CATALOGO_QUEUE = os.getenv('PROJECT_NAME')
+CATALOGO_QUEUE = os.getenv('CATALOGO_QUEUE')
 
 class LivroService:
     @classmethod
