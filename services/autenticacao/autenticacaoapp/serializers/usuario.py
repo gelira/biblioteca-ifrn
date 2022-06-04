@@ -1,7 +1,6 @@
-from django.db import transaction
 from rest_framework import serializers
 
-from ..services import NotificacaoService
+from ..services import UsuarioService
 from ..models import Usuario, Permissao
 from .perfil import PerfilSerializer
 
@@ -48,28 +47,15 @@ class UsuarioConsultaSerializer(serializers.ModelSerializer):
 
 class UsuarioUpdateSerializer(serializers.ModelSerializer):
     def validate_email_pessoal(self, value):
-        if Usuario.objects.filter(email_pessoal=value).exists():
+        if UsuarioService.email_pessoal_utilizado(value):
             raise serializers.ValidationError('Email já utilizado')
         return value
     
     def save(self):
-        with transaction.atomic():
-            usuario = self.instance
+        usuario = self.instance
+        email_pessoal = self.validated_data['email_pessoal']
 
-            email_pessoal = self.validated_data['email_pessoal']
-
-            usuario.email_pessoal = email_pessoal
-            usuario.save()
-
-            NotificacaoService.salvar_contato(
-                str(usuario._id),
-                {
-                    'nome': usuario.nome,
-                    'matricula': usuario.user.username,
-                    'email_institucional': usuario.email_institucional,
-                    'email_pessoal': email_pessoal,
-                }
-            )
+        UsuarioService.atualizar_email_pessoal(usuario, email_pessoal)
 
     class Meta:
         model = Usuario
