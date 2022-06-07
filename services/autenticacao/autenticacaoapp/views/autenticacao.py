@@ -35,7 +35,7 @@ class AutenticacaoViewSet(ViewSet):
 
         ser = serializers.UsuarioConsultaSerializer(usuario)
 
-        return Response(data=ser.data)
+        return Response(ser.data)
 
     @action(methods=['post'], detail=False, url_path='token', authentication_classes=[], permission_classes=[])
     def token(self, request):
@@ -46,7 +46,7 @@ class AutenticacaoViewSet(ViewSet):
 
         login_data = AutenticacaoService.login_suap(data['username'], data['password'])
 
-        return Response(data=login_data)
+        return Response(login_data)
 
     @action(methods=['post'], detail=False, url_path='token-local', authentication_classes=[], permission_classes=[])
     def token_local(self, request):
@@ -60,7 +60,7 @@ class AutenticacaoViewSet(ViewSet):
 
         login_data = AutenticacaoService.login_local(data['username'], data['password'])
         
-        return Response(data=login_data)
+        return Response(login_data)
 
     @action(methods=['get'], detail=False, url_path='verificar')
     def verificar(self, request):
