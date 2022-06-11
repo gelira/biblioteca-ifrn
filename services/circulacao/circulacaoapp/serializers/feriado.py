@@ -1,7 +1,8 @@
-from datetime import timedelta
+from django.db import transaction
 from rest_framework import serializers
 
-from ..models import Feriado, Data
+from ..services import FeriadoService
+from ..models import Feriado
 
 class FeriadoCreateSerializer(serializers.ModelSerializer):
     data_inicio = serializers.DateField(
@@ -15,18 +16,13 @@ class FeriadoCreateSerializer(serializers.ModelSerializer):
     def create(self, data):
         data_inicio = data.pop('data_inicio')
         data_fim = data.pop('data_fim', data_inicio)
-        feriado = super().create(data)
-        
-        while data_inicio <= data_fim:
-            Data.objects.create(
-                feriado=feriado,
-                dia=data_inicio.day,
-                mes=data_inicio.month,
-                ano=data_inicio.year
-            )
-            data_inicio = data_inicio + timedelta(days=1)
 
-        return feriado
+        with transaction.atomic():
+            feriado = super().create(data)
+
+            FeriadoService.create_dias_feriado(feriado, data_inicio, data_fim)
+
+            return feriado
 
     class Meta:
         model = Feriado

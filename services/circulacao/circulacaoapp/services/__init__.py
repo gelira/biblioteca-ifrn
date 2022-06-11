@@ -5,3 +5,4 @@ from .reserva import ReservaService
 from .devolucao import DevolucaoService
 from .notificacao import NotificacaoService
 from .abono import AbonoService
+from .feriado import FeriadoService
