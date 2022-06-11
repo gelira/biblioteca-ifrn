@@ -1,7 +1,9 @@
 import os
 import requests
+from django.utils import timezone
 
 from .. import exceptions
+from ..models import Emprestimo
 
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 AUTENTICACAO_TIMEOUT = int(os.getenv('AUTENTICACAO_TIMEOUT'))
@@ -87,6 +89,22 @@ class AutenticacaoService:
             'url': cls.url_abono_suspensoes,
             'json': suspensoes
         })
+
+    @classmethod
+    def check_usuario_suspenso(cls, usuario_id, suspensao):
+        hoje = timezone.localdate()
+
+        if suspensao is not None:
+            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
+            if suspensao >= hoje:
+                raise exceptions.UsuarioSuspenso
+
+        if Emprestimo.objects.filter(
+            usuario_id=usuario_id,
+            data_devolucao=None,
+            data_limite__lt=hoje
+        ).exists():
+            raise exceptions.EmprestimosAtrasados
 
     @classmethod
     def dispatch(self, options):
