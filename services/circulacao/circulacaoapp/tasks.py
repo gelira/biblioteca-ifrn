@@ -18,10 +18,6 @@ class IgnoreResultTask(BaseTask):
 def emprestimo_avaliado(emprestimo_id):
     EmprestimoService.emprestimo_avaliado(emprestimo_id)
 
-@shared_task(name='circulacao.get_emprestimo', base=BaseTask)
-def get_emprestimo(emprestimo_id, usuario_id):
-    return EmprestimoService.get_emprestimo(emprestimo_id, usuario_id)
-
 @shared_task(name='circulacao.verificar_reserva', base=IgnoreResultTask)
 def verificar_reserva(reserva_id):
     ReservaService.verificar_reserva(reserva_id)
