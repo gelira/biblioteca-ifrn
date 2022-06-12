@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'avaliacaoapp',
     'rest_framework',
+    'django_celery_beat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -150,3 +151,9 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BROKER_CONNECTION_TIMEOUT = 2
 
 CELERY_BROKER_CONNECTION_MAX_RETRIES = None
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_BEAT_SYNC_EVERY = 1
+
+CELERY_BEAT_MAX_LOOP_INTERVAL = 60
