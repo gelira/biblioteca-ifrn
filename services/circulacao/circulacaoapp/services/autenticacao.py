@@ -91,8 +91,9 @@ class AutenticacaoService:
         })
 
     @classmethod
-    def check_usuario_suspenso(cls, usuario_id, suspensao):
-        hoje = timezone.localdate()
+    def check_usuario_suspenso(cls, usuario_id, suspensao, hoje=None):
+        if not hoje:
+            hoje = timezone.localdate()
 
         if suspensao is not None:
             suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()

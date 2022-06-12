@@ -1,14 +1,7 @@
-from django.db import transaction
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
-from ..utils import calcular_data_limite
-from ..models import (
-    Emprestimo,
-    Renovacao, 
-    Reserva
-)
+from ..models import Emprestimo
 from ..services import (
     AutenticacaoService,
     EmprestimoService,
@@ -124,126 +117,32 @@ class RenovacaoEmprestimosSerializer(serializers.Serializer):
     faz_emprestimo = serializers.BooleanField()
 
     def validate_emprestimos(self, value):
-        emprestimos = list(map(lambda x: str(x), value))
-        return list(set(emprestimos))
+        return set(map(lambda x: str(x), value))
 
     def validate(self, data):
         emprestimos_id = data['emprestimos']
-        emprestimos = []
-        usuarios = {}
-        filtro = {}
-        hoje = timezone.localdate()
-        
+        usuario_id = None
+
         if not data['faz_emprestimo']:
-            filtro['usuario_id'] = self.context['request'].user['_id']
+            usuario_id = self.context['request'].user['_id']
 
-        for e_id in emprestimos_id:
-            filtro['_id'] = e_id
-            
-            emprestimo = Emprestimo.objects.filter(**filtro).first()
-            if emprestimo is None:
-                continue
-            
-            self.validar_emprestimo(emprestimo, hoje)
-            usuario_id = str(emprestimo.usuario_id)
-            if usuarios.get(usuario_id) is None:
-                usuarios[usuario_id] = self.validar_usuario(usuario_id, hoje)
-            
-            emprestimos.append(emprestimo)
+        try:
+            emprestimos, usuarios = EmprestimoService\
+                .fetch_emprestimos_para_renovacao(emprestimos_id, usuario_id)
 
-        data.update({
-            'emprestimos': emprestimos,
-            'usuarios': usuarios
-        })
-        return data
+            data.update({
+                'emprestimos': emprestimos,
+                'usuarios': usuarios
+            })
+
+            return data
+
+        except APIException as e:
+            raise serializers.ValidationError(str(e))
 
     def create(self, data):
-        agente_id = self.context['request'].user['_id']
         emprestimos = data['emprestimos']
         usuarios = data['usuarios']
+        agente_id = self.context['request'].user['_id']
 
-        agora = timezone.localtime()
-        agora_data = agora.strftime('%d/%m/%Y')
-        agora_hora = agora.strftime('%H:%M:%S')
-
-        comprovantes = []
-
-        with transaction.atomic():
-            for emprestimo in emprestimos:
-                usuario_id = str(emprestimo.usuario_id)
-
-                perfil = usuarios[usuario_id]['perfil']
-                emprestimo.quantidade_renovacoes += 1
-                
-                if emprestimo.quantidade_renovacoes >= perfil['quantidade_renovacoes']:
-                    emprestimo.maximo_renovacoes = True
-                
-                nova_data = calcular_data_limite(perfil['max_dias'])
-                emprestimo.data_limite = nova_data
-                
-                Renovacao.objects.create(
-                    emprestimo=emprestimo,
-                    nova_data_limite=nova_data,
-                    usuario_id=agente_id
-                )
-                emprestimo.save()
-
-                comprovantes.append({
-                    'usuario_id': usuario_id,
-                    'livro_id': str(emprestimo.livro_id),
-                    'data_limite': nova_data.strftime('%d/%m/%Y'),
-                    'data': agora_data,
-                    'hora': agora_hora,
-                    'exemplar_codigo': emprestimo.exemplar_codigo,
-                    'atendente_id': agente_id if agente_id != usuario_id else '' 
-                })
-
-        EmprestimoService.call_enviar_comprovantes_renovacao(comprovantes)
-
-        return {}
-
-    def validar_emprestimo(self, emprestimo, hoje):
-        if emprestimo.data_devolucao is not None:
-            raise serializers.ValidationError('Não é possível renovar empréstimo devolvido')
-
-        if emprestimo.data_limite < hoje:
-            raise serializers.ValidationError('Há empréstimos atrasados')
-
-        if emprestimo.maximo_renovacoes:
-            raise serializers.ValidationError('Há empréstimos com máximo de renovações')
-
-        if emprestimo.exemplar_referencia:
-            raise serializers.ValidationError('Não é possível renovar empréstimo de exemplar referência')
-
-        if Reserva.objects.filter(
-            livro_id=emprestimo.livro_id,
-            emprestimo_id=None,
-            cancelada=False,
-            disponibilidade_retirada=None,
-        ).exists():
-            raise serializers.ValidationError('Existem reservas para esse exemplar, não é possível renovar o empréstimo')
-        
-    def validar_usuario(self, usuario_id, hoje):
-        usuario = self.buscar_usuario(usuario_id)
-
-        suspensao = usuario['suspensao']
-        if suspensao is not None:
-            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date() 
-            if suspensao >= hoje:
-                raise serializers.ValidationError('Usuário suspenso')
-
-        if Emprestimo.objects.filter(
-            usuario_id=usuario_id,
-            data_devolucao=None,
-            data_limite__lt=hoje
-        ).exists():
-            raise serializers.ValidationError('Usuário com empréstimos atrasados')
-
-        return usuario
-
-    def buscar_usuario(self, usuario_id):
-        try:
-            return AutenticacaoService.consulta_usuario(usuario_id)
-
-        except APIException:
-            raise serializers.ValidationError('Não foi possível obter informações do usuário')
+        return EmprestimoService.save_renovacoes(emprestimos, usuarios, agente_id)

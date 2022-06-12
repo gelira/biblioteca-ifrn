@@ -9,7 +9,9 @@ from rest_framework.exceptions import APIException
 from circulacao.celery import app
 
 from .. import exceptions
-from ..models import Emprestimo
+from ..models import Emprestimo, Reserva, Renovacao
+
+from .autenticacao import AutenticacaoService
 from .notificacao import NotificacaoService
 from .catalogo import CatalogoService
 from .reserva import ReservaService
@@ -151,6 +153,110 @@ class EmprestimoService:
             cls.call_agendar_alertas_emprestimo(alertas)
 
             return emprestimos
+
+    @classmethod
+    def fetch_emprestimos_para_renovacao(cls, emprestimos_id, usuario_id):
+        emprestimos = []
+        usuarios = {}
+        filtro = {}
+        hoje = timezone.localdate()
+
+        if usuario_id:
+            filtro['usuario_id'] = usuario_id
+
+        for e_id in emprestimos_id:
+            filtro['_id'] = e_id
+            
+            emprestimo = Emprestimo.objects.filter(**filtro).first()
+            if emprestimo is None:
+                continue
+            
+            cls.validar_emprestimo_para_renovacao(emprestimo, hoje)
+
+            usuario_id = str(emprestimo.usuario_id)
+            if usuarios.get(usuario_id) is None:
+                usuarios[usuario_id] = cls.buscar_usuario_renovacao(usuario_id, hoje)
+            
+            emprestimos.append(emprestimo)
+
+        return emprestimos, usuarios
+
+    @classmethod
+    def validar_emprestimo_para_renovacao(cls, emprestimo, hoje):
+        if emprestimo.data_devolucao is not None:
+            raise APIException('Não é possível renovar empréstimo devolvido')
+
+        if emprestimo.data_limite < hoje:
+            raise APIException('Há empréstimos atrasados')
+
+        if emprestimo.maximo_renovacoes:
+            raise APIException('Há empréstimos com máximo de renovações')
+
+        if emprestimo.exemplar_referencia:
+            raise APIException('Não é possível renovar empréstimo de exemplar referência')
+
+        if Reserva.objects.filter(
+            livro_id=emprestimo.livro_id,
+            emprestimo_id=None,
+            cancelada=False,
+            disponibilidade_retirada=None,
+        ).exists():
+            raise APIException('Existem reservas para esse exemplar, não é possível renovar o empréstimo')
+
+    @classmethod
+    def buscar_usuario_renovacao(cls, usuario_id, hoje):
+        try:
+            usuario = AutenticacaoService.consulta_usuario(usuario_id)
+        except:
+            raise APIException('Não foi possível obter informações do usuário')
+
+        AutenticacaoService.check_usuario_suspenso(usuario_id, usuario['suspensao'], hoje)
+
+        return usuario
+
+    @classmethod
+    def save_renovacoes(cls, emprestimos, usuarios, agente_id):
+        agora = timezone.localtime()
+        agora_data = agora.strftime('%d/%m/%Y')
+        agora_hora = agora.strftime('%H:%M:%S')
+
+        comprovantes = []
+
+        with transaction.atomic():
+            for emprestimo in emprestimos:
+                usuario_id = str(emprestimo.usuario_id)
+
+                perfil = usuarios[usuario_id]['perfil']
+                emprestimo.quantidade_renovacoes += 1
+                
+                if emprestimo.quantidade_renovacoes >= perfil['quantidade_renovacoes']:
+                    emprestimo.maximo_renovacoes = True
+                
+                nova_data = FeriadoService.calcular_data_limite(perfil['max_dias'])
+                
+                emprestimo.data_limite = nova_data
+                
+                Renovacao.objects.create(
+                    emprestimo=emprestimo,
+                    nova_data_limite=nova_data,
+                    usuario_id=agente_id
+                )
+
+                emprestimo.save()
+
+                comprovantes.append({
+                    'usuario_id': usuario_id,
+                    'livro_id': str(emprestimo.livro_id),
+                    'data_limite': nova_data.strftime('%d/%m/%Y'),
+                    'data': agora_data,
+                    'hora': agora_hora,
+                    'exemplar_codigo': emprestimo.exemplar_codigo,
+                    'atendente_id': agente_id if agente_id != usuario_id else '' 
+                })
+
+            cls.call_enviar_comprovantes_renovacao(comprovantes)
+
+            return {}
 
     @classmethod
     def emprestimo_avaliado(cls, emprestimo_id):
