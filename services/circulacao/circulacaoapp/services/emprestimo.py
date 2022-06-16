@@ -29,6 +29,7 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 class EmprestimoService:
     task_enviar_comprovante_emprestimo = 'circulacao.enviar_comprovante_emprestimo'
     task_agendar_alertas_emprestimo = 'circulacao.agendar_alertas_emprestimo'
+    task_enviar_comprovante_renovacao = 'circulacao.enviar_comprovante_renovacao'
 
     @classmethod
     def check_livro_emprestado_usuario(cls, usuario_id, livro_id):
@@ -310,14 +311,29 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovantes_renovacao(cls, comprovantes):
-        group([
-            app.signature(
-                'circulacao.enviar_comprovante_renovacao',
-                args=[comprovante],
-                queue=CIRCULACAO_QUEUE,
-                ignore_result=True    
-            ) for comprovante in comprovantes
-        ])()
+        func = lambda x: ({
+            'args': [x],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        })
+
+        ctxs = list(map(func, comprovantes))
+
+        try:
+            send_task_group(cls.task_enviar_comprovante_renovacao, ctxs)
+
+        except:
+            for ctx in ctxs:
+                name = datetime_name(cls.task_enviar_comprovante_renovacao)
+                ctx.pop('ignore_result', None)
+                ctx.update({
+                    'name': name,
+                    'task': cls.task_enviar_comprovante_renovacao,
+                    'headers': { 'periodic_task_name': name },
+                    'one_off': True
+                })
+
+            save_batch_clocked_tasks(contexts=ctxs)
 
     @classmethod
     def checar_emprestimo(cls, contexto):
