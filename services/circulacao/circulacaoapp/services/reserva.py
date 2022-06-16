@@ -1,11 +1,9 @@
 import os
-import json
 from celery import group
 
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from django_celery_beat.models import PeriodicTask, ClockedSchedule
 
 from circulacao.celery import app
 
@@ -29,6 +27,7 @@ class ReservaService:
     task_proxima_reserva = 'circulacao.proxima_reserva'
     task_enviar_comprovante_reserva = 'circulacao.enviar_comprovante_reserva'
     task_enviar_comprovante_reserva_cancelada = 'circulacao.enviar_comprovante_reserva_cancelada'
+    task_verificar_reserva = 'circulacao.verificar_reserva'
 
     @classmethod
     def base_queryset(cls, **kwargs):
@@ -179,29 +178,28 @@ class ReservaService:
 
     @classmethod
     def agendar_verificacao(cls, reserva_id, data):
-        with transaction.atomic():
-            data = data + timezone.timedelta(days=1)
+        name = datetime_name(cls.task_verificar_reserva)
 
-            clock = ClockedSchedule.objects.create(
-                clocked_time=timezone.make_aware(
-                    timezone.datetime(
-                        year=data.year,
-                        month=data.month,
-                        day=data.day,
-                        hour=2,
-                        minute=30
-                    )
-                )
+        dt = timezone.make_aware(
+            timezone.datetime(
+                year=data.year,
+                month=data.month,
+                day=data.day,
+                hour=2,
+                minute=30
             )
+        )
 
-            PeriodicTask.objects.create(
-                clocked=clock,
-                name=f'Verificar Reserva {reserva_id}',
-                task='circulacao.verificar_reserva',
-                args=json.dumps([reserva_id]),
-                queue=CIRCULACAO_QUEUE,
-                one_off=True
-            )
+        save_clocked_task(
+            dt=dt, 
+            delay_seconds=24*60*60,
+            name=name,
+            task=cls.task_verificar_reserva,
+            headers={ 'periodic_task_name': name },
+            args=[reserva_id],
+            queue=CIRCULACAO_QUEUE,
+            one_off=True
+        )
 
     @classmethod
     def verificar_reserva(cls, reserva_id):
