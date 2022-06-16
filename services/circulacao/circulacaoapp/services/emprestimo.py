@@ -22,6 +22,7 @@ from .feriado import FeriadoService
 CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class EmprestimoService:
+    task_emprestimo_avaliado = 'circulacao.emprestimo_avaliado'
     task_enviar_comprovante_emprestimo = 'circulacao.enviar_comprovante_emprestimo'
     task_agendar_alertas_emprestimo = 'circulacao.agendar_alertas_emprestimo'
     task_enviar_comprovante_renovacao = 'circulacao.enviar_comprovante_renovacao'
