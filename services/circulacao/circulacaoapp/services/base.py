@@ -14,7 +14,10 @@ def datetime_name(name):
 
 def handle_datetime(dt=None, delay_seconds=60):
     if not dt:
-        dt = timezone.localtime() + timezone.timedelta(seconds=delay_seconds)
+        dt = timezone.localtime()
+
+    if delay_seconds > 0:
+        dt += timezone.timedelta(seconds=delay_seconds)
 
     if not dt.tzinfo:
         dt = timezone.make_aware(dt)
