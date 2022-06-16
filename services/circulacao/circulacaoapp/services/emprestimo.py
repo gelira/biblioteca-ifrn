@@ -1,12 +1,7 @@
 import os
-import json
-from celery import group
 from django.utils import timezone
 from django.db import transaction
-from django_celery_beat.models import PeriodicTask, ClockedSchedule
 from rest_framework.exceptions import APIException
-
-from circulacao.celery import app
 
 from .. import exceptions
 from ..models import Emprestimo, Reserva, Renovacao
@@ -30,6 +25,7 @@ class EmprestimoService:
     task_enviar_comprovante_emprestimo = 'circulacao.enviar_comprovante_emprestimo'
     task_agendar_alertas_emprestimo = 'circulacao.agendar_alertas_emprestimo'
     task_enviar_comprovante_renovacao = 'circulacao.enviar_comprovante_renovacao'
+    task_checar_emprestimo = 'circulacao.checar_emprestimo'
 
     @classmethod
     def check_livro_emprestado_usuario(cls, usuario_id, livro_id):
@@ -370,23 +366,25 @@ class EmprestimoService:
 
                 contexto['hoje'] = dia == 0
 
-                clock = ClockedSchedule.objects.create(
-                    clocked_time=timezone.make_aware(
-                        timezone.datetime(
-                            year=d.year,
-                            month=d.month,
-                            day=d.day,
-                            hour=9,
-                            minute=30
-                        )
+                name = datetime_name(cls.task_checar_emprestimo)
+
+                dt = timezone.make_aware(
+                    timezone.datetime(
+                        year=d.year,
+                        month=d.month,
+                        day=d.day,
+                        hour=9,
+                        minute=30
                     )
                 )
 
-                PeriodicTask.objects.create(
-                    clocked=clock,
-                    name=f'Alerta Empréstimo {e_id} ({dia})',
-                    task='circulacao.checar_emprestimo',
-                    args=json.dumps([contexto]),
+                save_clocked_task(
+                    dt=dt, 
+                    delay_seconds=0,
+                    name=name,
+                    task=cls.task_checar_emprestimo,
+                    headers={ 'periodic_task_name': name },
+                    args=[contexto],
                     queue=CIRCULACAO_QUEUE,
                     one_off=True
                 )
