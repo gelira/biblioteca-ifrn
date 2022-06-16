@@ -11,6 +11,11 @@ from circulacao.celery import app
 from .. import exceptions
 from ..models import Emprestimo, Reserva, Renovacao
 
+from .base import (
+    send_task, 
+    datetime_name, 
+    save_clocked_task
+)
 from .autenticacao import AutenticacaoService
 from .notificacao import NotificacaoService
 from .catalogo import CatalogoService
@@ -20,6 +25,8 @@ from .feriado import FeriadoService
 CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class EmprestimoService:
+    task_enviar_comprovante_emprestimo = 'circulacao.enviar_comprovante_emprestimo'
+
     @classmethod
     def check_livro_emprestado_usuario(cls, usuario_id, livro_id):
         if Emprestimo.objects.filter(
@@ -277,12 +284,26 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovante_emprestimo(cls, contexto):
-        app.send_task(
-            'circulacao.enviar_comprovante_emprestimo',
-            args=[contexto],
-            queue=CIRCULACAO_QUEUE,
-            ignore_result=True
-        )
+        ctx = {
+            'args': [contexto],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        }
+
+        try:
+            send_task(cls.task_enviar_comprovante_emprestimo, **ctx)
+
+        except:
+            name = datetime_name(cls.task_enviar_comprovante_emprestimo)
+            ctx.pop('ignore_result', None)
+            ctx.update({
+                'name': name,
+                'task': cls.task_enviar_comprovante_emprestimo,
+                'headers': { 'periodic_task_name': name },
+                'one_off': True
+            })
+            
+            save_clocked_task(**ctx)
 
     @classmethod
     def call_enviar_comprovantes_renovacao(cls, comprovantes):
