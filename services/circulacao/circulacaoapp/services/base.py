@@ -35,3 +35,9 @@ def save_clocked_task(dt=None, delay_seconds=60, **kw):
     clock = ClockedSchedule.objects.create(clocked_time=dt)
 
     PeriodicTask.objects.create(clocked=clock, **kw)
+
+def datetime_name(name):
+    dt = timezone.localtime()
+    dt_str = dt.strftime('%Y%m%d.%H%M%S.%f')
+
+    return f'{dt_str}-{name}'
