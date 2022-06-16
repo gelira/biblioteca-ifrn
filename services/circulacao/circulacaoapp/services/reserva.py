@@ -13,7 +13,9 @@ from .. import exceptions
 from ..models import Reserva, Emprestimo
 
 from .base import (
+    send_task,
     send_task_group, 
+    save_clocked_task,
     save_batch_clocked_tasks, 
     datetime_name
 )
@@ -25,6 +27,7 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class ReservaService:
     task_proxima_reserva = 'circulacao.proxima_reserva'
+    task_enviar_comprovante_reserva = 'circulacao.enviar_comprovante_reserva'
 
     @classmethod
     def base_queryset(cls, **kwargs):
@@ -316,12 +319,26 @@ class ReservaService:
 
     @classmethod
     def call_enviar_comprovante_reserva(cls, contexto):
-        app.send_task(
-            'circulacao.enviar_comprovante_reserva',
-            args=[contexto],
-            queue=CIRCULACAO_QUEUE,
-            ignore_result=True
-        )
+        ctx = {
+            'args': [contexto],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        }
+
+        try:
+            send_task(cls.task_enviar_comprovante_reserva, **ctx)
+
+        except:
+            name = datetime_name(cls.task_enviar_comprovante_reserva)
+            ctx.pop('ignore_result', None)
+            ctx.update({
+                'name': name,
+                'task': cls.task_enviar_comprovante_reserva,
+                'headers': { 'periodic_task_name': name },
+                'one_off': True
+            })
+            
+            save_clocked_task(**ctx)
 
     @classmethod
     def call_enviar_comprovante_reserva_cancelada(cls, contexto):
