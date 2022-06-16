@@ -29,6 +29,7 @@ class ReservaService:
     task_enviar_comprovante_reserva_cancelada = 'circulacao.enviar_comprovante_reserva_cancelada'
     task_verificar_reserva = 'circulacao.verificar_reserva'
     task_enviar_reserva_disponivel = 'circulacao.enviar_reserva_disponivel'
+    task_enviar_reserva_cancelada = 'circulacao.enviar_reserva_cancelada'
 
     @classmethod
     def base_queryset(cls, **kwargs):
@@ -276,12 +277,26 @@ class ReservaService:
 
     @classmethod
     def call_enviar_reserva_cancelada(cls, contexto):
-        app.send_task(
-            'circulacao.enviar_reserva_cancelada',
-            args=[contexto],
-            queue=CIRCULACAO_QUEUE,
-            ignore_result=True
-        )
+        ctx = {
+            'args': [contexto],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        }
+
+        try:
+            send_task(cls.task_enviar_reserva_cancelada, **ctx)
+
+        except:
+            name = datetime_name(cls.task_enviar_reserva_cancelada)
+            ctx.pop('ignore_result', None)
+            ctx.update({
+                'name': name,
+                'task': cls.task_enviar_reserva_cancelada,
+                'headers': { 'periodic_task_name': name },
+                'one_off': True
+            })
+            
+            save_clocked_task(**ctx)
 
     @classmethod
     def call_enviar_reservas_disponiveis(cls, reservas):
