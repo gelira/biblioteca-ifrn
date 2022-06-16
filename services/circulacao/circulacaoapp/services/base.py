@@ -61,6 +61,15 @@ def save_clocked_task(dt=None, delay_seconds=60, **kw):
     PeriodicTask.objects.create(clocked=clock, **kw)
 
 def save_batch_clocked_tasks(dt=None, delay_seconds=60, contexts=[]):
+    '''
+    name    -> nome único da task
+    task    -> nome da task
+    headers -> { 'periodic_task_name': ... }
+    args    -> lista de argumentos
+    kwargs  -> dicionário de argumentos
+    queue   -> nome da fila
+    one_off -> boolean
+    '''
     if not contexts:
         return
 
