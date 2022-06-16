@@ -77,13 +77,13 @@ class DevolucaoService:
                 })
 
             if suspensoes:
-                AutenticacaoService.suspensoes(list(map(
-                    lambda x: ({ 'usuario_id': x, 'dias': suspensoes[x] }), suspensoes)))
+                func = lambda x: ({ 'usuario_id': x, 'dias': suspensoes[x] })
+                AutenticacaoService.suspensoes(list(map(func, suspensoes)))
 
             CatalogoService.exemplares_devolvidos(codigos)
+            ReservaService.call_proximas_reservas(livros)
             
             cls.call_enviar_comprovantes_devolucao(comprovantes)
-            ReservaService.call_proximas_reservas(livros)
 
         return {}
 
