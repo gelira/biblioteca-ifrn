@@ -179,28 +179,29 @@ class ReservaService:
 
     @classmethod
     def agendar_verificacao(cls, reserva_id, data):
-        name = datetime_name(cls.task_verificar_reserva)
+        with transaction.atomic():
+            name = datetime_name(cls.task_verificar_reserva)
 
-        dt = timezone.make_aware(
-            timezone.datetime(
-                year=data.year,
-                month=data.month,
-                day=data.day,
-                hour=2,
-                minute=30
+            dt = timezone.make_aware(
+                timezone.datetime(
+                    year=data.year,
+                    month=data.month,
+                    day=data.day,
+                    hour=2,
+                    minute=30
+                )
             )
-        )
 
-        save_clocked_task(
-            dt=dt, 
-            delay_seconds=24*60*60,
-            name=name,
-            task=cls.task_verificar_reserva,
-            headers={ 'periodic_task_name': name },
-            args=[reserva_id],
-            queue=CIRCULACAO_QUEUE,
-            one_off=True
-        )
+            save_clocked_task(
+                dt=dt, 
+                delay_seconds=24*60*60,
+                name=name,
+                task=cls.task_verificar_reserva,
+                headers={ 'periodic_task_name': name },
+                args=[reserva_id],
+                queue=CIRCULACAO_QUEUE,
+                one_off=True
+            )
 
     @classmethod
     def verificar_reserva(cls, reserva_id):
