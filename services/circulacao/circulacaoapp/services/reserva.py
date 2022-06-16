@@ -63,8 +63,6 @@ class ReservaService:
 
     @classmethod
     def check_quantidade_reservas_emprestimos(cls, usuario_id, max_livros):
-        hoje = timezone.localdate()
-
         emprestimos = Emprestimo.objects.filter(
             usuario_id=usuario_id,
             data_devolucao=None
