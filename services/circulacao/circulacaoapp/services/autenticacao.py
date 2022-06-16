@@ -108,7 +108,7 @@ class AutenticacaoService:
             raise exceptions.EmprestimosAtrasados
 
     @classmethod
-    def dispatch(self, options):
+    def dispatch(cls, options):
         method = options.pop('method')
         url = options.pop('url')
         options['timeout'] = AUTENTICACAO_TIMEOUT
