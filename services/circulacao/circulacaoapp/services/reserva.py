@@ -1,11 +1,8 @@
 import os
-from celery import group
 
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-
-from circulacao.celery import app
 
 from .. import exceptions
 from ..models import Reserva, Emprestimo
@@ -297,17 +294,6 @@ class ReservaService:
             })
             
             save_clocked_task(**ctx)
-
-    @classmethod
-    def call_enviar_reservas_disponiveis(cls, reservas):
-        group([
-            app.signature(
-                'circulacao.enviar_reserva_disponivel',
-                args=[reserva],
-                queue=CIRCULACAO_QUEUE,
-                ignore_result=True
-            ) for reserva in reservas
-        ])()
 
     @classmethod
     def call_proximas_reservas(cls, livros):
