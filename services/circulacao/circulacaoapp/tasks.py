@@ -3,7 +3,8 @@ from celery import shared_task, Task
 from .services import (
     EmprestimoService,
     ReservaService,
-    DevolucaoService
+    DevolucaoService,
+    CatalogoService
 )
 
 class BaseTask(Task):
@@ -61,3 +62,7 @@ def enviar_comprovante_reserva(contexto):
 @shared_task(name='circulacao.enviar_comprovante_reserva_cancelada', base=IgnoreResultTask)
 def enviar_comprovante_reserva_cancelada(contexto):
     ReservaService.enviar_comprovante_reserva_cancelada(contexto)
+
+@shared_task(name='circulacao.exemplares_emprestados', base=IgnoreResultTask)
+def enviar_comprovante_reserva_cancelada(codigos):
+    CatalogoService.exemplares_devolvidos(codigos)

@@ -78,9 +78,10 @@ class DevolucaoService:
 
             if suspensoes:
                 func = lambda x: ({ 'usuario_id': x, 'dias': suspensoes[x] })
+                # A continuidade da transação demanda o sucesso dessa chamada
                 AutenticacaoService.suspensoes(list(map(func, suspensoes)))
 
-            CatalogoService.exemplares_devolvidos(codigos)
+            CatalogoService.call_exemplares_devolvidos(codigos)
             ReservaService.call_proximas_reservas(livros)
             
             cls.call_enviar_comprovantes_devolucao(comprovantes)

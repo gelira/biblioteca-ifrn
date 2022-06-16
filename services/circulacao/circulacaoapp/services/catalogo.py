@@ -2,16 +2,20 @@ import os
 import requests
 
 from .. import exceptions
+from .base import save_clocked_task, datetime_name
 
 CIRCULACAO_USUARIO_ID = os.getenv('CIRCULACAO_USUARIO_ID')
 
 CATALOGO_SERVICE_URL = os.getenv('CATALOGO_SERVICE_URL')
 CATALOGO_TIMEOUT = int(os.getenv('CATALOGO_TIMEOUT'))
 
+CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
+
 class CatalogoService:
     url_consulta_exemplar = CATALOGO_SERVICE_URL + '/exemplares/consulta'
     url_exemplares_emprestados = CATALOGO_SERVICE_URL + '/exemplares/emprestados'
     url_exemplares_devolvidos = CATALOGO_SERVICE_URL + '/exemplares/devolvidos'
+    task_exemplares_devolvidos = 'circulacao.exemplares_emprestados'
     url_buscar_livro = CATALOGO_SERVICE_URL + '/livros'
 
     @classmethod
@@ -48,6 +52,22 @@ class CatalogoService:
                 'codigos': codigos
             }
         })
+    
+    @classmethod
+    def call_exemplares_devolvidos(cls, codigos):
+        try:
+            cls.exemplares_devolvidos(codigos)
+        
+        except:
+            name = datetime_name(cls.task_exemplares_devolvidos)
+            save_clocked_task(
+                name=name,
+                task=cls.task_exemplares_devolvidos,
+                headers={ 'periodic_task_name': name },
+                args=[codigos],
+                queue=CIRCULACAO_QUEUE,
+                one_off=True
+            )
 
     @classmethod
     def busca_livro(cls, livro_id, **params):
