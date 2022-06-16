@@ -16,6 +16,15 @@ def send_task_group(task_name, contexts):
     group(list(map(func, contexts)))()
 
 def save_clocked_task(dt=None, delay_seconds=60, **kw):
+    '''
+    name    -> nome único da task
+    task    -> nome da task
+    headers -> { 'periodic_task_name': ... }
+    args    -> lista de argumentos
+    kwargs  -> dicionário de argumentos
+    queue   -> nome da fila
+    one_off -> boolean
+    '''
     if not dt:
         dt = timezone.localtime() + timezone.timedelta(seconds=delay_seconds)
 
