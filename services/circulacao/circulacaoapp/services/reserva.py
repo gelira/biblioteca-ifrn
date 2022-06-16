@@ -12,6 +12,11 @@ from circulacao.celery import app
 from .. import exceptions
 from ..models import Reserva, Emprestimo
 
+from .base import (
+    send_task_group, 
+    save_batch_clocked_tasks, 
+    datetime_name
+)
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
 from .feriado import FeriadoService
@@ -19,6 +24,8 @@ from .feriado import FeriadoService
 CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class ReservaService:
+    task_proxima_reserva = 'circulacao.proxima_reserva'
+
     @classmethod
     def base_queryset(cls, **kwargs):
         hoje = kwargs.pop('hoje', None)
@@ -271,14 +278,29 @@ class ReservaService:
 
     @classmethod
     def call_proximas_reservas(cls, livros):
-        group([
-            app.signature(
-                'circulacao.proxima_reserva',
-                args=[livro_id],
-                queue=CIRCULACAO_QUEUE,
-                ignore_result=True
-            ) for livro_id in livros
-        ])()
+        func = lambda x: ({
+            'args': [x],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        })
+
+        contexts = list(map(func, livros))
+
+        try:
+            send_task_group(cls.task_proxima_reserva, contexts)
+
+        except:
+            for context in contexts:
+                name = datetime_name(cls.task_proxima_reserva)
+                context.pop('ignore_result', None)
+                context.update({
+                    'name': name,
+                    'task': cls.task_proxima_reserva,
+                    'headers': { 'periodic_task_name': name },
+                    'one_off': True
+                })
+
+            save_batch_clocked_tasks(contexts=contexts)
 
     @classmethod
     def enviar_comprovante_reserva(cls, contexto):
