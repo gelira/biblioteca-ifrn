@@ -13,8 +13,10 @@ from ..models import Emprestimo, Reserva, Renovacao
 
 from .base import (
     send_task, 
+    send_task_group,
     datetime_name, 
-    save_clocked_task
+    save_clocked_task,
+    save_batch_clocked_tasks
 )
 from .autenticacao import AutenticacaoService
 from .notificacao import NotificacaoService
@@ -26,6 +28,7 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class EmprestimoService:
     task_enviar_comprovante_emprestimo = 'circulacao.enviar_comprovante_emprestimo'
+    task_agendar_alertas_emprestimo = 'circulacao.agendar_alertas_emprestimo'
 
     @classmethod
     def check_livro_emprestado_usuario(cls, usuario_id, livro_id):
@@ -374,11 +377,26 @@ class EmprestimoService:
 
     @classmethod
     def call_agendar_alertas_emprestimo(cls, contextos):
-        group([
-            app.signature(
-                'circulacao.agendar_alertas_emprestimo',
-                args=[contexto],
-                queue=CIRCULACAO_QUEUE,
-                ignore_result=True  
-            ) for contexto in contextos
-        ])()
+        func = lambda x: ({
+            'args': [x],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        })
+
+        ctxs = list(map(func, contextos))
+
+        try:
+            send_task_group(cls.task_agendar_alertas_emprestimo, ctxs)
+
+        except:
+            for ctx in ctxs:
+                name = datetime_name(cls.task_agendar_alertas_emprestimo)
+                ctx.pop('ignore_result', None)
+                ctx.update({
+                    'name': name,
+                    'task': cls.task_agendar_alertas_emprestimo,
+                    'headers': { 'periodic_task_name': name },
+                    'one_off': True
+                })
+
+            save_batch_clocked_tasks(contexts=ctxs)
