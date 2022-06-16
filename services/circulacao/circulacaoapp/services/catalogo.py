@@ -14,10 +14,11 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 class CatalogoService:
     url_consulta_exemplar = CATALOGO_SERVICE_URL + '/exemplares/consulta'
     url_exemplares_emprestados = CATALOGO_SERVICE_URL + '/exemplares/emprestados'
-    task_exemplares_emprestados = 'circulacao.exemplares_emprestados'
     url_exemplares_devolvidos = CATALOGO_SERVICE_URL + '/exemplares/devolvidos'
-    task_exemplares_devolvidos = 'circulacao.exemplares_devolvidos'
     url_buscar_livro = CATALOGO_SERVICE_URL + '/livros'
+
+    task_exemplares_emprestados = 'circulacao.exemplares_emprestados'
+    task_exemplares_devolvidos = 'circulacao.exemplares_devolvidos'
 
     @classmethod
     def consulta_codigo_exemplar(cls, codigo):
