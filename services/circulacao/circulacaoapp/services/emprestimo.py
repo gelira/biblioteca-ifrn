@@ -139,7 +139,7 @@ class EmprestimoService:
                     'data_limite': dl,
                 })
 
-            CatalogoService.exemplares_emprestados(codigos)
+            CatalogoService.call_exemplares_emprestados(codigos)
 
             agora = timezone.localtime()
 

@@ -14,8 +14,9 @@ CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 class CatalogoService:
     url_consulta_exemplar = CATALOGO_SERVICE_URL + '/exemplares/consulta'
     url_exemplares_emprestados = CATALOGO_SERVICE_URL + '/exemplares/emprestados'
+    task_exemplares_emprestados = 'circulacao.exemplares_emprestados'
     url_exemplares_devolvidos = CATALOGO_SERVICE_URL + '/exemplares/devolvidos'
-    task_exemplares_devolvidos = 'circulacao.exemplares_emprestados'
+    task_exemplares_devolvidos = 'circulacao.exemplares_devolvidos'
     url_buscar_livro = CATALOGO_SERVICE_URL + '/livros'
 
     @classmethod
@@ -39,6 +40,22 @@ class CatalogoService:
                 'codigos': codigos
             }
         })
+
+    @classmethod
+    def call_exemplares_emprestados(cls, codigos):
+        try:
+            cls.exemplares_emprestados(codigos)
+        
+        except:
+            name = datetime_name(cls.task_exemplares_emprestados)
+            save_clocked_task(
+                name=name,
+                task=cls.task_exemplares_emprestados,
+                headers={ 'periodic_task_name': name },
+                args=[codigos],
+                queue=CIRCULACAO_QUEUE,
+                one_off=True
+            )
 
     @classmethod
     def exemplares_devolvidos(cls, codigos):

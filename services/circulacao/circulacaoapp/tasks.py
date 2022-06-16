@@ -64,5 +64,9 @@ def enviar_comprovante_reserva_cancelada(contexto):
     ReservaService.enviar_comprovante_reserva_cancelada(contexto)
 
 @shared_task(name='circulacao.exemplares_emprestados', base=IgnoreResultTask)
-def enviar_comprovante_reserva_cancelada(codigos):
+def exemplares_emprestados(codigos):
+    CatalogoService.exemplares_emprestados(codigos)
+
+@shared_task(name='circulacao.exemplares_devolvidos', base=IgnoreResultTask)
+def exemplares_devolvidos(codigos):
     CatalogoService.exemplares_devolvidos(codigos)
