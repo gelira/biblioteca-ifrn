@@ -8,6 +8,11 @@ from circulacao.celery import app
 
 from ..models import Emprestimo, Suspensao
 
+from .base import (
+    send_task_group,
+    datetime_name,
+    save_batch_clocked_tasks
+)
 from .autenticacao import AutenticacaoService
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
@@ -16,6 +21,8 @@ from .reserva import ReservaService
 CIRCULACAO_QUEUE = os.getenv('CIRCULACAO_QUEUE')
 
 class DevolucaoService:
+    task_enviar_comprovante_devolucao = 'circulacao.enviar_comprovante_devolucao'
+
     @classmethod
     def get_emprestimos_para_devolucao(cls, emprestimos_id):
         qs = Emprestimo.objects.filter(
@@ -101,11 +108,26 @@ class DevolucaoService:
 
     @classmethod
     def call_enviar_comprovantes_devolucao(cls, comprovantes):
-        group([
-            app.signature(
-                'circulacao.enviar_comprovante_devolucao',
-                args=[comprovante],
-                queue=CIRCULACAO_QUEUE,
-                ignore_result=True
-            ) for comprovante in comprovantes
-        ])()
+        func = lambda x: ({
+            'args': [x],
+            'queue': CIRCULACAO_QUEUE,
+            'ignore_result': True
+        })
+
+        contexts = list(map(func, comprovantes))
+
+        try:
+            send_task_group(cls.task_enviar_comprovante_devolucao, contexts)
+
+        except:
+            for context in contexts:
+                name = datetime_name(cls.task_enviar_comprovante_devolucao)
+                context.pop('ignore_result', None)
+                context.update({
+                    'name': name,
+                    'task': cls.task_enviar_comprovante_devolucao,
+                    'headers': { 'periodic_task_name': name },
+                    'one_off': True
+                })
+
+            save_batch_clocked_tasks(contexts=contexts)
