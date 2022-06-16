@@ -35,8 +35,7 @@ class AbonoService:
 
             Suspensao.objects.filter(_id__in=suspensoes).update(abono_id=abono.pk)
             
-            AutenticacaoService.abono_suspensoes(
-                list(map(lambda x: ({ 'usuario_id': x, 'dias': usuarios[x] }), usuarios))
-            )
+            func = lambda x: ({ 'usuario_id': x, 'dias': usuarios[x] })
+            AutenticacaoService.abono_suspensoes(list(map(func, usuarios)))
         
             return abono
