@@ -249,18 +249,13 @@ class ReservaService:
 
     @classmethod
     def call_enviar_reserva_disponivel(cls, contexto):
-        ctx = {
-            'args': [contexto],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
 
         try:
             send_task(cls.task_enviar_reserva_disponivel, **ctx)
 
         except:
             name = datetime_name(cls.task_enviar_reserva_disponivel)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_reserva_disponivel,
@@ -272,18 +267,13 @@ class ReservaService:
 
     @classmethod
     def call_enviar_reserva_cancelada(cls, contexto):
-        ctx = {
-            'args': [contexto],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
 
         try:
             send_task(cls.task_enviar_reserva_cancelada, **ctx)
 
         except:
             name = datetime_name(cls.task_enviar_reserva_cancelada)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_reserva_cancelada,
@@ -295,11 +285,7 @@ class ReservaService:
 
     @classmethod
     def call_proximas_reservas(cls, livros):
-        func = lambda x: ({
-            'args': [x],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        })
+        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
 
         contexts = list(map(func, livros))
 
@@ -309,7 +295,6 @@ class ReservaService:
         except:
             for context in contexts:
                 name = datetime_name(cls.task_proxima_reserva)
-                context.pop('ignore_result', None)
                 context.update({
                     'name': name,
                     'task': cls.task_proxima_reserva,
@@ -333,18 +318,13 @@ class ReservaService:
 
     @classmethod
     def call_enviar_comprovante_reserva(cls, contexto):
-        ctx = {
-            'args': [contexto],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
 
         try:
             send_task(cls.task_enviar_comprovante_reserva, **ctx)
 
         except:
             name = datetime_name(cls.task_enviar_comprovante_reserva)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_reserva,
@@ -356,18 +336,13 @@ class ReservaService:
 
     @classmethod
     def call_enviar_comprovante_reserva_cancelada(cls, contexto):
-        ctx = {
-            'args': [contexto],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
 
         try:
             send_task(cls.task_enviar_comprovante_reserva_cancelada, **ctx)
 
         except:
             name = datetime_name(cls.task_enviar_comprovante_reserva_cancelada)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_reserva_cancelada,

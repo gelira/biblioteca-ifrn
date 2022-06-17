@@ -108,12 +108,7 @@ class DevolucaoService:
 
     @classmethod
     def call_enviar_comprovantes_devolucao(cls, comprovantes):
-        func = lambda x: ({
-            'args': [x],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        })
-
+        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
         contexts = list(map(func, comprovantes))
 
         try:
@@ -122,7 +117,6 @@ class DevolucaoService:
         except:
             for context in contexts:
                 name = datetime_name(cls.task_enviar_comprovante_devolucao)
-                context.pop('ignore_result', None)
                 context.update({
                     'name': name,
                     'task': cls.task_enviar_comprovante_devolucao,

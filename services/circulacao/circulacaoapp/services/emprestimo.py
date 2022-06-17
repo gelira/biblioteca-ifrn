@@ -285,18 +285,13 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovante_emprestimo(cls, contexto):
-        ctx = {
-            'args': [contexto],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
 
         try:
             send_task(cls.task_enviar_comprovante_emprestimo, **ctx)
 
         except:
             name = datetime_name(cls.task_enviar_comprovante_emprestimo)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_emprestimo,
@@ -308,12 +303,7 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovantes_renovacao(cls, comprovantes):
-        func = lambda x: ({
-            'args': [x],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        })
-
+        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
         ctxs = list(map(func, comprovantes))
 
         try:
@@ -322,7 +312,6 @@ class EmprestimoService:
         except:
             for ctx in ctxs:
                 name = datetime_name(cls.task_enviar_comprovante_renovacao)
-                ctx.pop('ignore_result', None)
                 ctx.update({
                     'name': name,
                     'task': cls.task_enviar_comprovante_renovacao,
@@ -392,12 +381,7 @@ class EmprestimoService:
 
     @classmethod
     def call_agendar_alertas_emprestimo(cls, contextos):
-        func = lambda x: ({
-            'args': [x],
-            'queue': CIRCULACAO_QUEUE,
-            'ignore_result': True
-        })
-
+        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
         ctxs = list(map(func, contextos))
 
         try:
@@ -406,7 +390,6 @@ class EmprestimoService:
         except:
             for ctx in ctxs:
                 name = datetime_name(cls.task_agendar_alertas_emprestimo)
-                ctx.pop('ignore_result', None)
                 ctx.update({
                     'name': name,
                     'task': cls.task_agendar_alertas_emprestimo,

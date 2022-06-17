@@ -57,18 +57,13 @@ class NotificacaoService:
 
     @classmethod
     def try_to_send(cls, task_name, args):
-        ctx = {
-            'args': args,
-            'queue': NOTIFICACAO_QUEUE,
-            'ignore_result': True
-        }
+        ctx = { 'args': args, 'queue': NOTIFICACAO_QUEUE }
 
         try:
             send_task(task_name, **ctx)
 
         except:
             name = datetime_name(task_name)
-            ctx.pop('ignore_result', None)
             ctx.update({
                 'name': name,
                 'task': task_name,

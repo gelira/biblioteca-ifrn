@@ -39,11 +39,11 @@ def handle_kwargs(kw):
 
 @circuit(failure_threshold = 1, recovery_timeout = 30)
 def send_task(task_name, **kw):
-    app.send_task(task_name, **kw)
+    app.send_task(task_name, ignore_result=True, **kw)
 
 @circuit(failure_threshold = 1, recovery_timeout = 30)
 def send_task_group(task_name, contexts):
-    func = lambda context: app.signature(task_name, **context)
+    func = lambda context: app.signature(task_name, ignore_result=True, **context)
     group(list(map(func, contexts)))()
 
 def save_clocked_task(dt=None, delay_seconds=60, **kw):
