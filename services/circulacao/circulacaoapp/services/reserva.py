@@ -193,10 +193,8 @@ class ReservaService:
                 delay_seconds=24*60*60,
                 name=name,
                 task=cls.task_verificar_reserva,
-                headers={ 'periodic_task_name': name },
                 args=[reserva_id],
-                queue=CIRCULACAO_QUEUE,
-                one_off=True
+                queue=CIRCULACAO_QUEUE
             )
 
     @classmethod
@@ -259,8 +257,6 @@ class ReservaService:
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_reserva_disponivel,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)
@@ -277,8 +273,6 @@ class ReservaService:
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_reserva_cancelada,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)
@@ -298,8 +292,6 @@ class ReservaService:
                 context.update({
                     'name': name,
                     'task': cls.task_proxima_reserva,
-                    'headers': { 'periodic_task_name': name },
-                    'one_off': True
                 })
 
             save_batch_clocked_tasks(contexts=contexts)
@@ -328,8 +320,6 @@ class ReservaService:
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_reserva,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)
@@ -346,8 +336,6 @@ class ReservaService:
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_reserva_cancelada,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)

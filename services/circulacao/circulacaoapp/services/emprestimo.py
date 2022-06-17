@@ -295,8 +295,6 @@ class EmprestimoService:
             ctx.update({
                 'name': name,
                 'task': cls.task_enviar_comprovante_emprestimo,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)
@@ -315,8 +313,6 @@ class EmprestimoService:
                 ctx.update({
                     'name': name,
                     'task': cls.task_enviar_comprovante_renovacao,
-                    'headers': { 'periodic_task_name': name },
-                    'one_off': True
                 })
 
             save_batch_clocked_tasks(contexts=ctxs)
@@ -373,10 +369,8 @@ class EmprestimoService:
                     delay_seconds=0,
                     name=name,
                     task=cls.task_checar_emprestimo,
-                    headers={ 'periodic_task_name': name },
                     args=[contexto],
-                    queue=CIRCULACAO_QUEUE,
-                    one_off=True
+                    queue=CIRCULACAO_QUEUE
                 )
 
     @classmethod
@@ -393,8 +387,6 @@ class EmprestimoService:
                 ctx.update({
                     'name': name,
                     'task': cls.task_agendar_alertas_emprestimo,
-                    'headers': { 'periodic_task_name': name },
-                    'one_off': True
                 })
 
             save_batch_clocked_tasks(contexts=ctxs)

@@ -52,10 +52,8 @@ class CatalogoService:
             save_clocked_task(
                 name=name,
                 task=cls.task_exemplares_emprestados,
-                headers={ 'periodic_task_name': name },
                 args=[codigos],
-                queue=CIRCULACAO_QUEUE,
-                one_off=True
+                queue=CIRCULACAO_QUEUE
             )
 
     @classmethod
@@ -81,10 +79,8 @@ class CatalogoService:
             save_clocked_task(
                 name=name,
                 task=cls.task_exemplares_devolvidos,
-                headers={ 'periodic_task_name': name },
                 args=[codigos],
-                queue=CIRCULACAO_QUEUE,
-                one_off=True
+                queue=CIRCULACAO_QUEUE
             )
 
     @classmethod

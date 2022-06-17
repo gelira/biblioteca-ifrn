@@ -25,14 +25,19 @@ def handle_datetime(dt=None, delay_seconds=60):
     return dt
 
 def handle_kwargs(kw):
+    name = kw.get('name')
     args = kw.get('args', [])
     kwargs = kw.get('kwargs', {})
     headers = kw.get('headers', {})
+
+    if name:
+        headers['periodic_task_name'] = name
 
     kw.update({
         'args': json.dumps(args),
         'kwargs': json.dumps(kwargs),
         'headers': json.dumps(headers),
+        'one_off': True,
     })
 
     return kw
@@ -50,11 +55,9 @@ def save_clocked_task(dt=None, delay_seconds=60, **kw):
     '''
     name    -> nome único da task
     task    -> nome da task
-    headers -> { 'periodic_task_name': ... }
     args    -> lista de argumentos
     kwargs  -> dicionário de argumentos
     queue   -> nome da fila
-    one_off -> boolean
     '''
     dt = handle_datetime(dt, delay_seconds)
     kw = handle_kwargs(kw)
@@ -67,11 +70,9 @@ def save_batch_clocked_tasks(dt=None, delay_seconds=60, contexts=[]):
     '''
     name    -> nome único da task
     task    -> nome da task
-    headers -> { 'periodic_task_name': ... }
     args    -> lista de argumentos
     kwargs  -> dicionário de argumentos
     queue   -> nome da fila
-    one_off -> boolean
     '''
     if not contexts:
         return

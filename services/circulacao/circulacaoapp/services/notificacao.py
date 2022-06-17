@@ -67,8 +67,6 @@ class NotificacaoService:
             ctx.update({
                 'name': name,
                 'task': task_name,
-                'headers': { 'periodic_task_name': name },
-                'one_off': True
             })
             
             save_clocked_task(**ctx)

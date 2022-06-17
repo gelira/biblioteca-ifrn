@@ -120,8 +120,6 @@ class DevolucaoService:
                 context.update({
                     'name': name,
                     'task': cls.task_enviar_comprovante_devolucao,
-                    'headers': { 'periodic_task_name': name },
-                    'one_off': True
                 })
 
             save_batch_clocked_tasks(contexts=contexts)
