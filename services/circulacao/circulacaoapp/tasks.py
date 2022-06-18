@@ -9,7 +9,7 @@ from .services import (
 
 class BaseTask(Task):
     autoretry_for = [Exception]
-    default_retry_delay = 30
+    default_retry_delay = 60
     max_retries = None
 
 class IgnoreResultTask(BaseTask):

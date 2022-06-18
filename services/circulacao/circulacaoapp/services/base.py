@@ -42,11 +42,11 @@ def handle_kwargs(kw):
 
     return kw
 
-@circuit(failure_threshold = 1, recovery_timeout = 30)
+@circuit(failure_threshold = 1, recovery_timeout = 60)
 def send_task(task_name, **kw):
     app.send_task(task_name, ignore_result=True, **kw)
 
-@circuit(failure_threshold = 1, recovery_timeout = 30)
+@circuit(failure_threshold = 1, recovery_timeout = 60)
 def send_task_group(task_name, contexts):
     func = lambda context: app.signature(task_name, ignore_result=True, **context)
     group(list(map(func, contexts)))()
