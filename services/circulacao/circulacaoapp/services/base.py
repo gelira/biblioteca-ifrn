@@ -104,3 +104,23 @@ def try_to_send(task_name, **kwargs):
         })
         
         save_clocked_task(**kwargs)
+
+def try_to_send_group(task_name, contexts, func):
+    '''
+    func        -> lambda function
+    contexts    -> lista
+    '''
+
+    contexts = list(map(func, contexts))
+
+    try:
+        send_task_group(task_name, contexts)
+
+    except:
+        for context in contexts:
+            context.update({
+                'name': datetime_name(task_name),
+                'task': task_name,
+            })
+
+        save_batch_clocked_tasks(contexts=contexts)
