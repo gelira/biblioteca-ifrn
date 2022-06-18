@@ -6,7 +6,7 @@ from django.db.models import F
 from django.utils.timezone import localtime
 from catalogo.celery import app
 
-from .. import exceptions, serializers
+from .. import exceptions
 from ..models import (
     Livro,
     FotoCapa,
@@ -18,19 +18,13 @@ CATALOGO_QUEUE = os.getenv('CATALOGO_QUEUE')
 
 class LivroService:
     @classmethod
-    def busca_livro(cls, livro_id, **kwargs):
+    def busca_livro(cls, livro_id):
         livro = Livro.objects.filter(_id=livro_id).first()
 
         if not livro:
             raise exceptions.LivroNotFound
 
-        if kwargs.get('sem_exemplares'):
-            serializer_class = serializers.LivroSerializer
-        else: 
-            serializer_class = serializers.LivroRetrieveSerializer
-        
-        ser = serializer_class(livro)
-        return ser.data
+        return livro
 
     @classmethod
     def upload_foto_capa(cls, livro_id, livro_pk, foto_base64):

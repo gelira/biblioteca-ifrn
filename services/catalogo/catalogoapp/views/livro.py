@@ -42,6 +42,12 @@ class LivroViewSet(viewsets.ModelViewSet):
         return []
 
     def get_serializer_class(self):
+        if self.action == 'retrieve':
+            if self.request.GET.get('sem_exemplares'):
+                return serializers.LivroSerializer
+
+            return serializers.LivroRetrieveSerializer
+
         if self.action == 'list':
             return serializers.LivroListSerializer
         
@@ -51,8 +57,8 @@ class LivroViewSet(viewsets.ModelViewSet):
         return serializers.LivroSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        data = LivroService.busca_livro(kwargs['pk'], sem_exemplares=request.GET.get('sem_exemplares'))
-        return Response(data)
+        ser = self.get_serializer(LivroService.busca_livro(kwargs['pk']))
+        return Response(ser.data)
 
     @action(methods=['put'], detail=True, url_path='foto-capa')
     def foto_capa(self, request, pk=None):

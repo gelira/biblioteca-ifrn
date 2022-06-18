@@ -48,6 +48,3 @@ class ExemplarService:
             raise exceptions.ExemplarNotFound
 
         return e
-
-        # ser = serializers.ExemplarConsultaSerializer(e)
-        # return ser.data
