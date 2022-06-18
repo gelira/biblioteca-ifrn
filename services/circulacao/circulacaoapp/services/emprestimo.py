@@ -7,11 +7,11 @@ from .. import exceptions
 from ..models import Emprestimo, Reserva, Renovacao
 
 from .base import (
-    send_task, 
     send_task_group,
     datetime_name, 
     save_clocked_task,
-    save_batch_clocked_tasks
+    save_batch_clocked_tasks,
+    try_to_send
 )
 from .autenticacao import AutenticacaoService
 from .notificacao import NotificacaoService
@@ -285,19 +285,11 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovante_emprestimo(cls, contexto):
-        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
-
-        try:
-            send_task(cls.task_enviar_comprovante_emprestimo, **ctx)
-
-        except:
-            name = datetime_name(cls.task_enviar_comprovante_emprestimo)
-            ctx.update({
-                'name': name,
-                'task': cls.task_enviar_comprovante_emprestimo,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_enviar_comprovante_emprestimo,
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE
+        )
 
     @classmethod
     def call_enviar_comprovantes_renovacao(cls, comprovantes):

@@ -8,11 +8,11 @@ from .. import exceptions
 from ..models import Reserva, Emprestimo
 
 from .base import (
-    send_task,
     send_task_group, 
     save_clocked_task,
     save_batch_clocked_tasks, 
-    datetime_name
+    datetime_name,
+    try_to_send
 )
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
@@ -247,35 +247,19 @@ class ReservaService:
 
     @classmethod
     def call_enviar_reserva_disponivel(cls, contexto):
-        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
-
-        try:
-            send_task(cls.task_enviar_reserva_disponivel, **ctx)
-
-        except:
-            name = datetime_name(cls.task_enviar_reserva_disponivel)
-            ctx.update({
-                'name': name,
-                'task': cls.task_enviar_reserva_disponivel,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_enviar_reserva_disponivel,
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE
+        )
 
     @classmethod
     def call_enviar_reserva_cancelada(cls, contexto):
-        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
-
-        try:
-            send_task(cls.task_enviar_reserva_cancelada, **ctx)
-
-        except:
-            name = datetime_name(cls.task_enviar_reserva_cancelada)
-            ctx.update({
-                'name': name,
-                'task': cls.task_enviar_reserva_cancelada,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_enviar_reserva_cancelada,
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE
+        )
 
     @classmethod
     def call_proximas_reservas(cls, livros):
@@ -310,32 +294,16 @@ class ReservaService:
 
     @classmethod
     def call_enviar_comprovante_reserva(cls, contexto):
-        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
-
-        try:
-            send_task(cls.task_enviar_comprovante_reserva, **ctx)
-
-        except:
-            name = datetime_name(cls.task_enviar_comprovante_reserva)
-            ctx.update({
-                'name': name,
-                'task': cls.task_enviar_comprovante_reserva,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_enviar_comprovante_reserva,
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE
+        )
 
     @classmethod
     def call_enviar_comprovante_reserva_cancelada(cls, contexto):
-        ctx = { 'args': [contexto], 'queue': CIRCULACAO_QUEUE }
-
-        try:
-            send_task(cls.task_enviar_comprovante_reserva_cancelada, **ctx)
-
-        except:
-            name = datetime_name(cls.task_enviar_comprovante_reserva_cancelada)
-            ctx.update({
-                'name': name,
-                'task': cls.task_enviar_comprovante_reserva_cancelada,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_enviar_comprovante_reserva_cancelada,
+            args=[contexto],
+            queue=CIRCULACAO_QUEUE
+        )

@@ -1,10 +1,6 @@
 import os
 
-from .base import (
-    send_task, 
-    datetime_name, 
-    save_clocked_task
-)
+from .base import try_to_send
 
 NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
 
@@ -21,52 +17,72 @@ class NotificacaoService:
 
     @classmethod
     def comprovante_emprestimo(cls, contexto):
-        cls.try_to_send(cls.task_comprovante_emprestimo, [contexto])
+        try_to_send(
+            cls.task_comprovante_emprestimo, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def comprovante_devolucao(cls, contexto):
-        cls.try_to_send(cls.task_comprovante_devolucao, [contexto])
+        try_to_send(
+            cls.task_comprovante_devolucao, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def comprovante_renovacao(cls, contexto):
-        cls.try_to_send(cls.task_comprovante_renovacao, [contexto])
+        try_to_send(
+            cls.task_comprovante_renovacao, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def reserva_disponivel(cls, contexto):
-        cls.try_to_send(cls.task_reserva_disponivel, [contexto])
+        try_to_send(
+            cls.task_reserva_disponivel, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def reserva_cancelada(cls, contexto):
-        cls.try_to_send(cls.task_reserva_cancelada, [contexto])
+        try_to_send(
+            cls.task_reserva_cancelada, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def comprovante_reserva(cls, contexto):
-        cls.try_to_send(cls.task_comprovante_reserva, [contexto])
+        try_to_send(
+            cls.task_comprovante_reserva, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
     
     @classmethod
     def comprovante_reserva_cancelada(cls, contexto):
-        cls.try_to_send(cls.task_comprovante_reserva_cancelada, [contexto])
+        try_to_send(
+            cls.task_comprovante_reserva_cancelada, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def alerta_emprestimo_vencendo(cls, contexto):
-        cls.try_to_send(cls.task_alerta_emprestimo_vencendo, [contexto])
+        try_to_send(
+            cls.task_alerta_emprestimo_vencendo, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )
 
     @classmethod
     def alerta_emprestimo_atrasado(cls, contexto):
-        cls.try_to_send(cls.task_alerta_emprestimo_atrasado, [contexto])
-
-    @classmethod
-    def try_to_send(cls, task_name, args):
-        ctx = { 'args': args, 'queue': NOTIFICACAO_QUEUE }
-
-        try:
-            send_task(task_name, **ctx)
-
-        except:
-            name = datetime_name(task_name)
-            ctx.update({
-                'name': name,
-                'task': task_name,
-            })
-            
-            save_clocked_task(**ctx)
+        try_to_send(
+            cls.task_alerta_emprestimo_atrasado, 
+            args=[contexto], 
+            queue=NOTIFICACAO_QUEUE
+        )

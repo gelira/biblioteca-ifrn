@@ -1,10 +1,7 @@
 import os
-from celery import group
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import APIException
-
-from circulacao.celery import app
 
 from ..models import Emprestimo, Suspensao
 
