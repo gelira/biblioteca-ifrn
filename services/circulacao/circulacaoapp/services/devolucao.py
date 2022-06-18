@@ -5,11 +5,7 @@ from rest_framework.exceptions import APIException
 
 from ..models import Emprestimo, Suspensao
 
-from .base import (
-    send_task_group,
-    datetime_name,
-    save_batch_clocked_tasks
-)
+from .base import try_to_send_group
 from .autenticacao import AutenticacaoService
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
@@ -105,18 +101,8 @@ class DevolucaoService:
 
     @classmethod
     def call_enviar_comprovantes_devolucao(cls, comprovantes):
-        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
-        contexts = list(map(func, comprovantes))
-
-        try:
-            send_task_group(cls.task_enviar_comprovante_devolucao, contexts)
-
-        except:
-            for context in contexts:
-                name = datetime_name(cls.task_enviar_comprovante_devolucao)
-                context.update({
-                    'name': name,
-                    'task': cls.task_enviar_comprovante_devolucao,
-                })
-
-            save_batch_clocked_tasks(contexts=contexts)
+        try_to_send_group(
+            cls.task_enviar_comprovante_devolucao,
+            comprovantes,
+            lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
+        )

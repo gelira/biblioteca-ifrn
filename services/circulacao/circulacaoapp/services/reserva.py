@@ -8,11 +8,10 @@ from .. import exceptions
 from ..models import Reserva, Emprestimo
 
 from .base import (
-    send_task_group, 
     save_clocked_task,
-    save_batch_clocked_tasks, 
     datetime_name,
-    try_to_send
+    try_to_send,
+    try_to_send_group
 )
 from .catalogo import CatalogoService
 from .notificacao import NotificacaoService
@@ -263,22 +262,11 @@ class ReservaService:
 
     @classmethod
     def call_proximas_reservas(cls, livros):
-        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
-
-        contexts = list(map(func, livros))
-
-        try:
-            send_task_group(cls.task_proxima_reserva, contexts)
-
-        except:
-            for context in contexts:
-                name = datetime_name(cls.task_proxima_reserva)
-                context.update({
-                    'name': name,
-                    'task': cls.task_proxima_reserva,
-                })
-
-            save_batch_clocked_tasks(contexts=contexts)
+        try_to_send_group(
+            cls.task_proxima_reserva,
+            livros,
+            lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
+        )
 
     @classmethod
     def enviar_comprovante_reserva(cls, contexto):

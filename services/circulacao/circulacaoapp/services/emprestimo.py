@@ -7,11 +7,10 @@ from .. import exceptions
 from ..models import Emprestimo, Reserva, Renovacao
 
 from .base import (
-    send_task_group,
     datetime_name, 
     save_clocked_task,
-    save_batch_clocked_tasks,
-    try_to_send
+    try_to_send,
+    try_to_send_group
 )
 from .autenticacao import AutenticacaoService
 from .notificacao import NotificacaoService
@@ -293,21 +292,11 @@ class EmprestimoService:
 
     @classmethod
     def call_enviar_comprovantes_renovacao(cls, comprovantes):
-        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
-        ctxs = list(map(func, comprovantes))
-
-        try:
-            send_task_group(cls.task_enviar_comprovante_renovacao, ctxs)
-
-        except:
-            for ctx in ctxs:
-                name = datetime_name(cls.task_enviar_comprovante_renovacao)
-                ctx.update({
-                    'name': name,
-                    'task': cls.task_enviar_comprovante_renovacao,
-                })
-
-            save_batch_clocked_tasks(contexts=ctxs)
+        try_to_send_group(
+            cls.task_enviar_comprovante_renovacao,
+            comprovantes,
+            lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
+        )
 
     @classmethod
     def checar_emprestimo(cls, contexto):
@@ -367,18 +356,8 @@ class EmprestimoService:
 
     @classmethod
     def call_agendar_alertas_emprestimo(cls, contextos):
-        func = lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
-        ctxs = list(map(func, contextos))
-
-        try:
-            send_task_group(cls.task_agendar_alertas_emprestimo, ctxs)
-
-        except:
-            for ctx in ctxs:
-                name = datetime_name(cls.task_agendar_alertas_emprestimo)
-                ctx.update({
-                    'name': name,
-                    'task': cls.task_agendar_alertas_emprestimo,
-                })
-
-            save_batch_clocked_tasks(contexts=ctxs)
+        try_to_send_group(
+            cls.task_agendar_alertas_emprestimo,
+            contextos,
+            lambda x: ({ 'args': [x], 'queue': CIRCULACAO_QUEUE })
+        )
