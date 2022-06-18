@@ -87,3 +87,20 @@ def save_batch_clocked_tasks(dt=None, delay_seconds=60, contexts=[]):
             **handle_kwargs(context)
         ) for context in contexts
     ])
+
+def try_to_send(task_name, **kwargs):
+    '''
+    args    -> lista de argumentos
+    queue   -> nome da fila
+    '''
+
+    try:
+        send_task(task_name, **kwargs)
+
+    except:
+        kwargs.update({
+            'name': datetime_name(task_name),
+            'task': task_name,
+        })
+        
+        save_clocked_task(**kwargs)
