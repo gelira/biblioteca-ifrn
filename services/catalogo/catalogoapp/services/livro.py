@@ -4,7 +4,6 @@ import base64
 from django.db import transaction
 from django.db.models import F
 from django.utils.timezone import localtime
-from catalogo.celery import app
 
 from .. import exceptions
 from ..models import (
@@ -14,9 +13,13 @@ from ..models import (
 )
 from ..cliente_aws import get_bucket
 
+from .base import try_to_send
+
 CATALOGO_QUEUE = os.getenv('CATALOGO_QUEUE')
 
 class LivroService:
+    task_upload_foto_capa = 'catalogo.upload_foto_capa'
+
     @classmethod
     def busca_livro(cls, livro_id):
         livro = Livro.objects.filter(_id=livro_id).first()
@@ -54,11 +57,10 @@ class LivroService:
             )
 
     @classmethod
-    def task_upload_foto_capa(cls, livro_id, livro_pk, foto_base64):
-        app.send_task(
-            'catalogo.upload_foto_capa',
+    def call_upload_foto_capa(cls, livro_id, livro_pk, foto_base64):
+        try_to_send(
+            cls.task_upload_foto_capa,
             args=[livro_id, livro_pk, foto_base64],
-            ignore_task=True, 
             queue=CATALOGO_QUEUE
         )
 
