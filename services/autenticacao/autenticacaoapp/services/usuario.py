@@ -63,7 +63,7 @@ class UsuarioService:
             usuario.email_pessoal = email_pessoal
             usuario.save()
 
-            NotificacaoService.salvar_contato(
+            NotificacaoService.call_salvar_contato(
                 str(usuario._id),
                 {
                     'nome': usuario.nome,
