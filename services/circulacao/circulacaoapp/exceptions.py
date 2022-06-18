@@ -20,3 +20,36 @@ class ServiceUnavailable(APIException):
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     default_detail = 'Serviço indisponível'
     default_code = 'service_unavailable'
+
+class UsuarioSuspenso(APIException):
+    default_detail = 'Usuário está suspenso'
+
+class EmprestimosAtrasados(APIException):
+    default_detail = 'Usuário tem empréstimos atrasados'
+
+class LivroEmprestadoUsuario(APIException):
+    default_detail = 'Usuário já possui um exemplar desse livro emprestado'
+
+class ReservaVigente(APIException):
+    default_detail = 'Usuário tem uma reserva vigente para este livro'
+
+class ExemplaresDisponiveis(APIException):
+    default_detail = 'Há exemplares desse livro disponíveis'
+
+class LimiteEmprestimosReservas(APIException):
+    default_detail = 'Os empréstimos + reservas do usuário estão no limite'
+
+class LimiteEmprestimos(APIException):
+    default_detail = 'O limite de livros para o usuário foi atingido'
+
+class ReservaNotFound(APIException):
+    default_detail = 'Reserva não encontrada'
+
+class ReservaCancelada(APIException):
+    default_detail = 'Reserva já cancelada'
+
+class ReservaAtendida(APIException):
+    default_detail = 'Reserva já atendida'
+
+class ExemplarLivroEmprestadoUsuario(APIException):
+    default_detail = 'Usuário não pode pegar dois exemplares do mesmo livro'

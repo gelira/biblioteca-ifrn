@@ -1,14 +1,16 @@
 import os
-from autenticacao.celery import app
+
+from .base import try_to_send
 
 NOTIFICACAO_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
 
 class NotificacaoService:
+    task_salvar_contato = 'notificacao.salvar_contato'
+
     @classmethod
-    def salvar_contato(cls, usuario_id, data):
-        app.send_task(
-            'notificacao.salvar_contato',
+    def call_salvar_contato(cls, usuario_id, data):
+        try_to_send(
+            cls.task_salvar_contato,
             args=[usuario_id, data],
-            queue=NOTIFICACAO_QUEUE,
-            ignore_result=True
+            queue=NOTIFICACAO_QUEUE
         )

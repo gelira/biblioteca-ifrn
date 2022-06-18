@@ -1,11 +1,7 @@
-from django.db import transaction
 from rest_framework import serializers
 
-from ..services import AutenticacaoService
-from ..models import (
-    Abono,
-    Suspensao
-)
+from ..services import AbonoService
+from ..models import Abono
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
     suspensoes = serializers.ListField(
@@ -15,48 +11,25 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        suspensoes_id = data['suspensoes']
-        suspensoes = []
-        usuarios = {}
-
-        for s_id in suspensoes_id:
-            suspensao = Suspensao.objects.filter(
-                _id=s_id,
-                abono_id=None
-            ).first()
-            
-            if suspensao is not None:
-                usuario_id = str(suspensao.usuario_id)
-                if usuario_id not in usuarios:
-                    usuarios[usuario_id] = 0
-                
-                usuarios[usuario_id] += suspensao.total_dias
-                suspensoes.append(s_id)
+        suspensoes, usuarios = AbonoService.validate_suspensoes(data['suspensoes'])
 
         if not usuarios:
             raise serializers.ValidationError('Nenhuma suspensão encontrada')
 
         data.update({
-            'usuario_id': self.context['request'].user['_id'],
+            'suspensoes': suspensoes,
             'usuarios': usuarios,
-            'suspensoes': suspensoes
         })
+
         return data
 
     def create(self, data):
+        usuario_id = self.context['request'].user['_id']
+        justificativa = data['justificativa']
+        suspensoes = data['suspensoes']
         usuarios = data['usuarios']
 
-        with transaction.atomic():
-            abono = Abono.objects.create(
-                usuario_id=data['usuario_id'],
-                justificativa=data['justificativa']
-            )
-
-            Suspensao.objects.filter(_id__in=data['suspensoes']).update(abono_id=abono.pk)
-            AutenticacaoService.abono_suspensoes(list(map(
-                lambda x: ({ 'usuario_id': x, 'dias': usuarios[x] }), usuarios)))
-        
-            return abono
+        return AbonoService.create_abono(usuario_id, justificativa, suspensoes, usuarios)
     
     class Meta:
         model = Abono

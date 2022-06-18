@@ -72,7 +72,7 @@ class AutenticacaoService:
             u.perfil = perfil
             u.save()
 
-        NotificacaoService.salvar_contato(
+        NotificacaoService.call_salvar_contato(
             str(u._id),
             {
                 'nome': nome,

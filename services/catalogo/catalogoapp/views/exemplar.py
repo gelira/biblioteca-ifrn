@@ -19,8 +19,8 @@ class ExemplarViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)', authentication_classes=[], permission_classes=[])
     def consulta(self, request, codigo):
-        data = ExemplarService.consulta_codigo_exemplar(codigo)
-        return Response(data)
+        ser = self.get_serializer(ExemplarService.consulta_codigo_exemplar(codigo))
+        return Response(ser.data)
 
     @action(methods=['patch'], detail=False, url_path='emprestados')
     def emprestados(self, request):
@@ -50,3 +50,9 @@ class ExemplarViewSet(viewsets.ModelViewSet):
             ]
 
         return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.action == 'consulta':
+            return serializers.ExemplarConsultaSerializer
+
+        return super().get_serializer_class()

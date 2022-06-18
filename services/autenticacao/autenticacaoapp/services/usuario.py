@@ -4,6 +4,7 @@ from django.db import transaction
 
 from .. import exceptions
 from ..models import Usuario
+from .notificacao import NotificacaoService
 
 class UsuarioService:
     @classmethod
@@ -51,3 +52,23 @@ class UsuarioService:
                 if usuario.suspensao >= hoje:
                     usuario.suspensao -= timezone.timedelta(days=dias)
                     usuario.save()
+
+    @classmethod
+    def email_pessoal_utilizado(cls, email):
+        return Usuario.objects.filter(email_pessoal=email).exists()
+
+    @classmethod
+    def atualizar_email_pessoal(cls, usuario, email_pessoal):
+        with transaction.atomic():
+            usuario.email_pessoal = email_pessoal
+            usuario.save()
+
+            NotificacaoService.call_salvar_contato(
+                str(usuario._id),
+                {
+                    'nome': usuario.nome,
+                    'matricula': usuario.user.username,
+                    'email_institucional': usuario.email_institucional,
+                    'email_pessoal': email_pessoal,
+                }
+            )

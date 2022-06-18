@@ -5,7 +5,7 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from ..models import Livro, Exemplar
-#from ..services import LivroService
+from ..services import LivroService
 from .exemplar import ExemplarListSerializer
 
 class LivroSerializer(serializers.ModelSerializer):
@@ -130,7 +130,7 @@ class FotoCapaLivroSerializer(serializers.Serializer):
         livro_pk = livro.pk
         foto_base64 = self.validated_data['foto_capa']
 
-        #LivroService.task_upload_foto_capa(livro_id, livro_pk, foto_base64)
+        LivroService.call_upload_foto_capa(livro_id, livro_pk, foto_base64)
 
     class Meta:
         model = Livro

@@ -1,129 +1,37 @@
-from django.db import transaction
-from django.db.models import Q
-from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
 from ..services import (
-    CatalogoService,
-    ReservaService
-) 
-from ..models import (
-    Reserva,
-    Emprestimo
+    AutenticacaoService, 
+    ReservaService, 
+    EmprestimoService
 )
+from ..models import Reserva
 
 class ReservaCreateSerializer(serializers.ModelSerializer):
     def validate_livro_id(self, value):
         livro_id = str(value)
-        self.validar_usuario_suspenso()
-        self.validar_emprestimos(livro_id)
-        self.validar_reservas(livro_id)
-        self.validar_livro(livro_id)
-        self.validar_quantidade_reservas_emprestimos()
-        return value
-
-    def validar_usuario_suspenso(self):
         usuario_id = self.context['request'].user['_id']
         suspensao = self.context['request'].user['suspensao']
-        hoje = timezone.localdate()
+        max_livros = self.context['request'].user['perfil']['max_livros']
 
-        if suspensao is not None:
-            suspensao = timezone.datetime.strptime(suspensao, '%Y-%m-%d').date()
-            if suspensao >= hoje:
-                raise serializers.ValidationError('Você está suspenso')
-
-        if Emprestimo.objects.filter(
-            usuario_id=usuario_id,
-            data_devolucao=None,
-            data_limite__lt=hoje
-        ).exists():
-            raise serializers.ValidationError('Você tem empréstimos atrasados')
-
-    def validar_emprestimos(self, livro_id):
-        if Emprestimo.objects.filter(
-            livro_id=livro_id,
-            usuario_id=self.context['request'].user['_id'],
-            data_devolucao=None
-        ).exists():
-            raise serializers.ValidationError('Você já possui um exemplar desse livro emprestado')
-
-    def validar_reservas(self, livro_id):
-        hoje = timezone.localdate()
-        usuario_id = self.context['request'].user['_id']
-        
-        if Reserva.objects.filter(
-            Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
-            usuario_id=usuario_id,
-            livro_id=livro_id,
-            cancelada=False,
-            emprestimo_id=None
-        ).exists():
-            raise serializers.ValidationError('Você tem uma reserva vigente para este livro')
-
-    def validar_livro(self, livro_id):
         try:
-            hoje = timezone.localdate()
-            livro = CatalogoService.busca_livro(livro_id)
-            
-            exemplares_disponiveis = livro['exemplares_disponiveis']
+            AutenticacaoService.check_usuario_suspenso(usuario_id, suspensao)
+            EmprestimoService.check_livro_emprestado_usuario(usuario_id, livro_id)
+            ReservaService.check_reservas_usuario(usuario_id, livro_id)
+            ReservaService.check_disponibilidade_livro(livro_id)
+            ReservaService.check_quantidade_reservas_emprestimos(usuario_id, max_livros)
 
-            if exemplares_disponiveis > 0:
-                if Reserva.objects.filter(
-                    Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
-                    livro_id=livro_id,
-                    cancelada=False,
-                    emprestimo_id=None
-                ).count() < exemplares_disponiveis:
-                    raise serializers.ValidationError('Há exemplares desse livro disponíveis')
-        
-        except serializers.ValidationError as e:
-            raise e
+        except APIException as e:
+            raise serializers.ValidationError(str(e))
 
-        except:
-            raise serializers.ValidationError('Serviço demorou muito a responder')
-
-    def validar_quantidade_reservas_emprestimos(self):
-        usuario_id = self.context['request'].user['_id']
-        hoje = timezone.localdate()
-
-        emprestimos = Emprestimo.objects.filter(
-            usuario_id=usuario_id,
-            data_devolucao=None
-        ).count()
-        reservas = Reserva.objects.filter(
-            Q(disponibilidade_retirada=None) | Q(disponibilidade_retirada__gte=hoje),
-            usuario_id=usuario_id,
-            cancelada=False,
-            emprestimo_id=None
-        ).count()
-
-        if emprestimos + reservas + 1 > self.context['request'].user['perfil']['max_livros']:
-            raise serializers.ValidationError('Seus empréstimos + reservas estão no limite')
+        return value
 
     def create(self, data):
         usuario_id = self.context['request'].user['_id']
         livro_id = data['livro_id']
 
-        agora = timezone.localtime()
-        agora_data = agora.strftime('%d/%m/%Y')
-        agora_hora = agora.strftime('%H:%M:%S')
-
-        with transaction.atomic():
-            reserva = Reserva.objects.create(
-                livro_id=livro_id,
-                usuario_id=usuario_id
-            )
-
-            contexto = {
-                'usuario_id': usuario_id,
-                'livro_id': livro_id,
-                'data': agora_data,
-                'hora': agora_hora,
-            }
-
-            ReservaService.call_enviar_comprovante_reserva(contexto)
-
-            return reserva
+        return ReservaService.create_reserva(usuario_id, livro_id)
 
     class Meta:
         model = Reserva
@@ -135,50 +43,13 @@ class CancelarReservaSerializer(serializers.Serializer):
     reserva = serializers.UUIDField()
 
     def validate_reserva(self, value):
-        reserva = Reserva.objects.filter(
-            _id=value,
-            usuario_id=self.context['request'].user['_id']
-        ).first()
+        usuario_id = self.context['request'].user['_id']
 
-        if reserva is None:
-            raise serializers.ValidationError('Reserva não encontrada')
+        try:
+            return ReservaService.check_reserva_to_cancel(usuario_id, value)
 
-        if reserva.cancelada:
-            raise serializers.ValidationError('Reserva já cancelada')
-
-        if reserva.emprestimo_id is not None:
-            raise serializers.ValidationError('Reserva já atendida')
-
-        return reserva
+        except APIException as e:
+            raise serializers.ValidationError(str(e))
 
     def create(self, data):
-        reserva = data['reserva']
-        usuario_id = str(reserva.usuario_id)
-        livro_id = str(reserva.livro_id)
-        
-        agora = timezone.localtime()
-        agora_data = agora.strftime('%d/%m/%Y')
-        agora_hora = agora.strftime('%H:%M:%S')
-
-        livros = []
-
-        with transaction.atomic():
-            reserva.cancelada = True
-            reserva.save()
-
-            if reserva.disponibilidade_retirada is not None:
-                livros.append(livro_id)
-
-        contexto = {
-            'usuario_id': usuario_id,
-            'livro_id': livro_id,
-            'data': agora_data,
-            'hora': agora_hora,
-        }
-
-        ReservaService.call_enviar_comprovante_reserva_cancelada(contexto)
-
-        if livros: 
-            ReservaService.call_proximas_reservas(livros)
-
-        return {}
+        return ReservaService.cancel_reserva(data['reserva'])

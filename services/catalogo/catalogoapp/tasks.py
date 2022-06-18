@@ -13,7 +13,6 @@ class IgnoreResultTask(BaseTask):
 class MaxRetriesTask(IgnoreResultTask):
     max_retries = 10
 
-@shared_task(name='catalogo.upload_foto_capa', base=MaxRetriesTask)
+@shared_task(name=LivroService.task_upload_foto_capa, base=MaxRetriesTask)
 def upload_foto_capa(livro_id, livro_pk, foto_base64):
     LivroService.upload_foto_capa(livro_id, livro_pk, foto_base64)
-

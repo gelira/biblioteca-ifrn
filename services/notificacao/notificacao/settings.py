@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
-PROJECT_NAME = os.getenv('PROJECT_NAME')
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'notificacaoapp',
+    'django_celery_beat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -131,13 +130,21 @@ STATIC_URL = '/static/'
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
-CELERY_DEFAULT_QUEUE = PROJECT_NAME
+CELERY_DEFAULT_QUEUE = os.getenv('NOTIFICACAO_QUEUE')
 
 CELERY_ACKS_LATE = True
 
 CELERY_TIMEZONE = TIME_ZONE
 
+CELERY_BROKER_CONNECTION_TIMEOUT = 2
+
 CELERY_BROKER_CONNECTION_MAX_RETRIES = None
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_BEAT_SYNC_EVERY = 1
+
+CELERY_BEAT_MAX_LOOP_INTERVAL = 60
 
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 

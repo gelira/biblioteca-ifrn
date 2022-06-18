@@ -1,6 +1,7 @@
+from django.db import transaction
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
-from .. import exceptions
 from ..models import (
     Avaliacao,
     Tag
@@ -22,8 +23,12 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         return Tag.objects.filter(_id__in=value).all()
 
     def validate_nota(self, value):
-        if value < 1 or value > 5:
-            raise serializers.ValidationError('Nota deve estar entre 1 e 5')
+        try:
+            AvaliacaoService.validar_nota(value)
+
+        except APIException as e:
+            raise serializers.ValidationError(str(e))
+        
         return value 
 
     def validate(self, data):
@@ -38,11 +43,12 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
         livro_id = str(data['livro_id'])
         nota = data['nota']
 
-        retorno = super().create(data)
-        CirculacaoService.emprestimo_avaliado(emprestimo_id)
-        CatalogoService.atualizar_nota(livro_id, nota)
+        with transaction.atomic():
+            retorno = super().create(data)
+            CirculacaoService.call_emprestimo_avaliado(emprestimo_id)
+            CatalogoService.call_atualizar_nota(livro_id, nota)
 
-        return retorno
+            return retorno
 
     def validar_emprestimo(self, emprestimo_id):
         usuario_id = self.context['request'].user['_id']
@@ -51,11 +57,8 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
             emprestimo = AvaliacaoService.validar_emprestimo(emprestimo_id, usuario_id)
             return emprestimo['livro_id']
 
-        except exceptions.InvalidEmprestimo as e:
+        except APIException as e:
             raise serializers.ValidationError(str(e))
-
-        except:
-            raise serializers.ValidationError('Erro de comunicação entre os serviços')
 
     class Meta:
         model = Avaliacao
