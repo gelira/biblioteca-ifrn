@@ -45,8 +45,8 @@ class AvaliacaoCreateSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             retorno = super().create(data)
-            CirculacaoService.emprestimo_avaliado(emprestimo_id)
-            CatalogoService.atualizar_nota(livro_id, nota)
+            CirculacaoService.call_emprestimo_avaliado(emprestimo_id)
+            CatalogoService.call_atualizar_nota(livro_id, nota)
 
             return retorno
 
