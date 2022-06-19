@@ -75,6 +75,19 @@ services:
     volumes:
       - notificacao-db-volume:/db/data
 
+  autenticacao-service:
+    container_name: autenticacao-service
+    build:
+      context: .
+      dockerfile: ./services/autenticacao/Dockerfile.api
+    restart: always
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - autenticacao-db
+
   catalogo-service:
     container_name: catalogo-service
     build:
@@ -87,6 +100,19 @@ services:
       - rabbitmq-server
       - redis-server
       - catalogo-db
+
+  autenticacao-beat:
+    container_name: autenticacao-beat
+    build:
+      context: .
+      dockerfile: ./services/autenticacao/Dockerfile.beat
+    restart: always
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - autenticacao-db
 
 networks:
   biblioteca-net:
