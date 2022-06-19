@@ -15,6 +15,30 @@ services:
     networks:
       - biblioteca-net
 
+  autenticacao-db:
+    container_name: autenticacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=abc@123
+      - PGDATA=/db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - ./docker-volumes/autenticacao-db:/db/data
+
+  avaliacao-db:
+    container_name: avaliacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=abc@123
+      - PGDATA=/db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - ./docker-volumes/avaliacao-db:/db/data
+
   catalogo-db:
     container_name: catalogo-db
     image: postgres:13-alpine
@@ -26,6 +50,30 @@ services:
       - biblioteca-net
     volumes:
       - ./docker-volumes/catalogo-db:/db/data
+
+  circulacao-db:
+    container_name: circulacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=abc@123
+      - PGDATA=/db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - ./docker-volumes/circulacao-db:/db/data
+
+  notificacao-db:
+    container_name: notificacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=abc@123
+      - PGDATA=/db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - ./docker-volumes/notificacao-db:/db/data
 
   catalogo-service:
     container_name: catalogo-service
