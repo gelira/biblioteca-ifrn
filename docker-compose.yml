@@ -1,0 +1,45 @@
+services:
+  rabbitmq-server:
+    container_name: rabbitmq-server
+    image: rabbitmq:3.10-management-alpine
+    restart: always
+    networks:
+      - biblioteca-net
+
+  redis-server:
+    container_name: redis-server 
+    image: redis:alpine
+    restart: always
+    networks:
+      - biblioteca-net
+
+  catalogo-db:
+    container_name: catalogo-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=abc@123
+      - PGDATA=/db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - catalogo-db-volume:/db/data
+
+  catalogo-service:
+    container_name: catalogo-service
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.api
+    restart: always
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+volumes:
+  catalogo-db-volume:
+
+networks:
+  biblioteca-net:
