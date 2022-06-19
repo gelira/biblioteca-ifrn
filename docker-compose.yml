@@ -3,6 +3,9 @@ services:
     container_name: rabbitmq-server
     image: rabbitmq:3.10-management-alpine
     restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     networks:
       - biblioteca-net
     volumes:
