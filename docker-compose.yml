@@ -128,11 +128,12 @@ services:
       - SECRET_KEY=${GATEWAY_SECRET_KEY}
       - REDIS_HOST=redis-server
       - REDIS_DB=${REDIS_DB}
+
       - AUTENTICACAO_TIMEOUT=2
-      - AUTENTICACAO_SERVICE_URL=autenticacao-service
-      - AVALIACAO_SERVICE_URL=avaliacao-service
-      - CATALOGO_SERVICE_URL=catalogo-service
-      - CIRCULACAO_SERVICE_URL=circulacao-service
+      - AUTENTICACAO_SERVICE_URL=http://autenticacao-service:8000
+      - AVALIACAO_SERVICE_URL=http://avaliacao-service:8000
+      - CATALOGO_SERVICE_URL=http://catalogo-service:8000
+      - CIRCULACAO_SERVICE_URL=http://circulacao-service:8000
     networks:
       biblioteca-net:
         ipv4_address: 10.77.49.200
