@@ -5,6 +5,8 @@ services:
     restart: always
     networks:
       - biblioteca-net
+    volumes:
+      - ./docker-volumes/rabbitmq-server:/var/lib/rabbitmq
 
   redis-server:
     container_name: redis-server 
