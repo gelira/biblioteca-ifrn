@@ -25,7 +25,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - ./docker-volumes/autenticacao-db:/db/data
+      - autenticacao-db-volume:/db/data
 
   avaliacao-db:
     container_name: avaliacao-db
@@ -37,7 +37,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - ./docker-volumes/avaliacao-db:/db/data
+      - avaliacao-db-volume:/db/data
 
   catalogo-db:
     container_name: catalogo-db
@@ -49,7 +49,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - ./docker-volumes/catalogo-db:/db/data
+      - catalogo-db-volume:/db/data
 
   circulacao-db:
     container_name: circulacao-db
@@ -61,7 +61,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - ./docker-volumes/circulacao-db:/db/data
+      - circulacao-db-volume:/db/data
 
   notificacao-db:
     container_name: notificacao-db
@@ -73,7 +73,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - ./docker-volumes/notificacao-db:/db/data
+      - notificacao-db-volume:/db/data
 
   catalogo-service:
     container_name: catalogo-service
@@ -90,3 +90,11 @@ services:
 
 networks:
   biblioteca-net:
+
+volumes:
+  rabbitmq-server-volume:
+  autenticacao-db-volume:
+  avaliacao-db-volume:
+  catalogo-db-volume:
+  circulacao-db-volume:
+  notificacao-db-volume:
