@@ -117,8 +117,33 @@ services:
       - redis-server
       - autenticacao-db
 
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile.api
+    restart: always
+    environment:
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${GATEWAY_SECRET_KEY}
+      - REDIS_HOST=redis-server
+      - REDIS_DB=${REDIS_DB}
+      - AUTENTICACAO_TIMEOUT=2
+      - AUTENTICACAO_SERVICE_URL=autenticacao-service
+      - AVALIACAO_SERVICE_URL=avaliacao-service
+      - CATALOGO_SERVICE_URL=catalogo-service
+      - CIRCULACAO_SERVICE_URL=circulacao-service
+    networks:
+      biblioteca-net:
+        ipv4_address: 10.77.49.200
+
 networks:
   biblioteca-net:
+    ipam:
+      config:
+        - subnet: 10.77.49.0/24
+          ip_range: 10.77.49.0/24
+          gateway: 10.77.49.250
 
 volumes:
   rabbitmq-server-volume:
