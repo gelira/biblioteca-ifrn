@@ -25,7 +25,7 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - catalogo-db-volume:/db/data
+      - ./docker-volumes/catalogo-db:/db/data
 
   catalogo-service:
     container_name: catalogo-service
@@ -39,9 +39,6 @@ services:
       - rabbitmq-server
       - redis-server
       - catalogo-db
-
-volumes:
-  catalogo-db-volume:
 
 networks:
   biblioteca-net:
