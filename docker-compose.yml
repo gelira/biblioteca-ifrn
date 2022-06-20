@@ -92,7 +92,7 @@ services:
     container_name: autenticacao-service
     build:
       context: .
-      dockerfile: ./services/autenticacao/Dockerfile.api
+      dockerfile: ./services/autenticacao/Dockerfile.service
     restart: always
     environment:
       DEBUG: ${DEBUG}
@@ -158,7 +158,7 @@ services:
     container_name: catalogo-service
     build:
       context: .
-      dockerfile: ./services/catalogo/Dockerfile.api
+      dockerfile: ./services/catalogo/Dockerfile.service
     restart: always
     networks:
       - biblioteca-net
@@ -171,7 +171,7 @@ services:
     container_name: gateway-service
     build:
       context: .
-      dockerfile: ./services/gateway/Dockerfile.api
+      dockerfile: ./services/gateway/Dockerfile.service
     restart: always
     environment:
       DEBUG: ${DEBUG}
