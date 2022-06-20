@@ -121,19 +121,6 @@ services:
       - redis-server
       - autenticacao-db
 
-  catalogo-service:
-    container_name: catalogo-service
-    build:
-      context: .
-      dockerfile: ./services/catalogo/Dockerfile.api
-    restart: always
-    networks:
-      - biblioteca-net
-    depends_on:
-      - rabbitmq-server
-      - redis-server
-      - catalogo-db
-
   autenticacao-beat:
     container_name: autenticacao-beat
     build:
@@ -166,6 +153,19 @@ services:
       - rabbitmq-server
       - redis-server
       - autenticacao-db
+
+  catalogo-service:
+    container_name: catalogo-service
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.api
+    restart: always
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
 
   gateway-service:
     container_name: gateway-service
