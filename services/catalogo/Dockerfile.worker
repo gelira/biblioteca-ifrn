@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./services/catalogo/ ./
 
-RUN chmod +x entrypoint-api.sh
+RUN chmod +x entrypoint-worker.sh
 
-ENTRYPOINT [ "./entrypoint-api.sh" ]
+ENTRYPOINT [ "./entrypoint-worker.sh" ]
