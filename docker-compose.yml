@@ -94,6 +94,26 @@ services:
       context: .
       dockerfile: ./services/autenticacao/Dockerfile.api
     restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AUTENTICACAO_DB_NAME}
+      DB_USER: ${AUTENTICACAO_DB_USER}
+      DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      DB_HOST: autenticacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
+      SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
+      SUAP_TIMEOUT: 5
+      AUTENTICACAO_USUARIO_ID: ${AUTENTICACAO_USUARIO_ID}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      NOTIFICACAO_USUARIO_ID: ${NOTIFICACAO_USUARIO_ID}
     networks:
       - biblioteca-net
     depends_on:
@@ -120,6 +140,26 @@ services:
       context: .
       dockerfile: ./services/autenticacao/Dockerfile.beat
     restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AUTENTICACAO_DB_NAME}
+      DB_USER: ${AUTENTICACAO_DB_USER}
+      DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      DB_HOST: autenticacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
+      SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
+      SUAP_TIMEOUT: 5
+      AUTENTICACAO_USUARIO_ID: ${AUTENTICACAO_USUARIO_ID}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      NOTIFICACAO_USUARIO_ID: ${NOTIFICACAO_USUARIO_ID}
     networks:
       - biblioteca-net
     depends_on:
