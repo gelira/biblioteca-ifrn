@@ -88,8 +88,8 @@ services:
     volumes:
       - notificacao-db-volume:/db/data
 
-  autenticacao-service:
-    container_name: autenticacao-service
+  autenticacao-api:
+    container_name: autenticacao-api
     build:
       context: .
       dockerfile: ./services/autenticacao/Dockerfile.api
@@ -179,7 +179,7 @@ services:
       REDIS_HOST: redis-server
       REDIS_DB: ${REDIS_DB}
       AUTENTICACAO_TIMEOUT: 2
-      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-api:8000
       AVALIACAO_SERVICE_URL: http://avaliacao-service:8000
       CATALOGO_SERVICE_URL: http://catalogo-service:8000
       CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
