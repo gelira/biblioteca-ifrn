@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./services/avaliacao/ ./
 
-RUN chmod +x entrypoint-api.sh
+RUN chmod +x entrypoint-service.sh
 
-ENTRYPOINT [ "./entrypoint-api.sh" ]
+ENTRYPOINT [ "./entrypoint-service.sh" ]
