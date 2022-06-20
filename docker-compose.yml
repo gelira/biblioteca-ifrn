@@ -154,6 +154,105 @@ services:
       - redis-server
       - autenticacao-db
 
+  avaliacao-service:
+    container_name: avaliacao-service
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
+  avaliacao-beat:
+    container_name: avaliacao-beat
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
+  avaliacao-worker:
+    container_name: avaliacao-worker
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
   catalogo-service:
     container_name: catalogo-service
     build:
