@@ -4,8 +4,8 @@ services:
     image: rabbitmq:3.10-management-alpine
     restart: always
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     networks:
       - biblioteca-net
     volumes:
@@ -23,8 +23,10 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_PASSWORD=abc@123
-      - PGDATA=/db/data
+      POSTGRES_DB: ${AUTENTICACAO_DB_NAME}
+      POSTGRES_USER: ${AUTENTICACAO_DB_USER}
+      POSTGRES_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      PGDATA: /db/data
     networks:
       - biblioteca-net
     volumes:
@@ -35,8 +37,10 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_PASSWORD=abc@123
-      - PGDATA=/db/data
+      POSTGRES_DB: ${AVALIACAO_DB_NAME}
+      POSTGRES_USER: ${AVALIACAO_DB_USER}
+      POSTGRES_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      PGDATA: /db/data
     networks:
       - biblioteca-net
     volumes:
@@ -47,8 +51,10 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_PASSWORD=abc@123
-      - PGDATA=/db/data
+      POSTGRES_DB: ${CATALOGO_DB_NAME}
+      POSTGRES_USER: ${CATALOGO_DB_USER}
+      POSTGRES_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      PGDATA: /db/data
     networks:
       - biblioteca-net
     volumes:
@@ -59,8 +65,10 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_PASSWORD=abc@123
-      - PGDATA=/db/data
+      POSTGRES_DB: ${CIRCULACAO_DB_NAME}
+      POSTGRES_USER: ${CIRCULACAO_DB_USER}
+      POSTGRES_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      PGDATA: /db/data
     networks:
       - biblioteca-net
     volumes:
@@ -71,8 +79,10 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_PASSWORD=abc@123
-      - PGDATA=/db/data
+      POSTGRES_DB: ${NOTIFICACAO_DB_NAME}
+      POSTGRES_USER: ${NOTIFICACAO_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIFICACAO_DB_PASSWORD}
+      PGDATA: /db/data
     networks:
       - biblioteca-net
     volumes:
@@ -124,16 +134,15 @@ services:
       dockerfile: ./services/gateway/Dockerfile.api
     restart: always
     environment:
-      - DEBUG=${DEBUG}
-      - SECRET_KEY=${GATEWAY_SECRET_KEY}
-      - REDIS_HOST=redis-server
-      - REDIS_DB=${REDIS_DB}
-
-      - AUTENTICACAO_TIMEOUT=2
-      - AUTENTICACAO_SERVICE_URL=http://autenticacao-service:8000
-      - AVALIACAO_SERVICE_URL=http://avaliacao-service:8000
-      - CATALOGO_SERVICE_URL=http://catalogo-service:8000
-      - CIRCULACAO_SERVICE_URL=http://circulacao-service:8000
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${GATEWAY_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      AUTENTICACAO_TIMEOUT: 2
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AVALIACAO_SERVICE_URL: http://avaliacao-service:8000
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
     networks:
       biblioteca-net:
         ipv4_address: 10.77.49.200
