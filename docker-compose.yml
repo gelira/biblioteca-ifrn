@@ -1,0 +1,500 @@
+services:
+  rabbitmq-server:
+    container_name: rabbitmq-server
+    image: rabbitmq:3.10-management-alpine
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    networks:
+      - biblioteca-net
+    volumes:
+      - rabbitmq-server-volume:/var/lib/rabbitmq
+
+  redis-server:
+    container_name: redis-server 
+    image: redis:alpine
+    restart: always
+    networks:
+      - biblioteca-net
+
+  autenticacao-db:
+    container_name: autenticacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      PGDATA: /db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - autenticacao-db-volume:/db/data
+
+  avaliacao-db:
+    container_name: avaliacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      PGDATA: /db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - avaliacao-db-volume:/db/data
+
+  catalogo-db:
+    container_name: catalogo-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      PGDATA: /db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - catalogo-db-volume:/db/data
+
+  circulacao-db:
+    container_name: circulacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      PGDATA: /db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - circulacao-db-volume:/db/data
+
+  notificacao-db:
+    container_name: notificacao-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${NOTIFICACAO_DB_PASSWORD}
+      PGDATA: /db/data
+    networks:
+      - biblioteca-net
+    volumes:
+      - notificacao-db-volume:/db/data
+
+  autenticacao-service:
+    container_name: autenticacao-service
+    build:
+      context: .
+      dockerfile: ./services/autenticacao/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AUTENTICACAO_DB_NAME}
+      DB_USER: ${AUTENTICACAO_DB_USER}
+      DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      DB_HOST: autenticacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
+      SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
+      SUAP_TIMEOUT: 5
+      AUTENTICACAO_USUARIO_ID: ${AUTENTICACAO_USUARIO_ID}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      NOTIFICACAO_USUARIO_ID: ${NOTIFICACAO_USUARIO_ID}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - autenticacao-db
+
+  autenticacao-beat:
+    container_name: autenticacao-beat
+    build:
+      context: .
+      dockerfile: ./services/autenticacao/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AUTENTICACAO_DB_NAME}
+      DB_USER: ${AUTENTICACAO_DB_USER}
+      DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
+      DB_HOST: autenticacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
+      SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
+      SUAP_TIMEOUT: 5
+      AUTENTICACAO_USUARIO_ID: ${AUTENTICACAO_USUARIO_ID}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      NOTIFICACAO_USUARIO_ID: ${NOTIFICACAO_USUARIO_ID}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - autenticacao-db
+
+  avaliacao-service:
+    container_name: avaliacao-service
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
+  avaliacao-beat:
+    container_name: avaliacao-beat
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
+  avaliacao-worker:
+    container_name: avaliacao-worker
+    build:
+      context: .
+      dockerfile: ./services/avaliacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${AVALIACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${AVALIACAO_DB_NAME}
+      DB_USER: ${AVALIACAO_DB_USER}
+      DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
+      DB_HOST: avaliacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+      CIRCULACAO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - avaliacao-db
+
+  catalogo-service:
+    container_name: catalogo-service
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+  catalogo-beat:
+    container_name: catalogo-beat
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+  catalogo-worker:
+    container_name: catalogo-worker
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+  circulacao-service:
+    container_name: circulacao-service
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
+  circulacao-beat:
+    container_name: circulacao-beat
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
+  circulacao-worker:
+    container_name: circulacao-worker
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
+  notificacao-worker:
+    container_name: notificacao-worker
+    build:
+      context: .
+      dockerfile: ./services/notificacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${NOTIFICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${NOTIFICACAO_DB_NAME}
+      DB_USER: ${NOTIFICACAO_DB_USER}
+      DB_PASSWORD: ${NOTIFICACAO_DB_PASSWORD}
+      DB_HOST: notificacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_SENDER: ${EMAIL_SENDER}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - notificacao-db
+
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${GATEWAY_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      AUTENTICACAO_TIMEOUT: 2
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AVALIACAO_SERVICE_URL: http://avaliacao-service:8000
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
+    networks:
+      biblioteca-net:
+        ipv4_address: 10.77.49.200
+
+networks:
+  biblioteca-net:
+    ipam:
+      config:
+        - subnet: 10.77.49.0/24
+          ip_range: 10.77.49.0/24
+          gateway: 10.77.49.250
+
+volumes:
+  rabbitmq-server-volume:
+  autenticacao-db-volume:
+  avaliacao-db-volume:
+  catalogo-db-volume:
+  circulacao-db-volume:
+  notificacao-db-volume:
