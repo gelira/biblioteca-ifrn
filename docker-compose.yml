@@ -259,6 +259,89 @@ services:
       context: .
       dockerfile: ./services/catalogo/Dockerfile.service
     restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+  catalogo-beat:
+    container_name: catalogo-beat
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - catalogo-db
+
+  catalogo-worker:
+    container_name: catalogo-worker
+    build:
+      context: .
+      dockerfile: ./services/catalogo/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CATALOGO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CATALOGO_DB_NAME}
+      DB_USER: ${CATALOGO_DB_USER}
+      DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
+      DB_HOST: catalogo-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CATALOGO_QUEUE: ${CATALOGO_QUEUE}
+      CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 2
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     networks:
       - biblioteca-net
     depends_on:
