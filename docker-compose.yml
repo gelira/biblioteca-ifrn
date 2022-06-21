@@ -442,6 +442,37 @@ services:
       - redis-server
       - circulacao-db
 
+  notificacao-worker:
+    container_name: notificacao-worker
+    build:
+      context: .
+      dockerfile: ./services/notificacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${NOTIFICACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${NOTIFICACAO_DB_NAME}
+      DB_USER: ${NOTIFICACAO_DB_USER}
+      DB_PASSWORD: ${NOTIFICACAO_DB_PASSWORD}
+      DB_HOST: notificacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_SENDER: ${EMAIL_SENDER}
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - notificacao-db
+
   gateway-service:
     container_name: gateway-service
     build:
