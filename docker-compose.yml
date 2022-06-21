@@ -349,6 +349,99 @@ services:
       - redis-server
       - catalogo-db
 
+  circulacao-service:
+    container_name: circulacao-service
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.service
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
+  circulacao-beat:
+    container_name: circulacao-beat
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.beat
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
+  circulacao-worker:
+    container_name: circulacao-worker
+    build:
+      context: .
+      dockerfile: ./services/circulacao/Dockerfile.worker
+    restart: always
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
+      REDIS_HOST: redis-server
+      REDIS_DB: ${REDIS_DB}
+      DB_NAME: ${CIRCULACAO_DB_NAME}
+      DB_USER: ${CIRCULACAO_DB_USER}
+      DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
+      DB_HOST: circulacao-db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
+      NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
+      CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
+      AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
+      AUTENTICACAO_TIMEOUT: 15
+      CATALOGO_SERVICE_URL: http://catalogo-service:8000
+      CATALOGO_TIMEOUT: 2
+    networks:
+      - biblioteca-net
+    depends_on:
+      - rabbitmq-server
+      - redis-server
+      - circulacao-db
+
   gateway-service:
     container_name: gateway-service
     build:
