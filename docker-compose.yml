@@ -14,9 +14,12 @@ services:
   redis-service:
     container_name: redis-service 
     image: redis:alpine
+    command: ["redis-server", "--save", "60", "1"]
     restart: always
     networks:
       - biblioteca-net
+    volumes:
+      - redis-service-volume:/data
 
   autenticacao-db:
     container_name: autenticacao-db
@@ -493,6 +496,7 @@ networks:
 
 volumes:
   rabbitmq-service-volume:
+  redis-service-volume:
   autenticacao-db-volume:
   avaliacao-db-volume:
   catalogo-db-volume:
