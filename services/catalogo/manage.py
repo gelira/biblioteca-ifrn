@@ -3,9 +3,14 @@
 import os
 import sys
 import dotenv
+from pathlib import Path
 
 def main():
-    dotenv.read_dotenv()
+    env_path = Path(__file__).parent / '.env'
+
+    if env_path.is_file():
+        dotenv.read_dotenv(env_path)
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'catalogo.settings')
     try:
         from django.core.management import execute_from_command_line
