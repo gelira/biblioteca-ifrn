@@ -1,6 +1,6 @@
 services:
-  rabbitmq-server:
-    container_name: rabbitmq-server
+  rabbitmq-service:
+    container_name: rabbitmq-service
     image: rabbitmq:3.10-management-alpine
     restart: always
     environment:
@@ -9,10 +9,10 @@ services:
     networks:
       - biblioteca-net
     volumes:
-      - rabbitmq-server-volume:/var/lib/rabbitmq
+      - rabbitmq-service-volume:/var/lib/rabbitmq
 
-  redis-server:
-    container_name: redis-server 
+  redis-service:
+    container_name: redis-service 
     image: redis:alpine
     restart: always
     networks:
@@ -87,14 +87,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${AUTENTICACAO_DB_NAME}
       DB_USER: ${AUTENTICACAO_DB_USER}
       DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
       DB_HOST: autenticacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
       SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
@@ -107,8 +107,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - autenticacao-db
 
   autenticacao-beat:
@@ -120,14 +120,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${AUTENTICACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${AUTENTICACAO_DB_NAME}
       DB_USER: ${AUTENTICACAO_DB_USER}
       DB_PASSWORD: ${AUTENTICACAO_DB_PASSWORD}
       DB_HOST: autenticacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       SUAP_URL_AUTENTICACAO: https://suap.ifrn.edu.br/api/v2/autenticacao/token/
       SUAP_URL_DADOS: https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/
@@ -140,8 +140,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - autenticacao-db
 
   avaliacao-service:
@@ -153,14 +153,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${AVALIACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${AVALIACAO_DB_NAME}
       DB_USER: ${AVALIACAO_DB_USER}
       DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
       DB_HOST: avaliacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
@@ -173,8 +173,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - avaliacao-db
 
   avaliacao-beat:
@@ -186,14 +186,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${AVALIACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${AVALIACAO_DB_NAME}
       DB_USER: ${AVALIACAO_DB_USER}
       DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
       DB_HOST: avaliacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
@@ -206,8 +206,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - avaliacao-db
 
   avaliacao-worker:
@@ -219,14 +219,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${AVALIACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${AVALIACAO_DB_NAME}
       DB_USER: ${AVALIACAO_DB_USER}
       DB_PASSWORD: ${AVALIACAO_DB_PASSWORD}
       DB_HOST: avaliacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       AVALIACAO_QUEUE: ${AVALIACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       AVALIACAO_USUARIO_ID: ${AVALIACAO_USUARIO_ID}
@@ -239,8 +239,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - avaliacao-db
 
   catalogo-service:
@@ -252,14 +252,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CATALOGO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CATALOGO_DB_NAME}
       DB_USER: ${CATALOGO_DB_USER}
       DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
       DB_HOST: catalogo-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CATALOGO_QUEUE: ${CATALOGO_QUEUE}
       CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
       AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
@@ -271,8 +271,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - catalogo-db
 
   catalogo-beat:
@@ -284,14 +284,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CATALOGO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CATALOGO_DB_NAME}
       DB_USER: ${CATALOGO_DB_USER}
       DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
       DB_HOST: catalogo-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CATALOGO_QUEUE: ${CATALOGO_QUEUE}
       CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
       AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
@@ -303,8 +303,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - catalogo-db
 
   catalogo-worker:
@@ -316,14 +316,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CATALOGO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CATALOGO_DB_NAME}
       DB_USER: ${CATALOGO_DB_USER}
       DB_PASSWORD: ${CATALOGO_DB_PASSWORD}
       DB_HOST: catalogo-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CATALOGO_QUEUE: ${CATALOGO_QUEUE}
       CATALOGO_USUARIO_ID: ${CATALOGO_USUARIO_ID}
       AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
@@ -335,8 +335,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - catalogo-db
 
   circulacao-service:
@@ -348,14 +348,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CIRCULACAO_DB_NAME}
       DB_USER: ${CIRCULACAO_DB_USER}
       DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
       DB_HOST: circulacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
@@ -366,8 +366,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - circulacao-db
 
   circulacao-beat:
@@ -379,14 +379,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CIRCULACAO_DB_NAME}
       DB_USER: ${CIRCULACAO_DB_USER}
       DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
       DB_HOST: circulacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
@@ -397,8 +397,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - circulacao-db
 
   circulacao-worker:
@@ -410,14 +410,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${CIRCULACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${CIRCULACAO_DB_NAME}
       DB_USER: ${CIRCULACAO_DB_USER}
       DB_PASSWORD: ${CIRCULACAO_DB_PASSWORD}
       DB_HOST: circulacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       CIRCULACAO_QUEUE: ${CIRCULACAO_QUEUE}
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       CIRCULACAO_USUARIO_ID: ${CIRCULACAO_USUARIO_ID}
@@ -428,8 +428,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - circulacao-db
 
   notificacao-worker:
@@ -441,14 +441,14 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${NOTIFICACAO_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       DB_NAME: ${NOTIFICACAO_DB_NAME}
       DB_USER: ${NOTIFICACAO_DB_USER}
       DB_PASSWORD: ${NOTIFICACAO_DB_PASSWORD}
       DB_HOST: notificacao-db
       DB_PORT: 5432
-      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-server/
+      CELERY_BROKER_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq-service/
       NOTIFICACAO_QUEUE: ${NOTIFICACAO_QUEUE}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_USE_TLS: ${EMAIL_USE_TLS}
@@ -459,8 +459,8 @@ services:
     networks:
       - biblioteca-net
     depends_on:
-      - rabbitmq-server
-      - redis-server
+      - rabbitmq-service
+      - redis-service
       - notificacao-db
 
   gateway-service:
@@ -472,7 +472,7 @@ services:
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${GATEWAY_SECRET_KEY}
-      REDIS_HOST: redis-server
+      REDIS_HOST: redis-service
       REDIS_DB: ${REDIS_DB}
       AUTENTICACAO_TIMEOUT: 2
       AUTENTICACAO_SERVICE_URL: http://autenticacao-service:8000
@@ -492,7 +492,7 @@ networks:
           gateway: 10.77.49.250
 
 volumes:
-  rabbitmq-server-volume:
+  rabbitmq-service-volume:
   autenticacao-db-volume:
   avaliacao-db-volume:
   catalogo-db-volume:
