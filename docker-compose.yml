@@ -481,15 +481,15 @@ services:
       CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
     networks:
       biblioteca-net:
-        ipv4_address: 10.77.49.200
+        ipv4_address: 172.20.0.2
 
 networks:
   biblioteca-net:
     ipam:
       config:
-        - subnet: 10.77.49.0/24
-          ip_range: 10.77.49.0/24
-          gateway: 10.77.49.250
+        - subnet: 172.20.0.0/16
+          ip_range: 172.20.128.0/17
+          gateway: 172.20.0.1
 
 volumes:
   rabbitmq-service-volume:
