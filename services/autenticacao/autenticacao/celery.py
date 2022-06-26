@@ -3,8 +3,13 @@ from __future__ import absolute_import, unicode_literals
 import os
 import dotenv
 import django
+from pathlib import Path
 
-dotenv.read_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+env_path = Path(__file__).parent.parent / '.env'
+
+if env_path.is_file():
+    dotenv.read_dotenv(env_path)
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'autenticacao.settings')
 
 django.setup()
