@@ -1,0 +1,10 @@
+Avaliação Publicada
+
+Olá, {{ nome_usuario }}!
+O seu comentário de avaliação do livro {{ titulo }}, feito em {{ data }} às {{ hora }}, foi voltou a ser público.
+Agradecemos pela cooperação.
+
+Comentário:
+"{{ comentario }}"
+
+Moderador: {{ nome_moderador }} ({{ matricula_moderador }})

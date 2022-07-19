@@ -1,0 +1,6 @@
+<h2>Empréstimo próximo do vencimento</h2>
+
+<h4>Olá, {{ nome_usuario }}!</h4>
+<p>Gostariamos de avisar que seu empréstimo do livro <strong>{{ titulo }}</strong>, exemplar <strong>{{ exemplar_codigo }}</strong>, está próximo do vencimento. Preste atenção nas datas para não receber nenhuma suspensão.</p>
+<p>O prazo de devolução é {% if hoje %}<strong>HOJE</strong>{% else %} dia <strong>{{ data_limite }}</strong>{% endif %}.</p>
+<p>Agradecemos pela compreensão.</p>

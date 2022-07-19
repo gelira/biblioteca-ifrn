@@ -1,0 +1,14 @@
+<h2>Comprovante de Empréstimo</h2>
+
+<h4>Olá, {{ nome_usuario }}!</h4>
+<p>Aqui está o seu comprovante de empréstimo feito em <strong>{{ data }}</strong>, às <strong>{{ hora }}</strong>:</p>
+<br>
+{% for exemplar in exemplares %}
+  <p>Título: <strong>{{ exemplar.titulo }}</strong></p>
+  <ul>
+    <li>Código: <strong>{{ exemplar.codigo }}{% if exemplar.referencia %} (EXEMPLAR DE REFERENCIA){% endif %}</strong></li>
+    <li>Devolver até {{ exemplar.data_limite }}</li>
+  </ul>
+  <br>
+{% endfor %}
+<p>Atendente: <strong>{{ nome_atendente }} ({{ matricula_atendente }})</strong></p>

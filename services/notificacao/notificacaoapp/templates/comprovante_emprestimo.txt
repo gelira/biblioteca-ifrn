@@ -1,0 +1,12 @@
+Comprovante de Empréstimo
+
+Olá, {{ nome_usuario }}!
+Aqui está o seu comprovante de empréstimo feito em {{ data }}, às {{ hora }}:
+
+{% for exemplar in exemplares %}
+Título: {{ exemplar.titulo }}
+-> Código: {{ exemplar.codigo }}{% if exemplar.referencia %} (EXEMPLAR DE REFERENCIA){% endif %}
+-> Devolver até {{ exemplar.data_limite }}
+
+{% endfor %}
+Atendente: {{ nome_atendente }} ({{ matricula_atendente }})

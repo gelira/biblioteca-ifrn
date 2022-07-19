@@ -1,0 +1,4 @@
+Comprovante de Cancelamento de Reserva
+
+Olá, {{ nome_usuario }}!
+O cancelamento da sua reserva do livro {{ titulo_livro }}, feito em {{ data }} às {{ hora }}, foi registrado com sucesso.

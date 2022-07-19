@@ -1,0 +1,7 @@
+Reserva Cancelada
+
+Olá, {{ nome_usuario }}!
+Comunicamos que a sua reserva do livro {{ titulo_livro }} foi cancelada.
+Esse cancelamento deu-se devido a não retirada da reserva até o dia {{ data_limite }}.
+
+Agradecemos pela compreensão.

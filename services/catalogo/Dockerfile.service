@@ -1,0 +1,15 @@
+FROM python:3.9-slim-bullseye
+
+WORKDIR /app
+
+ADD requirements.txt .
+
+RUN apt-get update && apt-get install -y gcc git libpq-dev
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./services/catalogo/ ./
+
+RUN chmod +x entrypoint-service.sh
+
+ENTRYPOINT [ "./entrypoint-service.sh" ]

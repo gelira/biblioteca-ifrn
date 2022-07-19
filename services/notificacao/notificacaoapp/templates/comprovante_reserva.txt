@@ -1,0 +1,5 @@
+Comprovante de Reserva
+
+Olá, {{ nome_usuario }}!
+Sua reserva do livro {{ titulo_livro }}, feita em {{ data }} às {{ hora }}, foi registrada com sucesso.
+Te avisaremos quando sua reserva estiver disponível.

@@ -1,0 +1,2 @@
+from .lista_sugestoes import ListaSugestoesService
+from .sugestao_aquisicao import SugestaoAquisicaoService
