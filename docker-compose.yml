@@ -1,6 +1,7 @@
 ### IP's
 
 ## Services
+# gateway-service   -> 172.20.10.1
 # rabbitmq-service  -> 172.20.10.11
 # redis-service     -> 172.20.10.12
 
@@ -504,7 +505,7 @@ services:
       CIRCULACAO_SERVICE_URL: http://circulacao-service:8000
     networks:
       biblioteca-net:
-        ipv4_address: 172.20.0.2
+        ipv4_address: 172.20.10.1
 
 networks:
   biblioteca-net:
