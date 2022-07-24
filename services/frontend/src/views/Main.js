@@ -1,21 +1,22 @@
 import React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 
+import AppToolbar from '../components/AppToolbar';
+import SideMenu from '../components/SideMenu';
+
 function Main() {
+  const [sideMenuIsOpen, setSideMenuIsOpen] = React.useState(false);
+
+  const openSideMenu = () => setSideMenuIsOpen(true);
+  const closeSideMenu = () => setSideMenuIsOpen(false);
+
   return (
     <>
-      <AppBar elevation="0">
-        <Toolbar>
-          <Typography variant="h6" component="div">
-            Scroll to elevate App bar
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Toolbar />
+      <AppToolbar openSideMenu={openSideMenu} />
+      <SideMenu sideMenuIsOpen={sideMenuIsOpen} closeSideMenu={closeSideMenu} />
+      
       <Container>
         <Box sx={{ my: 2 }}>
           {[...new Array(12)]
