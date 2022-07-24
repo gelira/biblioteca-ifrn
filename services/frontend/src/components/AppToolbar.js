@@ -25,7 +25,7 @@ function AppToolbar(props) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div">
-            Scroll to elevate App bar
+            Biblioteca IFRN
           </Typography>
         </Toolbar>
       </AppBar>
