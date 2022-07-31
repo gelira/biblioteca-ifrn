@@ -25,7 +25,7 @@ class SuapService:
 
         data = response.json()
 
-        self.token = data['token']
+        self.token = data['access']
         return data
 
     def dados_usuario(self):
