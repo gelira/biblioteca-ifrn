@@ -1,12 +1,7 @@
-from rest_framework.permissions import BasePermission
-
-from ..cliente_redis import ClienteRedis
+from .base import BasePermission
 
 class FazerEmprestimoPermissao(BasePermission):
     message = 'Você não tem permissão para realizar essa ação'
-
-    def __init__(self):
-        self.cliente_redis = ClienteRedis()
 
     def has_permission(self, request, view):
         _id = request.user['_id'] if isinstance(request.user, dict) else str(request.user.usuario._id)

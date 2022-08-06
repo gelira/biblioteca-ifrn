@@ -1,12 +1,7 @@
-from rest_framework.permissions import BasePermission
-
-from ..cliente_redis import ClienteRedis
+from .base import BasePermission
 
 class AutenticadoPermissao(BasePermission):
     message = 'Usuário não autenticado'
-
-    def __init__(self):
-        self.cliente_redis = ClienteRedis()
 
     def has_permission(self, request, view):
         if request.user is None:
