@@ -8,10 +8,10 @@ class AutenticacaoProxyView(BaseProxyView):
     upstream = AUTENTICACAO_SERVICE_URL
 
     def get_request_headers(self):
-        headers = super(BaseProxyView, self).get_request_headers()
-        headers.pop('X-Usuario-Id', None)
-        
         authorization = headers.get('Authorization')
+
+        headers = super().get_request_headers()
+        headers.pop('X-Usuario-Id', None)
 
         if authorization is not None:
             headers['Authorization'] = f'JWT {authorization}'
