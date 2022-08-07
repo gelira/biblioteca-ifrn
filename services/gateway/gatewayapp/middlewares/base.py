@@ -22,7 +22,7 @@ class BaseMiddleware:
                     'message': e.default_detail,
                     'code': e.default_code,
                 }, 
-                status=e.default_code
+                status=e.status_code
             )
 
     def allow_url(self, request):
