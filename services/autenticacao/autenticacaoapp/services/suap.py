@@ -36,7 +36,7 @@ class SuapService:
             'method': 'GET',
             'url': SUAP_URL_DADOS,
             'headers': {
-                'Authorization': f'JWT {self.token}',
+                'Authorization': f'Bearer {self.token}',
                 'Accept': 'application/json'
             }
         })
