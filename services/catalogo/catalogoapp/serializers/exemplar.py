@@ -14,7 +14,7 @@ class ExemplarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Livro não encontrado')
 
     def create(self, data):
-        return ExemplarService.create_exemplar(data['livro'])
+        return ExemplarService.create_exemplar(data['livro'], data['referencia'])
 
     class Meta:
         model = Exemplar
@@ -27,6 +27,9 @@ class ExemplarSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'codigo': {
                 'read_only': True
+            },
+            'referencia': {
+                'default': False
             }
         }
 
