@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ..models import Indexador, Livro
 
 class IndexadorSerializer(serializers.ModelSerializer):
-    livro_id = serializers.UUIDField()
+    livro_id = serializers.UUIDField(write_only=True)
 
     def validate(self, data):
         try:
@@ -13,11 +13,10 @@ class IndexadorSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Livro não encontrado')
 
     def create(self, data):
-        indexador = Indexador.objects.create(
+        return Indexador.objects.create(
             livro=data['livro'],
             indexador=data['indexador'] 
         )
-        return indexador
 
     class Meta:
         model = Indexador
