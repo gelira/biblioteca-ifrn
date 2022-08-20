@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -35,6 +36,17 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         ExemplarService.exemplares_devolvidos(codigos)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        try:
+            livro_id = self.request.GET.get('livro_id')
+            qs = qs.filter(livro___id=UUID(livro_id))
+        except:
+            pass
+
+        return qs
 
     def codigos(self, request):
         ser = serializers.CodigosExemplaresSerializers(data=request.data)
