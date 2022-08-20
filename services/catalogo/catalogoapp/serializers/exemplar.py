@@ -4,7 +4,7 @@ from ..services import ExemplarService
 from ..models import Exemplar, Livro
 
 class ExemplarSerializer(serializers.ModelSerializer):
-    livro_id = serializers.UUIDField()
+    livro_id = serializers.UUIDField(write_only=True)
 
     def validate(self, data):
         try:
@@ -19,13 +19,28 @@ class ExemplarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exemplar
         fields = [
+            'id',
             'livro_id',
             'referencia',
             'codigo'
         ]
         extra_kwargs = {
             'codigo': {
-                'required': False
+                'read_only': True
+            }
+        }
+
+class ExemplarUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exemplar
+        fields = [
+            'id',
+            'referencia',
+            'codigo'
+        ]
+        extra_kwargs = {
+            'codigo': {
+                'read_only': True
             }
         }
 

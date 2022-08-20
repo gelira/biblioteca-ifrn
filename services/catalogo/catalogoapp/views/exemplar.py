@@ -15,7 +15,6 @@ from ..services import ExemplarService
 
 class ExemplarViewSet(viewsets.ModelViewSet):
     queryset = Exemplar.objects.all()
-    serializer_class = serializers.ExemplarSerializer
     permission_classes = [AutenticadoPermissao, LivroModificarPermissao]
 
     @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)', authentication_classes=[], permission_classes=[])
@@ -67,4 +66,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         if self.action == 'consulta':
             return serializers.ExemplarConsultaSerializer
 
-        return super().get_serializer_class()
+        if self.action in ['update', 'partial_update']:
+            return serializers.ExemplarUpdateSerializer
+
+        return serializers.ExemplarSerializer
