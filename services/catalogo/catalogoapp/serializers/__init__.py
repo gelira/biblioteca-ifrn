@@ -2,7 +2,6 @@ from .livro import (
     LivroSerializer, 
     LivroListSerializer,
     LivroRetrieveSerializer,
-    LivroPesquisaSerializer,
     FotoCapaLivroSerializer,
     ExemplarConsultaSerializer,
     AtualizacaoNotaLivroSerializer
