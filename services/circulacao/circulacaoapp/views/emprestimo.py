@@ -25,11 +25,14 @@ class EmprestimoViewSet(ModelViewSet):
         FazerEmprestimoPermissao
     ]
     
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(usuario_id=self.request.user['_id']).all()
+
     def get_object(self):
         return get_object_or_404(
-            self.queryset, 
-            _id=self.kwargs['pk'],
-            usuario_id=self.request.user['_id']
+            self.get_queryset(), 
+            _id=self.kwargs['pk']
         )
 
     def get_serializer_class(self):
@@ -45,7 +48,7 @@ class EmprestimoViewSet(ModelViewSet):
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
-        if self.action in ['retrieve']:
+        if self.action in ['retrieve', 'list']:
             return [
                 AutenticadoPermissao()
             ]

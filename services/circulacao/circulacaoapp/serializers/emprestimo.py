@@ -30,19 +30,25 @@ class EmprestimoCreateSerializer(serializers.Serializer):
         codigos = data['codigos']
 
         try:
+            # Valida as credenciais do usuário
             usuario = self.validar_usuario(matricula, senha)
+
             usuario_id = usuario['_id']
             suspensao = usuario['suspensao']
             max_livros = usuario['perfil']['max_livros']
 
+            # Valida se o usuário não está suspenso nem tem empréstimos atrasados
             AutenticacaoService.check_usuario_suspenso(usuario_id, suspensao)
 
+            # Valida se a quantidade de empréstimos vigentes + livros sendo sendo emprestados não excede o limite do perfil do usuário
             livros_emprestados_id = EmprestimoService.check_emprestimos_usuario(
                 usuario_id, 
                 max_livros, 
                 len(codigos)
             )
 
+            # Verifica a situação do exemplar (disponível, ativo, referência)
+            # também certifica que o usuário não estará com dois exemplares do mesmo livro
             exemplares, reservas = EmprestimoService.check_codigos(
                 usuario_id, 
                 codigos, 
