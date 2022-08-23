@@ -43,13 +43,13 @@ class EmprestimoViewSet(ModelViewSet):
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
         
-        if self.action in ['retrieve', 'list']:
+        if self.action in ['retrieve', 'list', 'consulta']:
             return EmprestimoRetrieveSerializer
         
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
-        if self.action in ['retrieve', 'list']:
+        if self.action in ['retrieve', 'list', 'renovacoes']:
             return [
                 AutenticadoPermissao()
             ]
@@ -68,6 +68,23 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.save()
         
         return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=False, url_path='consulta')
+    def consulta(self, request):
+        exemplar_codigo = request.GET.get('exemplar_codigo')
+
+        if not exemplar_codigo:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        emprestimo = get_object_or_404(
+            self.queryset,
+            exemplar_codigo=exemplar_codigo,
+            data_devolucao=None
+        )
+
+        serializer = self.get_serializer(emprestimo)
+        
+        return Response(data=serializer.data)
 
     @action(methods=['post'], detail=False, url_path='devolucoes')
     def devolucoes(self, request):
