@@ -27,7 +27,7 @@ class EmprestimoViewSet(ModelViewSet):
     
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(usuario_id=self.request.user['_id']).all()
+        return qs.filter(usuario_id=self.request.user['_id']).order_by('-created').all()
 
     def get_object(self):
         return get_object_or_404(
@@ -42,7 +42,7 @@ class EmprestimoViewSet(ModelViewSet):
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
         
-        if self.action == 'retrieve':
+        if self.action in ['retrieve', 'list']:
             return EmprestimoRetrieveSerializer
         
         return EmprestimoCreateSerializer
