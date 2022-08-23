@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -66,7 +67,7 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False, url_path='devolucoes')
     def devolucoes(self, request):
@@ -74,7 +75,7 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False, url_path='renovacoes', permission_classes=[AutenticadoPermissao])
     def renovacoes(self, request):
@@ -84,9 +85,9 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path='avaliado', authentication_classes=[], permission_classes=[])
     def emprestimo_avaliado(self, request, pk):
         EmprestimoService.emprestimo_avaliado(pk)
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
