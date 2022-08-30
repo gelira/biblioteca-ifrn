@@ -65,7 +65,7 @@ class AutenticacaoViewSet(ViewSet):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
-        UsuarioService.suspensoes(ser.validated_data)
+        UsuarioService.suspensoes(ser.validated_data['suspensoes'])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -74,7 +74,7 @@ class AutenticacaoViewSet(ViewSet):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
-        UsuarioService.abono_suspensoes(ser.validated_data)
+        UsuarioService.abono_suspensoes(ser.validated_data['suspensoes'])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

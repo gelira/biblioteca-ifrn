@@ -79,7 +79,9 @@ class AutenticacaoService:
         cls.dispatch({
             'method': 'POST',
             'url': cls.url_suspensoes,
-            'json': suspensoes
+            'json': {
+                'suspensoes': suspensoes
+            }
         })
     
     @classmethod
@@ -87,7 +89,9 @@ class AutenticacaoService:
         cls.dispatch({
             'method': 'POST',
             'url': cls.url_abono_suspensoes,
-            'json': suspensoes
+            'json': {
+                'suspensoes': suspensoes
+            }
         })
 
     @classmethod
