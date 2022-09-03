@@ -2,7 +2,6 @@ from .livro import (
     LivroSerializer, 
     LivroListSerializer,
     LivroRetrieveSerializer,
-    LivroPesquisaSerializer,
     FotoCapaLivroSerializer,
     ExemplarConsultaSerializer,
     AtualizacaoNotaLivroSerializer
@@ -10,6 +9,7 @@ from .livro import (
 from .indexador import IndexadorSerializer
 from .exemplar import (
     ExemplarSerializer,
+    ExemplarUpdateSerializer,
     CodigosExemplaresSerializers
 )
 from .localizacao_fisica import LocalizacaoFisicaSerializer

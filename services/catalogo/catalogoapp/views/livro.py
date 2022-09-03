@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -51,14 +52,32 @@ class LivroViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return serializers.LivroListSerializer
         
-        if self.action == 'pesquisa':
-            return serializers.LivroPesquisaSerializer
-        
         return serializers.LivroSerializer
 
     def retrieve(self, request, *args, **kwargs):
         ser = self.get_serializer(LivroService.busca_livro(kwargs['pk']))
         return Response(ser.data)
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        if self.action == 'list':
+            titulo = self.request.GET.get('titulo')
+            autor = self.request.GET.get('autor')
+            indexador = self.request.GET.get('indexador')
+
+            if titulo is not None:
+                qs = qs.filter(titulo__icontains=titulo)
+            
+            elif autor is not None:
+                qs = qs.filter(
+                    Q(autor_principal__icontains=autor) | Q(autores_secundarios__icontains=autor) 
+                )
+
+            elif indexador is not None:
+                qs = qs.filter(indexadores__indexador__icontains=indexador)
+
+        return qs
 
     @action(methods=['put'], detail=True, url_path='foto-capa')
     def foto_capa(self, request, pk=None):
@@ -68,14 +87,6 @@ class LivroViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['post'], detail=False, url_path='pesquisa')
-    def pesquisa(self, request):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        return Response(data=serializer.validated_data)
 
     @action(methods=['patch'], detail=False, url_path='atualizar-nota')
     def atualizar_nota(self, request):

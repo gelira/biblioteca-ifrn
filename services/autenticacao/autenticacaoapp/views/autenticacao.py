@@ -6,25 +6,19 @@ from rest_framework import status
 
 from .. import serializers
 from ..services import AutenticacaoService, UsuarioService
+from ..authentication import HeaderUsuarioIdAutenticacao
+from ..permissions import CirculacaoServicePermissao
 
 class AutenticacaoViewSet(ViewSet):
-    @action(methods=['get', 'put'], detail=False, url_path='informacoes')
-    def informacoes(self, request):
-        if request.method.lower() == 'put':
+    @action(methods=['get', 'patch'], detail=False, url_path='informacoes')
+    def action_informacoes(self, request):
+        if request.method.lower() == 'patch':
             return self.atualizar_informacoes(request)
 
-        usuario_id = str(request.user.usuario._id)
-        usuario = AutenticacaoService.informacoes_usuario(usuario_id)
-
-        data = serializers.UsuarioSerializer(usuario).data
-
-        if request.GET.get('save_cache'):
-            AutenticacaoService.save_cache(usuario_id, data)
-
-        return Response(data)
+        return self.get_informacoes(request)
 
     @action(methods=['get'], detail=False, url_path='consulta')
-    def consulta(self, request):
+    def action_consulta(self, request):
         _id = request.GET.get('id')
         matricula = request.GET.get('matricula')
         
@@ -38,7 +32,7 @@ class AutenticacaoViewSet(ViewSet):
         return Response(ser.data)
 
     @action(methods=['post'], detail=False, url_path='token', authentication_classes=[], permission_classes=[])
-    def token(self, request):
+    def action_token(self, request):
         ser = serializers.LoginSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
@@ -49,7 +43,7 @@ class AutenticacaoViewSet(ViewSet):
         return Response(login_data)
 
     @action(methods=['post'], detail=False, url_path='token-local', authentication_classes=[], permission_classes=[])
-    def token_local(self, request):
+    def action_token_local(self, request):
         if not settings.DEBUG:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -63,26 +57,26 @@ class AutenticacaoViewSet(ViewSet):
         return Response(login_data)
 
     @action(methods=['get'], detail=False, url_path='verificar')
-    def verificar(self, request):
+    def action_verificar(self, request):
         return Response({
             '_id': request.user.usuario._id
         })
 
-    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[], permission_classes=[])
-    def suspensoes(self, request):
+    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
+    def action_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
-        UsuarioService.suspensoes(ser.validated_data)
+        UsuarioService.suspensoes(ser.validated_data['suspensoes'])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[], permission_classes=[])
-    def abono_suspensoes(self, request):
+    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
+    def action_abono_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
-        UsuarioService.abono_suspensoes(ser.validated_data)
+        UsuarioService.abono_suspensoes(ser.validated_data['suspensoes'])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -95,3 +89,14 @@ class AutenticacaoViewSet(ViewSet):
         ser.save()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_informacoes(self, request):
+        usuario_id = str(request.user.usuario._id)
+        usuario = AutenticacaoService.informacoes_usuario(usuario_id)
+
+        data = serializers.UsuarioSerializer(usuario).data
+
+        if request.GET.get('save_cache'):
+            AutenticacaoService.save_cache(usuario_id, data)
+
+        return Response(data)

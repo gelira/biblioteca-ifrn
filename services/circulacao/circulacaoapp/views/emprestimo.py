@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -25,11 +26,14 @@ class EmprestimoViewSet(ModelViewSet):
         FazerEmprestimoPermissao
     ]
     
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(usuario_id=self.request.user['_id']).order_by('-created').all()
+
     def get_object(self):
         return get_object_or_404(
-            self.queryset, 
-            _id=self.kwargs['pk'],
-            usuario_id=self.request.user['_id']
+            self.get_queryset(), 
+            _id=self.kwargs['pk']
         )
 
     def get_serializer_class(self):
@@ -39,13 +43,13 @@ class EmprestimoViewSet(ModelViewSet):
         if self.action == 'renovacoes':
             return RenovacaoEmprestimosSerializer
         
-        if self.action == 'retrieve':
+        if self.action in ['retrieve', 'list', 'consulta']:
             return EmprestimoRetrieveSerializer
         
         return EmprestimoCreateSerializer
 
     def get_permissions(self):
-        if self.action in ['retrieve']:
+        if self.action in ['retrieve', 'list', 'renovacoes']:
             return [
                 AutenticadoPermissao()
             ]
@@ -63,7 +67,24 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=False, url_path='consulta')
+    def consulta(self, request):
+        exemplar_codigo = request.GET.get('exemplar_codigo')
+
+        if not exemplar_codigo:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        emprestimo = get_object_or_404(
+            self.queryset,
+            exemplar_codigo=exemplar_codigo,
+            data_devolucao=None
+        )
+
+        serializer = self.get_serializer(emprestimo)
+        
+        return Response(data=serializer.data)
 
     @action(methods=['post'], detail=False, url_path='devolucoes')
     def devolucoes(self, request):
@@ -71,7 +92,7 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False, url_path='renovacoes', permission_classes=[AutenticadoPermissao])
     def renovacoes(self, request):
@@ -81,9 +102,9 @@ class EmprestimoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path='avaliado', authentication_classes=[], permission_classes=[])
     def emprestimo_avaliado(self, request, pk):
         EmprestimoService.emprestimo_avaliado(pk)
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)

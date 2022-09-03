@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from rest_framework.exceptions import APIException
 
 ALLOW_URLS = [
-    '/autenticacao',
+    '/autenticacao/token',
 ]
 
 class BaseMiddleware:
@@ -22,7 +22,7 @@ class BaseMiddleware:
                     'message': e.default_detail,
                     'code': e.default_code,
                 }, 
-                status=e.default_code
+                status=e.status_code
             )
 
     def allow_url(self, request):

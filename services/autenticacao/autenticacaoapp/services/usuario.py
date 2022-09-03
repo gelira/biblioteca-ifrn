@@ -1,4 +1,3 @@
-import uuid
 from django.utils import timezone
 from django.db import transaction
 
@@ -9,11 +8,6 @@ from .notificacao import NotificacaoService
 class UsuarioService:
     @classmethod
     def validacao(cls, usuario_id):
-        try:
-            uuid.UUID(usuario_id)
-        except:
-            raise exceptions.InvalidUUID
-
         hoje = timezone.localdate()
 
         usuario = Usuario.objects.filter(_id=usuario_id).first()

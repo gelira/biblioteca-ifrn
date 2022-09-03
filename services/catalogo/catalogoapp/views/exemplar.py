@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -14,7 +15,6 @@ from ..services import ExemplarService
 
 class ExemplarViewSet(viewsets.ModelViewSet):
     queryset = Exemplar.objects.all()
-    serializer_class = serializers.ExemplarSerializer
     permission_classes = [AutenticadoPermissao, LivroModificarPermissao]
 
     @action(methods=['get'], detail=False, url_path='consulta/(?P<codigo>[^/.]+)', authentication_classes=[], permission_classes=[])
@@ -36,6 +36,17 @@ class ExemplarViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        try:
+            livro_id = self.request.GET.get('livro_id')
+            qs = qs.filter(livro___id=UUID(livro_id))
+        except:
+            pass
+
+        return qs
+
     def codigos(self, request):
         ser = serializers.CodigosExemplaresSerializers(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -55,4 +66,7 @@ class ExemplarViewSet(viewsets.ModelViewSet):
         if self.action == 'consulta':
             return serializers.ExemplarConsultaSerializer
 
-        return super().get_serializer_class()
+        if self.action in ['update', 'partial_update']:
+            return serializers.ExemplarUpdateSerializer
+
+        return serializers.ExemplarSerializer
