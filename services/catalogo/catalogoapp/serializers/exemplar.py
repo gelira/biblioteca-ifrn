@@ -4,7 +4,7 @@ from ..services import ExemplarService
 from ..models import Exemplar, Livro
 
 class ExemplarSerializer(serializers.ModelSerializer):
-    livro_id = serializers.UUIDField()
+    livro_id = serializers.UUIDField(write_only=True)
 
     def validate(self, data):
         try:
@@ -14,18 +14,36 @@ class ExemplarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Livro não encontrado')
 
     def create(self, data):
-        return ExemplarService.create_exemplar(data['livro'])
+        return ExemplarService.create_exemplar(data['livro'], data['referencia'])
 
     class Meta:
         model = Exemplar
         fields = [
+            'id',
             'livro_id',
             'referencia',
             'codigo'
         ]
         extra_kwargs = {
             'codigo': {
-                'required': False
+                'read_only': True
+            },
+            'referencia': {
+                'default': False
+            }
+        }
+
+class ExemplarUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exemplar
+        fields = [
+            'id',
+            'referencia',
+            'codigo'
+        ]
+        extra_kwargs = {
+            'codigo': {
+                'read_only': True
             }
         }
 

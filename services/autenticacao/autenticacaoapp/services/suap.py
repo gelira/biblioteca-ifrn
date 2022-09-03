@@ -25,7 +25,7 @@ class SuapService:
 
         data = response.json()
 
-        self.token = data['token']
+        self.token = data['access']
         return data
 
     def dados_usuario(self):
@@ -36,7 +36,7 @@ class SuapService:
             'method': 'GET',
             'url': SUAP_URL_DADOS,
             'headers': {
-                'Authorization': f'JWT {self.token}',
+                'Authorization': f'Bearer {self.token}',
                 'Accept': 'application/json'
             }
         })

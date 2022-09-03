@@ -1,7 +1,6 @@
 import io
 import base64
 from PIL import Image
-from django.db.models import Q
 from rest_framework import serializers
 
 from ..models import Livro, Exemplar
@@ -79,35 +78,6 @@ class LivroRetrieveSerializer(serializers.ModelSerializer):
             'id',
             'soma_notas'
         ]
-
-class LivroPesquisaSerializer(serializers.Serializer):
-    titulo = serializers.CharField(
-        required=False
-    )
-    autor = serializers.CharField(
-        required=False
-    )
-    indexador = serializers.CharField(
-        required=False
-    )
-
-    def validate(self, data):
-        titulo = data.get('titulo')
-        autor = data.get('autor')
-        indexador = data.get('indexador')
-        qs = Livro.objects.all()
-
-        if titulo is not None:
-            qs = qs.filter(titulo__icontains=titulo).all()
-        elif autor is not None:
-            qs = qs.filter(
-                Q(autor_principal__icontains=autor) | Q(autores_secundarios__icontains=autor) 
-            ).all()
-        elif indexador is not None:
-            qs = qs.filter(indexadores__indexador__icontains=indexador).all()
-
-        serializer = LivroListSerializer(qs, many=True)
-        return serializer.data
 
 class FotoCapaLivroSerializer(serializers.Serializer):
     foto_capa = serializers.CharField()

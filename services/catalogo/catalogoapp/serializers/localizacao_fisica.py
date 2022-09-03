@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ..models import LocalizacaoFisica, Livro
 
 class LocalizacaoFisicaSerializer(serializers.ModelSerializer):
-    livro_id = serializers.UUIDField()
+    livro_id = serializers.UUIDField(write_only=True)
 
     def validate(self, data):
         try:

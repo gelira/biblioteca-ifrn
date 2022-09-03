@@ -46,6 +46,9 @@ class PromocaoService:
         if not codigo_promocao:
             raise exceptions.InvalidCodigoPromocao
 
+        if codigo_promocao.bolsista_id is not None:
+            raise exceptions.InvalidCodigoPromocao
+
         return codigo_promocao
 
     @classmethod

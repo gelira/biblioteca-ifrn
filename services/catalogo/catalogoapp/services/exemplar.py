@@ -14,11 +14,12 @@ class ExemplarService:
         return ''.join(chars)
 
     @classmethod
-    def create_exemplar(cls, livro):
+    def create_exemplar(cls, livro, referencia):
         while True:
             try:
                 return Exemplar.objects.create(
                     livro=livro,
+                    referencia=referencia,
                     codigo=cls.gerar_codigo()
                 )
 

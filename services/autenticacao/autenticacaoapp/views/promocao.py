@@ -34,7 +34,7 @@ class PromocaoViewSet(viewsets.ModelViewSet):
 
         return super().get_permissions()
 
-    @action(methods=['patch'], detail=False, url_path='utilizar')
+    @action(methods=['post'], detail=False, url_path='utilizar')
     def utilizar_codigo(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
