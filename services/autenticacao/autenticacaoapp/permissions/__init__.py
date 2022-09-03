@@ -4,3 +4,4 @@ from .suspensao import AbonarSuspensaoPermissao
 from .promocao import PromoverBolsistaPermissao
 from .usuario import ConsultarUsuarioPermissao
 from .perfil import GerenciarPerfilPermissao
+from .services import CirculacaoServicePermissao

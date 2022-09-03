@@ -6,6 +6,8 @@ from rest_framework import status
 
 from .. import serializers
 from ..services import AutenticacaoService, UsuarioService
+from ..authentication import HeaderUsuarioIdAutenticacao
+from ..permissions import CirculacaoServicePermissao
 
 class AutenticacaoViewSet(ViewSet):
     @action(methods=['get', 'patch'], detail=False, url_path='informacoes')
@@ -60,7 +62,7 @@ class AutenticacaoViewSet(ViewSet):
             '_id': request.user.usuario._id
         })
 
-    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[], permission_classes=[])
+    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
     def action_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -69,7 +71,7 @@ class AutenticacaoViewSet(ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[], permission_classes=[])
+    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
     def action_abono_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
