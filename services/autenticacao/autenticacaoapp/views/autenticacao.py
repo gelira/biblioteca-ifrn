@@ -1,8 +1,9 @@
 from django.conf import settings
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from .. import serializers
 from ..services import AutenticacaoService, UsuarioService
@@ -62,7 +63,13 @@ class AutenticacaoViewSet(ViewSet):
             '_id': request.user.usuario._id
         })
 
-    @action(methods=['post'], detail=False, url_path='suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
+    @action(
+        methods=['post'], 
+        detail=False, 
+        url_path='suspensoes', 
+        authentication_classes=[HeaderUsuarioIdAutenticacao], 
+        permission_classes=[IsAuthenticated, CirculacaoServicePermissao]
+    )
     def action_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -71,7 +78,13 @@ class AutenticacaoViewSet(ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['post'], detail=False, url_path='abono-suspensoes', authentication_classes=[HeaderUsuarioIdAutenticacao], permission_classes=[CirculacaoServicePermissao])
+    @action(
+        methods=['post'], 
+        detail=False, 
+        url_path='abono-suspensoes', 
+        authentication_classes=[HeaderUsuarioIdAutenticacao], 
+        permission_classes=[IsAuthenticated, CirculacaoServicePermissao]
+    )
     def action_abono_suspensoes(self, request):
         ser = serializers.SuspensoesUsuariosSerializer(data=request.data)
         ser.is_valid(raise_exception=True)

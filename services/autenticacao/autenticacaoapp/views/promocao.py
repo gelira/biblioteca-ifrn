@@ -1,22 +1,19 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from ..models import CodigoPromocao
 from ..serializers import (
     CodigoPromocaoCreateSerializer,
     UtilizarCodigoPromocaoSerializer
 )
-from ..permissions import (
-    AutenticadoPermissao,
-    PromoverBolsistaPermissao
-)
+from ..permissions import PromoverBolsistaPermissao
 
 class PromocaoViewSet(viewsets.ModelViewSet):
     queryset = CodigoPromocao.objects.all()
     permission_classes = [
-        AutenticadoPermissao
+        IsAuthenticated
     ]
     
     def get_serializer_class(self):
@@ -26,13 +23,12 @@ class PromocaoViewSet(viewsets.ModelViewSet):
         return CodigoPromocaoCreateSerializer
 
     def get_permissions(self):
-        if self.action == 'create':
-            return [
-                AutenticadoPermissao(),
-                PromoverBolsistaPermissao()
-            ]
+        permissions = super().get_permissions()
 
-        return super().get_permissions()
+        if self.action == 'create':
+            permissions.append(PromoverBolsistaPermissao())
+
+        return permissions
 
     @action(methods=['post'], detail=False, url_path='utilizar')
     def utilizar_codigo(self, request):
