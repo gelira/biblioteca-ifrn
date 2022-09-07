@@ -1,6 +1,7 @@
 import os
 import json
 from redis import Redis
+from circuitbreaker import circuit
 
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_DB = int(os.getenv('REDIS_DB'))
@@ -14,6 +15,7 @@ class ClienteRedis:
             socket_timeout=2
         )
 
+    @circuit(failure_threshold = 1, recovery_timeout = 60)
     def store(self, chave, valor, update=False):
         if not isinstance(valor, str):
             valor = json.dumps(valor)
@@ -23,9 +25,11 @@ class ClienteRedis:
         else:
             self.con.set(chave, valor, ex=4*60*60)
 
+    @circuit(failure_threshold = 1, recovery_timeout = 60)
     def exist(self, chave):
         return self.con.exists(chave) > 0
 
+    @circuit(failure_threshold = 1, recovery_timeout = 60)
     def get(self, chave):
         valor = self.con.get(chave)
         if valor is None:
