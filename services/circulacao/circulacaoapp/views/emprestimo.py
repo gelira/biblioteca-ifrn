@@ -104,7 +104,7 @@ class EmprestimoViewSet(ModelViewSet):
         
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=['patch'], detail=True, url_path='avaliado', authentication_classes=[], permission_classes=[])
+    @action(methods=['patch'], detail=True, url_path='avaliado')
     def emprestimo_avaliado(self, request, pk):
         EmprestimoService.emprestimo_avaliado(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
