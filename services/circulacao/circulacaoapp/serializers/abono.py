@@ -4,14 +4,14 @@ from ..services import AbonoService
 from ..models import Abono
 
 class AbonoCreateSerializer(serializers.ModelSerializer):
-    suspensoes = serializers.ListField(
+    emprestimos = serializers.ListField(
         child=serializers.UUIDField(),
         allow_empty=False,
         write_only=True
     )
 
     def validate(self, data):
-        suspensoes, usuarios = AbonoService.validate_suspensoes(data['suspensoes'])
+        suspensoes, usuarios = AbonoService.validate_suspensoes(data['emprestimos'])
 
         if not usuarios:
             raise serializers.ValidationError('Nenhuma suspensão encontrada')
@@ -34,6 +34,6 @@ class AbonoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Abono
         fields = [
-            'suspensoes',
+            'emprestimos',
             'justificativa'
         ]

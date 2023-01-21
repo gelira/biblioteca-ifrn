@@ -5,13 +5,13 @@ from .autenticacao import AutenticacaoService
 
 class AbonoService:
     @classmethod
-    def validate_suspensoes(cls, suspensoes_id):
+    def validate_suspensoes(cls, emprestimos_id):
         suspensoes = []
         usuarios = {}
 
-        for s_id in suspensoes_id:
+        for e_id in emprestimos_id:
             suspensao = Suspensao.objects.filter(
-                _id=s_id, 
+                emprestimo___id=e_id, 
                 abono_id=None
             ).first()
             
@@ -21,7 +21,7 @@ class AbonoService:
                     usuarios[usuario_id] = 0
                 
                 usuarios[usuario_id] += suspensao.total_dias
-                suspensoes.append(s_id)
+                suspensoes.append(suspensao._id)
 
         return suspensoes, usuarios
 
