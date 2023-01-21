@@ -8,6 +8,8 @@ from ..models import Emprestimo
 AUTENTICACAO_SERVICE_URL = os.getenv('AUTENTICACAO_SERVICE_URL')
 AUTENTICACAO_TIMEOUT = int(os.getenv('AUTENTICACAO_TIMEOUT'))
 
+CIRCULACAO_USUARIO_ID = os.getenv('CIRCULACAO_USUARIO_ID')
+
 class AutenticacaoService:
     url_token = AUTENTICACAO_SERVICE_URL + '/token'
     url_informacoes_usuario = AUTENTICACAO_SERVICE_URL + '/informacoes'
@@ -79,6 +81,9 @@ class AutenticacaoService:
         cls.dispatch({
             'method': 'POST',
             'url': cls.url_suspensoes,
+            'headers': {
+                'X-Usuario-Id': CIRCULACAO_USUARIO_ID,
+            },
             'json': {
                 'suspensoes': suspensoes
             }
@@ -89,6 +94,9 @@ class AutenticacaoService:
         cls.dispatch({
             'method': 'POST',
             'url': cls.url_abono_suspensoes,
+            'headers': {
+                'X-Usuario-Id': CIRCULACAO_USUARIO_ID,
+            },
             'json': {
                 'suspensoes': suspensoes
             }
